@@ -5,6 +5,9 @@ package edu.idi.idatt;
  */
 public class App {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        int numberOfDice = 2;
+        Dice dice = new Dice(numberOfDice);
+
+        System.out.println("Threw " + numberOfDice + " dice and got " + dice.roll() + ".");
     }
 }
