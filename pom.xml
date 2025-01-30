@@ -94,17 +94,14 @@
             <executions>
                 <execution>
                     <id>default-cli</id>
-                  <configuration>
-                      <mainClass>edu.idi.idatt/edu.idi.idatt.App</mainClass>
-                      <launcher>app</launcher>
-                      <jlinkZipName>app</jlinkZipName>
-                      <jlinkImageName>app</jlinkImageName>
-                      <noManPages>tru</noManPages>
-                      <stripDebug>true</stripDebug>
-                      <noHeaderFiles>true</noHeaderFiles>
-                  </configuration>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
                 </execution>
             </executions>
+          <configuration>
+            <mainClass>edu.idi.idatt.App</mainClass>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
