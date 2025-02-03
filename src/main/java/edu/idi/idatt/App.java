@@ -1,6 +1,7 @@
 package edu.idi.idatt;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -16,6 +17,7 @@ public class App extends Application {
     TileGrid tileGrid = new TileGrid(10, 10, 50);
 
     VBox root = new VBox(10, label, tileGrid);
+    root.setAlignment(Pos.CENTER);
     Scene scene = new Scene(root, 400, 300);
     stage.setScene(scene);
     stage.setTitle("JavaFX Maven App");

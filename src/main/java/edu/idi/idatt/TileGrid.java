@@ -1,6 +1,6 @@
 package edu.idi.idatt;
 
-import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
 public class TileGrid extends GridPane {
@@ -12,8 +12,9 @@ public class TileGrid extends GridPane {
 
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
-        Button tile = new Button();
+        Label tile = new Label();
         tile.setPrefSize(tileSize, tileSize);
+        tile.setStyle("-fx-border-color: black; -fx-background-color: white");
         this.add(tile, col, row);
       }
     }
