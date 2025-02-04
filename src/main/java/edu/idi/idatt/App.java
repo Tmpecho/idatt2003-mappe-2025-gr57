@@ -1,7 +1,7 @@
 package edu.idi.idatt;
 
 import javafx.application.Application;
-import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -14,11 +14,11 @@ public class App extends Application {
     Dice dice = new Dice(numberOfDice);
 
     Label label = new Label("Threw " + numberOfDice + " dice and got " + dice.roll() + ".");
-    TileGrid tileGrid = new TileGrid(10, 10, 50);
+    GameBoard gameBoard = new GameBoard();
+    gameBoard.setPadding(new Insets(10));
 
-    VBox root = new VBox(10, label, tileGrid);
-    root.setAlignment(Pos.CENTER);
-    Scene scene = new Scene(root, 400, 300);
+    VBox root = new VBox(10, label, gameBoard);
+    Scene scene = new Scene(root, 700, 800);
     stage.setScene(scene);
     stage.setTitle("JavaFX Maven App");
     stage.show();

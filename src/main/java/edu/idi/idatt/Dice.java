@@ -23,10 +23,10 @@ public class Dice {
 		return sum;
 	}
 
-	public int getDie(int dieNumber) {
-		if (dieNumber < 0 || dieNumber >= dice.size()) {
+	public int getDie(int dieIndex) {
+		if (dieIndex < 0 || dieIndex >= dice.size()) {
 			throw new IllegalArgumentException("Die number out of bounds");
 		}
-		return dice.get(dieNumber).getLastRolledValue();
+		return dice.get(dieIndex).getLastRolledValue();
 	}
 }
