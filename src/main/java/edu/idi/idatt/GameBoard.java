@@ -9,8 +9,8 @@ import java.util.stream.IntStream;
  * Represents the game board.
  */
 public class GameBoard extends Pane {
-	private static final int ROWS = 9;
-	private static final int COLS = 10;
+	private static final int ROWS = 10;
+	private static final int COLS = 9;
 	private static final int BOARD_SIZE = ROWS * COLS;
 	private static final int tileSize = 60;
 	private static final int gapSize = 5;
