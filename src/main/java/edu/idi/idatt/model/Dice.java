@@ -1,4 +1,4 @@
-package edu.idi.idatt;
+package edu.idi.idatt.model;
 
 import java.util.ArrayList;
 import java.util.List;

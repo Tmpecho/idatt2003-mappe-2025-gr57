@@ -1,5 +1,7 @@
 package edu.idi.idatt;
 
+import edu.idi.idatt.model.Dice;
+import edu.idi.idatt.model.GameBoard;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;

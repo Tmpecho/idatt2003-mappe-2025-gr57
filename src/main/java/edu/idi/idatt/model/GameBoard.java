@@ -1,4 +1,4 @@
-package edu.idi.idatt;
+package edu.idi.idatt.model;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
