@@ -79,13 +79,9 @@ public class GameBoard extends Pane {
    * Adds a player to the game board.
    *
    * @param player the player to add
-   * @param playerColor the color of the player's icon
    */
-  public void addPlayer(Player player, Paint playerColor) {
-    Circle icon = new Circle(15);
-    icon.setFill(playerColor);
-    playerIcons.put(player, icon);
-    this.getChildren().add(icon);
+  public void addPlayer(Player player) {
+    this.getChildren().add(player.getIcon());
     updatePlayerPosition(player);
   }
 
