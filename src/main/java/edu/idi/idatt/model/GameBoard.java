@@ -62,4 +62,8 @@ public class GameBoard extends Pane {
 		int gridRow = ROWS - 1 - rowFromBottom;
 		return new int[]{col, gridRow};
 	}
+
+	public static int getBoardSize() {
+		return BOARD_SIZE;
+	}
 }

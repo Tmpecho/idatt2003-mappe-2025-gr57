@@ -18,5 +18,8 @@ public class Player {
   }
 
   public void setPosition(int position) {
+    if (position < 0 && position > GameBoard.getBoardSize()) {
+      throw new IllegalArgumentException("Position must be between 0 and the furthest position on the board.");
+    }
   }
 }
