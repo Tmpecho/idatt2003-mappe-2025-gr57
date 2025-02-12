@@ -17,9 +17,20 @@ public class Player {
     return position;
   }
 
+  public int incrementPosition(int increment) {
+    int newPosition = position + increment;
+    if (newPosition > GameBoard.getBoardSize()) {
+      // bounce back
+      newPosition = GameBoard.getBoardSize() - (newPosition - GameBoard.getBoardSize());
+    }
+    position = newPosition;
+    return position;
+  }
+
   public void setPosition(int position) {
     if (position < 1 && position > GameBoard.getBoardSize()) {
-      throw new IllegalArgumentException("Position must be between 0 and the furthest position on the board.");
+      throw new IllegalArgumentException(
+          "Position must be between 1 and the furthest position on the board.");
     }
     this.position = position;
   }
