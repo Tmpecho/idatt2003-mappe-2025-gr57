@@ -1,4 +1,4 @@
-package edu.idi.idatt.model;
+package edu.ntnu.idi.idatt.boardgame.model;
 
 import javafx.scene.shape.Circle;
 import javafx.scene.paint.Paint;
