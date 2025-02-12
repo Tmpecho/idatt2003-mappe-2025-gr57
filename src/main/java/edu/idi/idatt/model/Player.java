@@ -6,7 +6,7 @@ import javafx.scene.paint.Paint;
 public class Player {
   private final String name;
   private int position;
-  private Circle icon;
+  private final Circle icon;
 
   /**
    * Creates a new player with the given name and color.
@@ -17,7 +17,7 @@ public class Player {
   public Player(String name, Paint color) {
     this.name = name;
     this.position = 1;
-    this.icon = new Circle(15);
+    this.icon = new Circle(7);
     this.icon.setFill(color);
   }
 
