@@ -1,54 +1,33 @@
 package edu.ntnu.idi.idatt.boardgame.model;
 
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 
 /** Represents the game board. */
 public class GameBoard extends Pane {
   private static final int ROWS = 10;
   private static final int COLS = 9;
   private static final int BOARD_SIZE = ROWS * COLS;
-  private static final int tileSize = 60;
-  private static final int gapSize = 5;
+  private static final int TILE_SIZE = 60;
+  private static final int GAP_SIZE = 5;
 
   private final Tile[][] tiles = new Tile[ROWS][COLS];
 
-  private final Map<Integer, Player> players = new HashMap<>();
-  private final int numberOfPlayers;
 
-  private final List<Color> playerColors = List.of(
-    Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PURPLE
-  );
-
-  public GameBoard(int numberOfPlayers) {
-    this.numberOfPlayers = numberOfPlayers;
-
+  public GameBoard() {
     GridPane grid = new GridPane();
-    grid.setHgap(gapSize);
-    grid.setVgap(gapSize);
+    grid.setHgap(GAP_SIZE);
+    grid.setVgap(GAP_SIZE);
 
     buildTiles(grid);
-    createPlayers();
-    addPlayersToStart();
     getChildren().add(grid);
 
     // Todo: Add snakes and ladders to the board
   }
 
-  private void createPlayers() {
-    for (int i = 1; i <= numberOfPlayers; i++) {
-      Player player = new Player(i, playerColors.get(i - 1));
-      players.put(i, player);
-    }
-  }
-
-  private void addPlayersToStart() {
+  public void addPlayersToStart(Map<Integer, Player> players) {
     players.values().forEach(player -> {
       player.setPosition(1);
 
@@ -69,7 +48,7 @@ public class GameBoard extends Pane {
               int[] gridPos = getGridCoordinates(pos);
               int col = gridPos[0];
               int row = gridPos[1];
-              Tile tile = new Tile(pos, tileSize);
+              Tile tile = new Tile(pos, TILE_SIZE);
               tiles[row][col] = tile;
               grid.add(tile.getTile(), col, row);
             });
@@ -96,5 +75,17 @@ public class GameBoard extends Pane {
 
   public static int getBoardSize() {
     return BOARD_SIZE;
+  }
+
+  public void incrementPlayerPosition(Player Player, int increment) {
+    int oldPos = Player.getPosition();
+    int newPos = Player.incrementPosition(increment);
+    Player.setPosition(newPos);
+
+    Tile oldTile = tiles[getGridCoordinates(oldPos)[1]][getGridCoordinates(oldPos)[0]];
+    Tile newTile = tiles[getGridCoordinates(newPos)[1]][getGridCoordinates(newPos)[0]];
+
+    oldTile.removePlayer(Player);
+    newTile.addPlayer(Player);
   }
 }
