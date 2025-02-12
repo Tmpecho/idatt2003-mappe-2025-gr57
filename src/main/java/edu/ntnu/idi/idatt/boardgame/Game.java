@@ -19,6 +19,8 @@ public class Game {
 
   private final Map<Integer, Player> players;
 
+  private Player currentPlayer;
+
   public Game() {
     this.dice = new Dice(2);
     this.players = createPlayers();
@@ -26,8 +28,7 @@ public class Game {
 
     gameBoard.addPlayersToStart(players);
 
-    Player currentPlayer = players.get(1);
-    gameBoard.incrementPlayerPosition(currentPlayer, 10);
+    this.currentPlayer = players.get(1);
   }
 
   private Map<Integer, Player> createPlayers() {
@@ -42,7 +43,6 @@ public class Game {
   }
 
   public void start() {
-    // take turns while the game is not won
   }
 
   public GameBoard getGameBoard() {
