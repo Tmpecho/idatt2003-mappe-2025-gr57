@@ -16,7 +16,7 @@ public class App extends Application {
     Dice dice = new Dice(numberOfDice);
 
     Label label = new Label("Threw " + numberOfDice + " dice and got " + dice.roll() + ".");
-    GameBoard gameBoard = new GameBoard();
+    GameBoard gameBoard = new GameBoard(2);
     gameBoard.setPadding(new Insets(10));
 
     VBox root = new VBox(10, label, gameBoard);
