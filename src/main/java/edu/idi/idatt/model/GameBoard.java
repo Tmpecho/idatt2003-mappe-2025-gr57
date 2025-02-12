@@ -1,6 +1,5 @@
 package edu.idi.idatt.model;
 
-import javafx.geometry.Point2D;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
