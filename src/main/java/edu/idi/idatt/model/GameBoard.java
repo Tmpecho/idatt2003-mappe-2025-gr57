@@ -1,8 +1,15 @@
 package edu.idi.idatt.model;
 
-import java.util.stream.IntStream;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 /** Represents the game board. */
 public class GameBoard extends Pane {
@@ -13,6 +20,8 @@ public class GameBoard extends Pane {
   private static final int gapSize = 5;
 
   private final Tile[][] tiles = new Tile[ROWS][COLS];
+
+  private final Map<Player, Node> playerIcons = new HashMap<>();
 
   public GameBoard() {
     GridPane grid = new GridPane();
@@ -64,5 +73,64 @@ public class GameBoard extends Pane {
 
   public static int getBoardSize() {
     return BOARD_SIZE;
+  }
+
+  /**
+   * Adds a player to the game board.
+   *
+   * @param player the player to add
+   * @param playerColor the color of the player's icon
+   */
+  public void addPlayer(Player player, Paint playerColor) {
+    Circle icon = new Circle(15);
+    icon.setFill(playerColor);
+    playerIcons.put(player, icon);
+    this.getChildren().add(icon);
+    updatePlayerPosition(player);
+  }
+
+  /**
+   * Updates the position of a player on the game board.
+   *
+   * @param player the player to update
+   */
+  public void updatePlayerPosition(Player player) {
+    Node icon = playerIcons.get(player);
+    if (icon == null) return;
+
+    int position = player.getPosition();
+    if (position < 1 || position > BOARD_SIZE) {
+      icon.setVisible(false);
+      return;
+    }
+
+    Point2D coords = getTileCenter(position);
+    if (coords == null) {
+      icon.setVisible(false);
+      return;
+    }
+
+    icon.setLayoutX(coords.getX() - ((Circle) icon).getRadius());
+    icon.setLayoutY(coords.getY() - ((Circle) icon).getRadius());
+    icon.setVisible(true);
+  }
+
+  /**
+   * Computes the center of a tile on the game board.
+   *
+   * @param position the position of the tile
+   * @return the center of the tile
+   */
+  private Point2D getTileCenter(int position) {
+    if (position < 1 || position > BOARD_SIZE) return null;
+
+    int[] gridCoords = getGridCoordinates(position);
+    int col = gridCoords[0];
+    int row = gridCoords[1];
+
+    double x = col * (tileSize + gapSize) + tileSize / 2.0;
+    double y = row * (tileSize + gapSize) + tileSize / 2.0;
+
+    return new Point2D(x, y);
   }
 }
