@@ -5,7 +5,6 @@ import java.util.stream.IntStream;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 
-/** Represents the game board for a snakes and ladders game. */
 public class GameBoard extends Pane {
   private static final int ROWS = 10;
   private static final int COLS = 9;
@@ -15,7 +14,6 @@ public class GameBoard extends Pane {
 
   private final Tile[][] tiles = new Tile[ROWS][COLS];
 
-  /** Constructs a GameBoard with a grid of tiles. */
   public GameBoard() {
     GridPane grid = new GridPane();
     grid.setHgap(GAP_SIZE);
@@ -43,8 +41,8 @@ public class GameBoard extends Pane {
   }
 
   /**
-   * Increments the player's position by the given increment. Removes the player from the old tile
-   * and adds them to the new tile.
+   * Increments a player's position by the given increment. The method removes the player from the
+   * old tile and adds them to the new tile.
    *
    * @param player the player to move
    * @param increment the number of positions to move forward
@@ -52,19 +50,14 @@ public class GameBoard extends Pane {
   public void incrementPlayerPosition(Player player, int increment) {
     int oldPos = player.getPosition();
     int newPos = player.incrementPosition(increment);
-
-    updatePlayerPosition(player, oldPos, newPos);
-  }
-
-  private void updatePlayerPosition(Player player, int oldPos, int newPos) {
     getTileAtPosition(oldPos).removePlayer(player);
     getTileAtPosition(newPos).addPlayer(player);
   }
 
   /**
-   * Builds the tiles and adds them to the provided grid.
+   * Builds the board tiles and adds them to the grid.
    *
-   * @param grid the grid to add the tiles to
+   * @param grid the GridPane to which the tiles are added
    */
   private void buildTiles(GridPane grid) {
     IntStream.rangeClosed(1, BOARD_SIZE)
@@ -80,27 +73,36 @@ public class GameBoard extends Pane {
   }
 
   /**
-   * Computes grid coordinates (column, row) for a given board position. The first tile (position 1)
-   * is placed at tiles[0][0].
+   * Computes grid coordinates for a given board position. The layout is such that:
    *
-   * @param position the board square (1–BOARD_SIZE)
-   * @return an int array where index 0 is column and index 1 is row
+   * <ul>
+   *   <li>Tile 1 is at the bottom left (col = 0, row = ROWS-1).
+   *   <li>Tile BOARD_SIZE is at the top left (col = 0, row = 0).
+   *   <li>The board uses a zigzag pattern: even rows (from the bottom) progress left to right, odd
+   *       rows right to left.
+   * </ul>
+   *
+   * @param position the board position (1 ≤ position ≤ BOARD_SIZE)
+   * @return an array where index 0 is the column and index 1 is the row
    */
   private int[] getGridCoordinates(int position) {
     int index = position - 1;
-    int row = index / COLS;
-    int col = index % COLS;
-
-    if (row % 2 != 0) {
-      col = COLS - 1 - col;
+    int rowFromBottom = index / COLS;
+    int col;
+    if (rowFromBottom % 2 == 0) {
+      col = index % COLS;
+    } else {
+      col = COLS - 1 - (index % COLS);
     }
-    return new int[] {col, row};
+    // Because row 0 in the grid is the top, we invert the row order.
+    int gridRow = ROWS - 1 - rowFromBottom;
+    return new int[] {col, gridRow};
   }
 
   /**
-   * Returns the Tile corresponding to a given board position.
+   * Returns the tile corresponding to a given board position.
    *
-   * @param position the board position (1–BOARD_SIZE)
+   * @param position the board position (1 ≤ position ≤ BOARD_SIZE)
    * @return the Tile at that position
    */
   private Tile getTileAtPosition(int position) {
