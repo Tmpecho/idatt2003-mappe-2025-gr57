@@ -1,4 +1,4 @@
-package edu.idi.idatt;
+package edu.ntnu.idi.idatt.boardgame;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

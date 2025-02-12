@@ -1,7 +1,7 @@
-package edu.idi.idatt;
+package edu.ntnu.idi.idatt.boardgame;
 
-import edu.idi.idatt.model.Dice;
-import edu.idi.idatt.model.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.model.Dice;
+import edu.ntnu.idi.idatt.boardgame.model.GameBoard;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;

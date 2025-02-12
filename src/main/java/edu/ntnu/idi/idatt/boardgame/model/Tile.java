@@ -1,4 +1,4 @@
-package edu.idi.idatt.model;
+package edu.ntnu.idi.idatt.boardgame.model;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
