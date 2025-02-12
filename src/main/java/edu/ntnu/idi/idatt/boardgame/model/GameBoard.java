@@ -51,7 +51,9 @@ public class GameBoard extends Pane {
   private void addPlayersToStart() {
     players.values().forEach(player -> {
       player.setPosition(1);
-      // todo: Add players to tile 1
+
+      Tile startTile = tiles[9][0];
+	  startTile.addPlayer(player);
     });
   }
 
