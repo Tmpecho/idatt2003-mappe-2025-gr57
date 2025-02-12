@@ -4,18 +4,18 @@ import javafx.scene.shape.Circle;
 import javafx.scene.paint.Paint;
 
 public class Player {
-  private final String name;
+  private final int id;
   private int position;
   private final Circle icon;
 
   /**
-   * Creates a new player with the given name and color.
+   * Creates a new player with the given id and color.
    *
-   * @param name the name of the player
+   * @param id the id of the player
    * @param color the color of the player
    */
-  public Player(String name, Paint color) {
-    this.name = name;
+  public Player(int id, Paint color) {
+    this.id = id;
     this.position = 1;
     this.icon = new Circle(7);
     this.icon.setFill(color);
@@ -26,8 +26,8 @@ public class Player {
    *
    * @return the name of the player
    */
-  public String getName() {
-    return name;
+  public int getId() {
+    return id;
   }
 
   /**
@@ -75,5 +75,14 @@ public class Player {
    */
   public Circle getIcon() {
     return icon;
+  }
+
+  @Override
+  public String toString() {
+    return "Player{" +
+            "id=" + id +
+            ", position=" + position +
+            ", icon=" + icon +
+            '}';
   }
 }

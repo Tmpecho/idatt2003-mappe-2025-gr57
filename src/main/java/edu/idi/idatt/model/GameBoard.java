@@ -1,13 +1,12 @@
 package edu.idi.idatt.model;
 
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
+import javafx.scene.paint.Color;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -21,17 +20,40 @@ public class GameBoard extends Pane {
 
   private final Tile[][] tiles = new Tile[ROWS][COLS];
 
-  private final Map<Player, Node> playerIcons = new HashMap<>();
+  private final Map<Integer, Player> players = new HashMap<>();
+  private final int numberOfPlayers;
 
-  public GameBoard() {
+  private final List<Color> playerColors = List.of(
+    Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PURPLE
+  );
+
+  public GameBoard(int numberOfPlayers) {
+    this.numberOfPlayers = numberOfPlayers;
+
     GridPane grid = new GridPane();
     grid.setHgap(gapSize);
     grid.setVgap(gapSize);
 
     buildTiles(grid);
+    createPlayers();
+    addPlayersToStart();
     getChildren().add(grid);
 
     // Todo: Add snakes and ladders to the board
+  }
+
+  private void createPlayers() {
+    for (int i = 1; i <= numberOfPlayers; i++) {
+      Player player = new Player(i, playerColors.get(i - 1));
+      players.put(i, player);
+    }
+  }
+
+  private void addPlayersToStart() {
+    players.values().forEach(player -> {
+      player.setPosition(1);
+      // todo: Add players to tile 1
+    });
   }
 
   /**
@@ -73,60 +95,5 @@ public class GameBoard extends Pane {
 
   public static int getBoardSize() {
     return BOARD_SIZE;
-  }
-
-  /**
-   * Adds a player to the game board.
-   *
-   * @param player the player to add
-   */
-  public void addPlayer(Player player) {
-    this.getChildren().add(player.getIcon());
-    updatePlayerPosition(player);
-  }
-
-  /**
-   * Updates the position of a player on the game board.
-   *
-   * @param player the player to update
-   */
-  public void updatePlayerPosition(Player player) {
-    Node icon = playerIcons.get(player);
-    if (icon == null) return;
-
-    int position = player.getPosition();
-    if (position < 1 || position > BOARD_SIZE) {
-      icon.setVisible(false);
-      return;
-    }
-
-    Point2D coords = getTileCenter(position);
-    if (coords == null) {
-      icon.setVisible(false);
-      return;
-    }
-
-    icon.setLayoutX(coords.getX() - ((Circle) icon).getRadius());
-    icon.setLayoutY(coords.getY() - ((Circle) icon).getRadius());
-    icon.setVisible(true);
-  }
-
-  /**
-   * Computes the center of a tile on the game board.
-   *
-   * @param position the position of the tile
-   * @return the center of the tile
-   */
-  private Point2D getTileCenter(int position) {
-    if (position < 1 || position > BOARD_SIZE) return null;
-
-    int[] gridCoords = getGridCoordinates(position);
-    int col = gridCoords[0];
-    int row = gridCoords[1];
-
-    double x = col * (tileSize + gapSize) + tileSize / 2.0;
-    double y = row * (tileSize + gapSize) + tileSize / 2.0;
-
-    return new Point2D(x, y);
   }
 }
