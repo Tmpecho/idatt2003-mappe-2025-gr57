@@ -1,9 +1,15 @@
 package edu.ntnu.idi.idatt.boardgame.model;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+import javafx.scene.Group;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.util.Pair;
 
 public class GameBoard extends Pane {
   private static final int ROWS = 10;
@@ -13,6 +19,8 @@ public class GameBoard extends Pane {
   private static final int GAP_SIZE = 5;
 
   private final Tile[][] tiles = new Tile[ROWS][COLS];
+  private final Map<Integer, Connector> connectors = new HashMap<>();
+  private final Group connectorGroup = new Group();
 
   public GameBoard() {
     GridPane grid = new GridPane();
@@ -20,16 +28,12 @@ public class GameBoard extends Pane {
     grid.setVgap(GAP_SIZE);
 
     buildTiles(grid);
-    getChildren().add(grid);
+    getChildren().addAll(grid, connectorGroup);
 
-    // Todo: Add snakes and ladders to the board
+    addSnakesAndLadders();
   }
 
-  /**
-   * Adds all players to the starting tile (position 1).
-   *
-   * @param players a map of players keyed by their ID
-   */
+  /** Adds all players to the starting tile (position 1). */
   public void addPlayersToStart(Map<Integer, Player> players) {
     players
         .values()
@@ -41,24 +45,65 @@ public class GameBoard extends Pane {
   }
 
   /**
-   * Increments a player's position by the given increment. The method removes the player from the
-   * old tile and adds them to the new tile.
+   * Increments a player's position by the given increment and returns a log message. After moving
+   * normally, if the landing tile is the trigger for a connector, the effect is applied.
    *
    * @param player the player to move
-   * @param increment the number of positions to move forward
+   * @param increment the dice roll increment
+   * @return a log message describing the move
    */
-  public void incrementPlayerPosition(Player player, int increment) {
+  public String incrementPlayerPosition(Player player, int increment) {
     int oldPos = player.getPosition();
     int newPos = player.incrementPosition(increment);
-    getTileAtPosition(oldPos).removePlayer(player);
-    getTileAtPosition(newPos).addPlayer(player);
+
+    movePlayer(player, oldPos, newPos);
+
+    String message = "Player " + player.getId() + " rolled " + increment + " to tile " + newPos;
+    String connectorMessage = applyConnectorIfPresent(player);
+
+    if (!connectorMessage.isEmpty()) {
+      message += connectorMessage;
+    }
+    return message;
   }
 
   /**
-   * Builds the board tiles and adds them to the grid.
+   * Moves a player from one tile to another.
    *
-   * @param grid the GridPane to which the tiles are added
+   * @param player the player to move
+   * @param fromPos the current tile position
+   * @param toPos the destination tile position
    */
+  private void movePlayer(Player player, int fromPos, int toPos) {
+    getTileAtPosition(fromPos).removePlayer(player);
+    player.setPosition(toPos);
+    getTileAtPosition(toPos).addPlayer(player);
+  }
+
+  /**
+   * Checks if the player's current position triggers a connector. If so, moves the player
+   * accordingly and returns a message.
+   *
+   * @param player the player to check
+   * @return a string message if a connector is applied, or an empty string
+   */
+  private String applyConnectorIfPresent(Player player) {
+    int pos = player.getPosition();
+
+    if (connectors.containsKey(pos)) {
+      Connector connector = connectors.get(pos);
+      int destination = connector.getEnd();
+      movePlayer(player, pos, destination);
+
+      if (connector.getConnectorType().equals("Ladder")) {
+        return " and climbed a ladder to tile " + destination;
+      } else if (connector.getColor().equals(Color.RED)) {
+        return " and slid down a snake to tile " + destination;
+      }
+    }
+    return "";
+  }
+
   private void buildTiles(GridPane grid) {
     IntStream.rangeClosed(1, BOARD_SIZE)
         .forEach(
@@ -73,20 +118,13 @@ public class GameBoard extends Pane {
   }
 
   /**
-   * Computes grid coordinates for a given board position. The layout is such that:
+   * Computes grid coordinates for a given board position.
    *
-   * <ul>
-   *   <li>Tile 1 is at the bottom left (col = 0, row = ROWS-1).
-   *   <li>Tile BOARD_SIZE is at the top left (col = 0, row = 0).
-   *   <li>The board uses a zigzag pattern: even rows (from the bottom) progress left to right, odd
-   *       rows right to left.
-   * </ul>
-   *
-   * @param position the board position (1 ≤ position ≤ BOARD_SIZE)
-   * @return an array where index 0 is the column and index 1 is the row
+   * @param pos the board position (1 ≤ pos ≤ BOARD_SIZE)
+   * @return an array {col, row}
    */
-  private int[] getGridCoordinates(int position) {
-    int index = position - 1;
+  private int[] getGridCoordinates(int pos) {
+    int index = pos - 1;
     int rowFromBottom = index / COLS;
     int col;
     if (rowFromBottom % 2 == 0) {
@@ -102,12 +140,85 @@ public class GameBoard extends Pane {
   /**
    * Returns the tile corresponding to a given board position.
    *
-   * @param position the board position (1 ≤ position ≤ BOARD_SIZE)
+   * @param pos the board position (1 ≤ pos ≤ BOARD_SIZE)
    * @return the Tile at that position
    */
-  private Tile getTileAtPosition(int position) {
-    int[] coords = getGridCoordinates(position);
+  private Tile getTileAtPosition(int pos) {
+    int[] coords = getGridCoordinates(pos);
     return tiles[coords[1]][coords[0]];
+  }
+
+  /**
+   * Computes the center pixel coordinates of a tile.
+   *
+   * @param pos the board position
+   * @return a double array {x, y} representing the center
+   */
+  private double[] getTileCenter(int pos) {
+    int[] coords = getGridCoordinates(pos);
+    double x = coords[0] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
+    double y = coords[1] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
+    return new double[] {x, y};
+  }
+
+  /** Adds a set of snakes and ladders. */
+  private void addSnakesAndLadders() {
+    @SuppressWarnings("unchecked")
+    Pair<Integer, Integer>[] snakes =
+        new Pair[] {
+          new Pair<>(30, 14),
+          new Pair<>(34, 7),
+          new Pair<>(47, 7),
+          new Pair<>(54, 35),
+          new Pair<>(65, 5),
+          new Pair<>(87, 31),
+        };
+    @SuppressWarnings("unchecked")
+    Pair<Integer, Integer>[] ladders =
+        new Pair[] {
+          new Pair<>(8, 6),
+          new Pair<>(21, 10),
+          new Pair<>(33, 5),
+          new Pair<>(48, 7),
+          new Pair<>(61, 8),
+          new Pair<>(70, 9),
+          new Pair<>(81, 2)
+        };
+
+    Arrays.stream(snakes).forEach(snake -> addSnake(snake.getKey(), snake.getValue()));
+    Arrays.stream(ladders).forEach(ladder -> addLadder(ladder.getKey(), ladder.getValue()));
+  }
+
+  /**
+   * Adds a snake connector. The given start is the snake's head, so if a player lands here, they
+   * slide down by the given length.
+   */
+  private void addSnake(int start, int length) {
+    Connector snake = new Snake(start, length);
+    connectors.put(start, snake);
+    drawConnector(snake);
+  }
+
+  /**
+   * Adds a ladder connector. The given start is the ladder's bottom; landing here moves the player
+   * upward.
+   */
+  private void addLadder(int start, int length) {
+    Connector ladder = new Ladder(start, length);
+    connectors.put(start, ladder);
+    drawConnector(ladder);
+  }
+
+  /** Draws a straight line representing a connector. */
+  private void drawConnector(Connector connector) {
+    double[] startCenter = getTileCenter(connector.getStart());
+    double[] endCenter = getTileCenter(connector.getEnd());
+
+    Line line = new Line(startCenter[0], startCenter[1], endCenter[0], endCenter[1]);
+
+    line.setStroke(connector.getColor());
+    line.setStrokeWidth(3);
+    connectorGroup.getChildren().add(line);
   }
 
   public static int getBoardSize() {

@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
 public class Game {
   private final GameBoard gameBoard;
   private final Dice dice;
   private final Button rollDiceButton;
+  private final Label logLabel;
 
   private final int numberOfPlayers = 2;
   private final List<Color> playerColors =
@@ -27,6 +29,7 @@ public class Game {
     this.players = createPlayers();
     this.gameBoard = new GameBoard();
     this.rollDiceButton = new Button("Roll dice");
+    this.logLabel = new Label("Game log:");
 
     gameBoard.addPlayersToStart(players);
     this.currentPlayer = players.get(1);
@@ -35,19 +38,19 @@ public class Game {
   }
 
   /**
-   * Sets up the event handler for the roll dice button. When pressed, the dice are rolled, the
-   * current player's position is updated on the board, and the turn passes to the next player.
+   * Sets up the dice roll button event. After rolling, the move (and any connector effect) is
+   * applied and the log label is updated.
    */
   private void setupRollDiceButton() {
     rollDiceButton.setOnAction(
         e -> {
           if (!gameOver) {
             int roll = dice.roll();
-            gameBoard.incrementPlayerPosition(currentPlayer, roll);
-
+            String logMessage = gameBoard.incrementPlayerPosition(currentPlayer, roll);
+            logLabel.setText(logMessage);
             if (currentPlayer.getPosition() == GameBoard.getBoardSize()) {
               gameOver = true;
-              System.out.println("Player " + currentPlayer.getId() + " wins!");
+              logLabel.setText("Player " + currentPlayer.getId() + " wins!");
               rollDiceButton.setDisable(true);
             } else {
               currentPlayer = getNextPlayer();
@@ -56,20 +59,10 @@ public class Game {
         });
   }
 
-  /**
-   * Returns the next player in turn.
-   *
-   * @return the next Player
-   */
   private Player getNextPlayer() {
     return players.get((currentPlayer.getId() % numberOfPlayers) + 1);
   }
 
-  /**
-   * Creates the players and returns them in a map keyed by their IDs.
-   *
-   * @return a map of players
-   */
   private Map<Integer, Player> createPlayers() {
     Map<Integer, Player> players = new HashMap<>();
     IntStream.rangeClosed(1, numberOfPlayers)
@@ -87,5 +80,9 @@ public class Game {
 
   public Button getRollDiceButton() {
     return rollDiceButton;
+  }
+
+  public Label getLogLabel() {
+    return logLabel;
   }
 }

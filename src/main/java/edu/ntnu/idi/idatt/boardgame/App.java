@@ -10,7 +10,7 @@ public class App extends Application {
   public void start(Stage stage) {
     Game game = new Game();
 
-    VBox root = new VBox(game.getGameBoard(), game.getRollDiceButton());
+    VBox root = new VBox(game.getGameBoard(), game.getRollDiceButton(), game.getLogLabel());
     Scene scene = new Scene(root, 700, 800);
     stage.setScene(scene);
     stage.setTitle("JavaFX Maven App");
