@@ -1,7 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.model;
 
-import javafx.scene.shape.Circle;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 
 public class Player {
   private final int id;
@@ -79,10 +79,6 @@ public class Player {
 
   @Override
   public String toString() {
-    return "Player{" +
-            "id=" + id +
-            ", position=" + position +
-            ", icon=" + icon +
-            '}';
+    return "Player{" + "id=" + id + ", position=" + position + ", icon=" + icon + '}';
   }
 }
