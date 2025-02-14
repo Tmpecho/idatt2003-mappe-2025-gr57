@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt.boardgame;
+package edu.ntnu.idi.idatt.boardgame.controller;
 
 import edu.ntnu.idi.idatt.boardgame.model.Dice;
 import edu.ntnu.idi.idatt.boardgame.model.GameBoard;
@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
-public class Game {
+public class GameController {
   private final GameBoard gameBoard;
   private final Dice dice;
   private final Button rollDiceButton;
@@ -24,7 +24,7 @@ public class Game {
   private Player currentPlayer;
   private boolean gameOver = false;
 
-  public Game() {
+  public GameController() {
     this.dice = new Dice(2);
     this.players = createPlayers();
     this.gameBoard = new GameBoard();
