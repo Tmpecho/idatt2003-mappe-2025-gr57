@@ -3,7 +3,6 @@ package edu.ntnu.idi.idatt.boardgame.model;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -20,8 +19,8 @@ public class Tile {
   private final List<Player> players;
 
   /**
-   * Constructs a Tile at a given board position with a specified size.
-   * The tile is initially empty (no players).
+   * Constructs a Tile at a given board position with a specified size. The tile is initially empty
+   * (no players).
    *
    * @param pos the board position (e.g. 1, 2, 3, …)
    * @param tileSize the size (width and height) of the tile
@@ -66,15 +65,6 @@ public class Tile {
   }
 
   /**
-   * Returns a copy of the players currently on the tile.
-   *
-   * @return list of players on the tile
-   */
-  public List<Player> getPlayers() {
-    return new ArrayList<>(players);
-  }
-
-  /**
    * Adds a player to the tile if it is not already present, then updates the display.
    *
    * @param player the player to add
@@ -98,8 +88,8 @@ public class Tile {
   }
 
   /**
-   * Updates the display. Always shows the position label.
-   * If there are players on the tile, their icons are added to the playerBox.
+   * Updates the display. Always shows the position label. If there are players on the tile, their
+   * icons are added to the playerBox.
    */
   private void updateDisplay() {
     container.getChildren().clear();
@@ -108,11 +98,12 @@ public class Tile {
     playerBox.getChildren().clear();
 
     // If there are players, add their icons and then add the playerBox to the container
-    if (!players.isEmpty()) {
-      for (Player player : players) {
-        playerBox.getChildren().add(player.getIcon());
-      }
-      container.getChildren().add(playerBox);
+    if (players.isEmpty()) {
+      return;
     }
+    for (Player player : players) {
+      playerBox.getChildren().add(player.getIcon());
+    }
+    container.getChildren().add(playerBox);
   }
 }

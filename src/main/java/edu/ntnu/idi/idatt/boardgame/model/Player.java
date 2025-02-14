@@ -51,8 +51,7 @@ public class Player {
       // bounce back
       newPosition = GameBoard.getBoardSize() - (newPosition - GameBoard.getBoardSize());
     }
-    position = newPosition;
-    return position;
+    return newPosition;
   }
 
   /**
