@@ -1,6 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.model;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -9,7 +8,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.util.Pair;
 
 public class GameBoard extends Pane {
   private static final int ROWS = 10;
@@ -21,6 +19,27 @@ public class GameBoard extends Pane {
   private final Tile[][] tiles = new Tile[ROWS][COLS];
   private final Map<Integer, Connector> connectors = new HashMap<>();
   private final Group connectorGroup = new Group();
+
+  private static final Map<Integer, Integer> SNAKES =
+      // top, snake length
+      Map.of(
+          30, 14,
+          34, 7,
+          47, 7,
+          54, 35,
+          65, 5,
+          87, 31);
+
+  private static final Map<Integer, Integer> LADDERS =
+      // bottom, ladder length
+      Map.of(
+          8, 6,
+          21, 10,
+          33, 5,
+          48, 7,
+          61, 8,
+          70, 9,
+          81, 2);
 
   public GameBoard() {
     GridPane grid = new GridPane();
@@ -90,16 +109,21 @@ public class GameBoard extends Pane {
   private String applyConnectorIfPresent(Player player) {
     int pos = player.getPosition();
 
-    if (connectors.containsKey(pos)) {
-      Connector connector = connectors.get(pos);
-      int destination = connector.getEnd();
-      movePlayer(player, pos, destination);
+    if (!connectors.containsKey(pos)) {
+      return "";
+    }
+    Connector connector = connectors.get(pos);
+    int destination = connector.getEnd();
+    movePlayer(player, pos, destination);
 
-      if (connector.getConnectorType().equals("Ladder")) {
-        return " and climbed a ladder to tile " + destination;
-      } else if (connector.getColor().equals(Color.RED)) {
-        return " and slid down a snake to tile " + destination;
-      }
+    return additionalMessage(connector, destination);
+  }
+
+  private static String additionalMessage(Connector connector, int destination) {
+    if (connector.getConnectorType().equals("Ladder")) {
+      return " and climbed a ladder to tile " + destination;
+    } else if (connector.getColor().equals(Color.RED)) {
+      return " and slid down a snake to tile " + destination;
     }
     return "";
   }
@@ -111,6 +135,7 @@ public class GameBoard extends Pane {
               int[] gridPos = getGridCoordinates(pos);
               int col = gridPos[0];
               int row = gridPos[1];
+
               Tile tile = new Tile(pos, TILE_SIZE);
               tiles[row][col] = tile;
               grid.add(tile.getTile(), col, row);
@@ -127,6 +152,7 @@ public class GameBoard extends Pane {
     int index = pos - 1;
     int rowFromBottom = index / COLS;
     int col;
+
     if (rowFromBottom % 2 == 0) {
       col = index % COLS;
     } else {
@@ -163,30 +189,8 @@ public class GameBoard extends Pane {
 
   /** Adds a set of snakes and ladders. */
   private void addSnakesAndLadders() {
-    @SuppressWarnings("unchecked")
-    Pair<Integer, Integer>[] snakes =
-        new Pair[] {
-          new Pair<>(30, 14),
-          new Pair<>(34, 7),
-          new Pair<>(47, 7),
-          new Pair<>(54, 35),
-          new Pair<>(65, 5),
-          new Pair<>(87, 31),
-        };
-    @SuppressWarnings("unchecked")
-    Pair<Integer, Integer>[] ladders =
-        new Pair[] {
-          new Pair<>(8, 6),
-          new Pair<>(21, 10),
-          new Pair<>(33, 5),
-          new Pair<>(48, 7),
-          new Pair<>(61, 8),
-          new Pair<>(70, 9),
-          new Pair<>(81, 2)
-        };
-
-    Arrays.stream(snakes).forEach(snake -> addSnake(snake.getKey(), snake.getValue()));
-    Arrays.stream(ladders).forEach(ladder -> addLadder(ladder.getKey(), ladder.getValue()));
+    SNAKES.forEach(this::addSnake);
+    LADDERS.forEach(this::addLadder);
   }
 
   /**

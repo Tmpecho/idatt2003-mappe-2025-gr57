@@ -44,17 +44,20 @@ public class Game {
   private void setupRollDiceButton() {
     rollDiceButton.setOnAction(
         e -> {
-          if (!gameOver) {
-            int roll = dice.roll();
-            String logMessage = gameBoard.incrementPlayerPosition(currentPlayer, roll);
-            logLabel.setText(logMessage);
-            if (currentPlayer.getPosition() == GameBoard.getBoardSize()) {
-              gameOver = true;
-              logLabel.setText("Player " + currentPlayer.getId() + " wins!");
-              rollDiceButton.setDisable(true);
-            } else {
-              currentPlayer = getNextPlayer();
-            }
+          if (gameOver) {
+            return;
+          }
+
+          int roll = dice.roll();
+          String logMessage = gameBoard.incrementPlayerPosition(currentPlayer, roll);
+          logLabel.setText(logMessage);
+
+          if (currentPlayer.getPosition() != GameBoard.getBoardSize()) {
+            currentPlayer = getNextPlayer();
+          } else {
+            gameOver = true;
+            logLabel.setText("Player " + currentPlayer.getId() + " wins!");
+            rollDiceButton.setDisable(true);
           }
         });
   }
