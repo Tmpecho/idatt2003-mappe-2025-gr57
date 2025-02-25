@@ -1,5 +1,6 @@
-package edu.ntnu.idi.idatt.boardgame.model;
+package edu.ntnu.idi.idatt.boardgame.domain.player;
 
+import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 

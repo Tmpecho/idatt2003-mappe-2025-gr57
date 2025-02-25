@@ -1,14 +1,14 @@
-package edu.ntnu.idi.idatt.boardgame.model;
+package edu.ntnu.idi.idatt.boardgame.domain.board;
 
 import javafx.scene.paint.Color;
 
-class Snake extends Connector {
+class Ladder extends Connector {
   private final int end;
-  private final Color color = Color.RED;
+  private final Color color = Color.GREEN;
 
-  public Snake(int start, int length) {
+  public Ladder(int start, int length) {
     super(start);
-    this.end = start - length;
+    this.end = start + length;
   }
 
   @Override
@@ -23,6 +23,6 @@ class Snake extends Connector {
 
   @Override
   public Object getConnectorType() {
-    return "Snake";
+    return "Ladder";
   }
 }

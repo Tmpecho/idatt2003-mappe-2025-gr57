@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.model;
 
+import edu.ntnu.idi.idatt.boardgame.domain.dice.Dice;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
