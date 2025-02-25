@@ -1,9 +1,8 @@
 package edu.ntnu.idi.idatt.boardgame.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;

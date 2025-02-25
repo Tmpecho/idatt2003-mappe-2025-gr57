@@ -1,10 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
-
-import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import javafx.scene.Group;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
