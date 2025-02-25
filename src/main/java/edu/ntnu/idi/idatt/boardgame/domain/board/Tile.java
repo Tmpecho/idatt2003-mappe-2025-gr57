@@ -1,5 +1,6 @@
-package edu.ntnu.idi.idatt.boardgame.model;
+package edu.ntnu.idi.idatt.boardgame.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Pos;

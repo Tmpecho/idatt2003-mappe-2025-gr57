@@ -1,8 +1,8 @@
 package edu.ntnu.idi.idatt.boardgame.controller;
 
-import edu.ntnu.idi.idatt.boardgame.model.Dice;
-import edu.ntnu.idi.idatt.boardgame.model.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.model.Player;
+import edu.ntnu.idi.idatt.boardgame.domain.dice.Dice;
+import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
