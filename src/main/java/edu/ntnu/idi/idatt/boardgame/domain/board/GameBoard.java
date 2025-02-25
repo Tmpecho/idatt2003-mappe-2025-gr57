@@ -78,7 +78,7 @@ public class GameBoard extends Pane {
 
     movePlayer(player, oldPos, newPos);
 
-    String message = "Player " + player.getId() + " rolled " + increment + " to tile " + newPos;
+    String message = "Player " + player.getId() + " rolled a " + increment + " and moved to tile " + newPos;
     String connectorMessage = applyConnectorIfPresent(player);
 
     if (!connectorMessage.isEmpty()) {

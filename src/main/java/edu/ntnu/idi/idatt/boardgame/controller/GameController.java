@@ -1,7 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.controller;
 
-import edu.ntnu.idi.idatt.boardgame.domain.dice.Dice;
+import edu.ntnu.idi.idatt.boardgame.action.CompositeAction;
+import edu.ntnu.idi.idatt.boardgame.action.RollAction;
 import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +24,8 @@ public class GameController {
       List.of(Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PURPLE);
   private final Map<Integer, Player> players;
   private Player currentPlayer;
-  private boolean gameOver = false;
+
+  private final GameLoop gameLoop;
 
   public GameController() {
     this.dice = new Dice(2);
@@ -34,32 +37,12 @@ public class GameController {
     gameBoard.addPlayersToStart(players);
     this.currentPlayer = players.get(1);
 
+    gameLoop = new GameLoop();
     setupRollDiceButton();
   }
 
-  /**
-   * Sets up the dice roll button event. After rolling, the move (and any connector effect) is
-   * applied and the log label is updated.
-   */
   private void setupRollDiceButton() {
-    rollDiceButton.setOnAction(
-        e -> {
-          if (gameOver) {
-            return;
-          }
-
-          int roll = dice.roll();
-          String logMessage = gameBoard.incrementPlayerPosition(currentPlayer, roll);
-          logLabel.setText(logMessage);
-
-          if (currentPlayer.getPosition() != GameBoard.getBoardSize()) {
-            currentPlayer = getNextPlayer();
-          } else {
-            gameOver = true;
-            logLabel.setText("Player " + currentPlayer.getId() + " wins!");
-            rollDiceButton.setDisable(true);
-          }
-        });
+    rollDiceButton.setOnAction(e -> gameLoop.onRoll());
   }
 
   private Player getNextPlayer() {
@@ -75,6 +58,33 @@ public class GameController {
               players.put(playerId, player);
             });
     return players;
+  }
+
+  private class GameLoop {
+    private CompositeAction currentAction = new CompositeAction();
+
+    public void onRoll() {
+      currentAction.addAction(new RollAction(gameBoard, currentPlayer, dice));
+
+      String actionMessage = currentAction.execute();
+      logLabel.setText(actionMessage);
+
+      if (playerWon()) {
+        onGameFinish();
+      } else {
+        currentPlayer = getNextPlayer();
+        currentAction = new CompositeAction();
+      }
+    }
+
+    private boolean playerWon() {
+      return currentPlayer.getPosition() == GameBoard.getBoardSize();
+    }
+
+    private void onGameFinish() {
+      logLabel.setText("Player " + currentPlayer.getId() + " wins!");
+      rollDiceButton.setDisable(true);
+    }
   }
 
   public GameBoard getGameBoard() {
