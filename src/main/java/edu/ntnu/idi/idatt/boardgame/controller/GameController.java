@@ -6,7 +6,6 @@ import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.view.GameView;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

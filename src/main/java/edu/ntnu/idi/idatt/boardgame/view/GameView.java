@@ -7,9 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-/**
- * The GameView class.
- */
+/** The GameView class. */
 public class GameView {
   private final Button rollDiceButton;
   private final Label logLabel;
@@ -27,11 +25,7 @@ public class GameView {
 
     VBox mainLayout = new VBox(10);
 
-    mainLayout.getChildren().addAll(
-            gameBoard,
-            rollDiceButton,
-            logLabel
-    );
+    mainLayout.getChildren().addAll(gameBoard, rollDiceButton, logLabel);
 
     root = new BorderPane();
     root.setCenter(mainLayout);
@@ -75,15 +69,13 @@ public class GameView {
     logLabel.setText(text);
   }
 
-  /**
-   * Disable the roll button.
-   */
+  /** Disable the roll button. */
   public void disableRollButton() {
     rollDiceButton.setDisable(true);
   }
 
   /**
-   * Return root pane
+   * Return root pane.
    *
    * @return the root pane
    */
