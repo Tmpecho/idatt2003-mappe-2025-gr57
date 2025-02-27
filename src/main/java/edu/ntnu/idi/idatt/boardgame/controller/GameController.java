@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.scene.paint.Color;
 
+/**
+ * The GameController class.
+ */
 public class GameController {
   private final GameBoard gameBoard;
   private final Dice dice;
@@ -23,6 +26,9 @@ public class GameController {
   private Player currentPlayer;
   private GameView gameView;
 
+  /**
+   * Constructor for GameController.
+   */
   public GameController() {
     this.dice = new Dice(2);
     this.players = createPlayers();
@@ -32,14 +38,29 @@ public class GameController {
     this.currentPlayer = players.get(1);
   }
 
+  /**
+   * Set the game view.
+   *
+   * @param gameView the game view
+   */
   public void setGameView(GameView gameView) {
     this.gameView = gameView;
   }
 
+  /**
+   * Get the current player.
+   *
+   * @return the current player
+   */
   private Player getNextPlayer() {
     return players.get((currentPlayer.getId() % numberOfPlayers) + 1);
   }
 
+  /**
+   * Create players.
+   *
+   * @return the map of players
+   */
   private Map<Integer, Player> createPlayers() {
     Map<Integer, Player> players = new HashMap<>();
     IntStream.rangeClosed(1, numberOfPlayers)
@@ -51,6 +72,9 @@ public class GameController {
     return players;
   }
 
+  /**
+   * Roll the dice.
+   */
   public void onRoll() {
     CompositeAction currentAction = new CompositeAction();
     currentAction.addAction(new RollAction(gameBoard, currentPlayer, dice));
@@ -65,15 +89,28 @@ public class GameController {
     }
   }
 
+  /**
+   * Check if the player has won.
+   *
+   * @return true if the player has won, false otherwise
+   */
   private boolean playerWon() {
     return currentPlayer.getPosition() == GameBoard.getBoardSize();
   }
 
+  /**
+   * Handle the game finish.
+   */
   private void onGameFinish() {
     gameView.updateLogText("Player " + currentPlayer.getId() + " wins!");
     gameView.disableRollButton();
   }
 
+  /**
+   * Get the game board.
+   *
+   * @return the game board
+   */
   public GameBoard getGameBoard() {
     return gameBoard;
   }
