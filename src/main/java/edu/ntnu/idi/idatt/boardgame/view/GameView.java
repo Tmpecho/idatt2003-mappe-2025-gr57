@@ -1,7 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.view;
 
-import edu.ntnu.idi.idatt.boardgame.controller.GameController;
-import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.controller.common.GameController;
+import java.util.List;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -12,52 +12,29 @@ public class GameView {
   private final Button rollDiceButton;
   private final Label logLabel;
   private final BorderPane root;
+  private final List<GameController> gameControllers;
 
-  /**
-   * Constructor for GameView.
-   *
-   * @param controller the game controller
-   * @param gameBoard the game board
-   */
-  public GameView(GameController controller, GameBoard gameBoard) {
+  /** Constructor for GameView. */
+  public GameView(List<GameController> gameControllers) {
+    this.gameControllers = gameControllers;
     this.rollDiceButton = new Button("Roll dice");
     this.logLabel = new Label("Game log:");
 
     VBox mainLayout = new VBox(10);
 
-    mainLayout.getChildren().addAll(gameBoard, rollDiceButton, logLabel);
+    mainLayout
+        .getChildren()
+        .addAll(gameControllers.get(0).getGameBoard(), rollDiceButton, logLabel);
 
     root = new BorderPane();
     root.setCenter(mainLayout);
 
-    setupRollDiceButton(controller);
+    setupRollDiceButton();
   }
 
-  /**
-   * Setup the roll dice button.
-   *
-   * @param controller the game controller
-   */
-  private void setupRollDiceButton(GameController controller) {
-    rollDiceButton.setOnAction(e -> controller.onRoll());
-  }
-
-  /**
-   * Get the roll dice button.
-   *
-   * @return the roll dice button
-   */
-  public Button getRollDiceButton() {
-    return rollDiceButton;
-  }
-
-  /**
-   * Get the log label.
-   *
-   * @return the log label
-   */
-  public Label getLogLabel() {
-    return logLabel;
+  /** Setup the roll dice button. */
+  private void setupRollDiceButton() {
+    rollDiceButton.setOnAction(e -> gameControllers.get(0).onRoll());
   }
 
   /**
