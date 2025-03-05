@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.scene.paint.Color;
 
-public class SnakesAndLaddersController extends GameController {
+public class SnakesAndLaddersController extends GameController<SnakesAndLaddersPlayer> {
   private final GameBoard gameBoard = new GameBoard();
   private GameView gameView;
   private final int numberOfPlayers;

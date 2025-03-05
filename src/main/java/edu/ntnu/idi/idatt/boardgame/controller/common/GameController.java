@@ -6,9 +6,9 @@ import edu.ntnu.idi.idatt.boardgame.domain.games.snakesAndLadders.player.SnakesA
 import edu.ntnu.idi.idatt.boardgame.view.GameView;
 
 /** The GameController class. */
-public abstract class GameController {
+public abstract class GameController<P extends Player> {
   private GameView gameView;
-  private final Player currentPlayer;
+  private final P currentPlayer;
 
   public GameController() {
     currentPlayer = null;
