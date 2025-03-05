@@ -1,10 +1,10 @@
-package edu.ntnu.idi.idatt.boardgame.domain.player;
+package edu.ntnu.idi.idatt.boardgame.domain.common.player;
 
-import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.domain.common.board.GameBoard;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
-public class Player {
+public abstract class Player {
   private final int id;
   private int position;
   private final Circle icon;
@@ -40,20 +40,6 @@ public class Player {
     return position;
   }
 
-  /**
-   * Increments the position of the player by the given increment.
-   *
-   * @param increment the amount to increment the position by
-   * @return the new position of the player
-   */
-  public int incrementPosition(int increment) {
-    int newPosition = position + increment;
-    if (newPosition > GameBoard.getBoardSize()) {
-      // bounce back
-      newPosition = GameBoard.getBoardSize() - (newPosition - GameBoard.getBoardSize());
-    }
-    return newPosition;
-  }
 
   /**
    * Sets the position of the player.

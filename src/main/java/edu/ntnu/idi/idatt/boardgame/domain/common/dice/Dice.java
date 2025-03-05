@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt.boardgame.domain.dice;
+package edu.ntnu.idi.idatt.boardgame.domain.common.dice;
 
 import java.util.ArrayList;
 import java.util.List;

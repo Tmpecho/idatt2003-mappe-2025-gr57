@@ -1,9 +1,13 @@
-package edu.ntnu.idi.idatt.boardgame.domain.board;
+package edu.ntnu.idi.idatt.boardgame.domain.common.board;
 
-import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import edu.ntnu.idi.idatt.boardgame.domain.games.snakesAndLadders.board.Connector;
+import edu.ntnu.idi.idatt.boardgame.domain.games.snakesAndLadders.board.Ladder;
+import edu.ntnu.idi.idatt.boardgame.domain.games.snakesAndLadders.board.Snake;
+import edu.ntnu.idi.idatt.boardgame.domain.games.snakesAndLadders.player.SnakesAndLaddersPlayer;
 import javafx.scene.Group;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -54,7 +58,7 @@ public class GameBoard extends Pane {
   }
 
   /** Adds all players to the starting tile (position 1). */
-  public void addPlayersToStart(Map<Integer, Player> players) {
+  public void addPlayersToStart(Map<Integer, SnakesAndLaddersPlayer> players) {
     players
         .values()
         .forEach(
@@ -72,7 +76,7 @@ public class GameBoard extends Pane {
    * @param increment the dice roll increment
    * @return a log message describing the move
    */
-  public String incrementPlayerPosition(Player player, int increment) {
+  public String incrementPlayerPosition(SnakesAndLaddersPlayer player, int increment) {
     int oldPos = player.getPosition();
     int newPos = player.incrementPosition(increment);
 
@@ -94,7 +98,7 @@ public class GameBoard extends Pane {
    * @param fromPos the current tile position
    * @param toPos the destination tile position
    */
-  private void movePlayer(Player player, int fromPos, int toPos) {
+  private void movePlayer(SnakesAndLaddersPlayer player, int fromPos, int toPos) {
     getTileAtPosition(fromPos).removePlayer(player);
     player.setPosition(toPos);
     getTileAtPosition(toPos).addPlayer(player);
@@ -107,7 +111,7 @@ public class GameBoard extends Pane {
    * @param player the player to check
    * @return a string message if a connector is applied, or an empty string
    */
-  private String applyConnectorIfPresent(Player player) {
+  private String applyConnectorIfPresent(SnakesAndLaddersPlayer player) {
     int pos = player.getPosition();
 
     if (!connectors.containsKey(pos)) {
