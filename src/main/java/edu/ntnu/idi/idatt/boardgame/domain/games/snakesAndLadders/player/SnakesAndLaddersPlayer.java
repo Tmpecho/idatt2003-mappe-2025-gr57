@@ -5,7 +5,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
 public class SnakesAndLaddersPlayer extends edu.ntnu.idi.idatt.boardgame.domain.common.player.Player {
-	private final int position;
+	private int position;
 
 	/**
 	 * Creates a new player with the given id and color.
@@ -18,6 +18,25 @@ public class SnakesAndLaddersPlayer extends edu.ntnu.idi.idatt.boardgame.domain.
 		this.position = 1;
 		Circle icon = new Circle(7);
 		icon.setFill(color);
+	}
+
+	@Override
+	public int getPosition() {
+		return position;
+	}
+
+	/**
+	 * Sets the position of the player.
+	 *
+	 * @param position the new position of the player
+	 */
+	@Override
+	public void setPosition(int position) {
+		if (position < 1 && position > GameBoard.getBoardSize()) {
+			throw new IllegalArgumentException(
+					"Position must be between 1 and the furthest position on the board.");
+		}
+		this.position = position;
 	}
 
 	/**

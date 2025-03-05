@@ -1,6 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.domain.common.player;
 
-import edu.ntnu.idi.idatt.boardgame.domain.common.board.GameBoard;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
@@ -36,23 +35,14 @@ public abstract class Player {
    *
    * @return the position of the player
    */
-  public int getPosition() {
-    return position;
-  }
-
+  public abstract int getPosition();
 
   /**
    * Sets the position of the player.
    *
    * @param position the new position of the player
    */
-  public void setPosition(int position) {
-    if (position < 1 && position > GameBoard.getBoardSize()) {
-      throw new IllegalArgumentException(
-          "Position must be between 1 and the furthest position on the board.");
-    }
-    this.position = position;
-  }
+  public abstract void setPosition(int position);
 
   /**
    * Returns the icon of the player.
