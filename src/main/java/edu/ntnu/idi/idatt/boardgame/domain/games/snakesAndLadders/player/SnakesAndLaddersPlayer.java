@@ -32,7 +32,7 @@ public class SnakesAndLaddersPlayer extends edu.ntnu.idi.idatt.boardgame.domain.
 	 */
 	@Override
 	public void setPosition(int position) {
-		if (position < 1 && position > GameBoard.getBoardSize()) {
+		if (position < 1 || position > GameBoard.getBoardSize()) {
 			throw new IllegalArgumentException(
 					"Position must be between 1 and the furthest position on the board.");
 		}
