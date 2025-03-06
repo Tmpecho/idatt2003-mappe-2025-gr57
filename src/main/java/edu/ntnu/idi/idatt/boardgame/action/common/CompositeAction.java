@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt.boardgame.action;
+package edu.ntnu.idi.idatt.boardgame.action.common;
 
 import java.util.ArrayList;
 import java.util.List;
