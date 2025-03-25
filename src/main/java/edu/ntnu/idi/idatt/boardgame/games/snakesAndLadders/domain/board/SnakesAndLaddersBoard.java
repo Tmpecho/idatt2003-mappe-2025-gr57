@@ -1,16 +1,18 @@
-package edu.ntnu.idi.idatt.boardgame.domain.board;
+package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-public class GameBoard extends Pane {
+public class SnakesAndLaddersBoard extends Pane implements GameBoard {
   private static final int ROWS = 10;
   private static final int COLS = 9;
   private static final int BOARD_SIZE = ROWS * COLS;
@@ -42,7 +44,7 @@ public class GameBoard extends Pane {
           70, 9,
           81, 2);
 
-  public GameBoard() {
+  public SnakesAndLaddersBoard() {
     GridPane grid = new GridPane();
     grid.setHgap(GAP_SIZE);
     grid.setVgap(GAP_SIZE);
@@ -53,38 +55,33 @@ public class GameBoard extends Pane {
     addSnakesAndLadders();
   }
 
-  /** Adds all players to the starting tile (position 1). */
+  @Override
   public void addPlayersToStart(Map<Integer, Player> players) {
-    players
-        .values()
-        .forEach(
-            player -> {
-              player.setPosition(1);
-              getTileAtPosition(1).addPlayer(player);
-            });
+    players.values().forEach(player -> {
+      player.setPosition(1);
+      getTileAtPosition(1).addPlayer(player);
+    });
   }
 
-  /**
-   * Increments a player's position by the given increment and returns a log message. After moving
-   * normally, if the landing tile is the trigger for a connector, the effect is applied.
-   *
-   * @param player the player to move
-   * @param increment the dice roll increment
-   * @return a log message describing the move
-   */
+  @Override
   public String incrementPlayerPosition(Player player, int increment) {
     int oldPos = player.getPosition();
-    int newPos = player.incrementPosition(increment);
-
+    int newPos = oldPos + increment;
+    if (newPos > getBoardSize()) {
+      newPos = getBoardSize() - (newPos - getBoardSize());
+    }
     movePlayer(player, oldPos, newPos);
-
     String message = "Player " + player.getId() + " rolled a " + increment + " and moved to tile " + newPos;
     String connectorMessage = applyConnectorIfPresent(player);
-
     if (!connectorMessage.isEmpty()) {
       message += connectorMessage;
     }
     return message;
+  }
+
+  @Override
+  public int getBoardSize() {
+    return BOARD_SIZE;
   }
 
   /**
@@ -226,7 +223,8 @@ public class GameBoard extends Pane {
     connectorGroup.getChildren().add(line);
   }
 
-  public static int getBoardSize() {
-    return BOARD_SIZE;
+  @Override
+  public Node getNode() {
+    return this;  // Returns itself, since Pane is a Node
   }
 }

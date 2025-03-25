@@ -1,6 +1,6 @@
-package edu.ntnu.idi.idatt.boardgame.domain.board;
+package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Pos;
@@ -12,11 +12,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
-public class Tile {
+public
+class Tile { // todo: make this class implement a common interface for all tiles so we can have
+             // different types of tiles
   private final StackPane tile;
   private final Label posLabel;
   private final HBox playerBox;
-  private final VBox container;
+  private final VBox tileContainer;
   private final List<Player> players;
 
   /**
@@ -39,20 +41,18 @@ public class Tile {
     playerBox.setSpacing(-5);
 
     // Container holding the position label and, if any, the playerBox.
-    container = new VBox();
-    container.setAlignment(Pos.CENTER);
-    container.setSpacing(5);
-    container.getChildren().add(posLabel);
+    tileContainer = new VBox();
+    tileContainer.setAlignment(Pos.CENTER);
+    tileContainer.setSpacing(5);
+    tileContainer.getChildren().add(posLabel);
 
-    // The rectangle representing the tile's background
-    Rectangle rect = new Rectangle(tileSize, tileSize);
-    rect.setFill(Color.BEIGE);
-    rect.setStroke(Color.DARKGRAY);
-    rect.setArcWidth(5);
-    rect.setArcHeight(5);
+    Rectangle tileBackground = new Rectangle(tileSize, tileSize);
+    tileBackground.setFill(Color.BEIGE);
+    tileBackground.setStroke(Color.DARKGRAY);
+    tileBackground.setArcWidth(5);
+    tileBackground.setArcHeight(5);
 
-    // Build the overall StackPane
-    tile = new StackPane(rect, container);
+    tile = new StackPane(tileBackground, tileContainer);
     tile.setAlignment(Pos.CENTER);
   }
 
@@ -93,8 +93,8 @@ public class Tile {
    * icons are added to the playerBox.
    */
   private void updateDisplay() {
-    container.getChildren().clear();
-    container.getChildren().add(posLabel);
+    tileContainer.getChildren().clear();
+    tileContainer.getChildren().add(posLabel);
 
     playerBox.getChildren().clear();
 
@@ -102,9 +102,7 @@ public class Tile {
     if (players.isEmpty()) {
       return;
     }
-    for (Player player : players) {
-      playerBox.getChildren().add(player.getIcon());
-    }
-    container.getChildren().add(playerBox);
+    players.forEach(player -> playerBox.getChildren().add(player.getIcon()));
+    tileContainer.getChildren().add(playerBox);
   }
 }

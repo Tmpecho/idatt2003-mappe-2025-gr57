@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt.boardgame.domain.board;
+package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
 import javafx.scene.paint.Color;
 

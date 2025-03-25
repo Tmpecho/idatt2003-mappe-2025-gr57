@@ -1,26 +1,23 @@
-package edu.ntnu.idi.idatt.boardgame.domain.dice;
+package edu.ntnu.idi.idatt.boardgame.common.dice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
-public class Dice {
+
+public class Dice implements DiceInterface {
   private final List<Die> dice = new ArrayList<>();
 
   public Dice(int numberOfDice) {
     if (numberOfDice < 1) {
       throw new IllegalArgumentException("Number of dice must be at least 1");
     }
-    for (int i = 0; i < numberOfDice; i++) {
-      dice.add(new Die());
-    }
+	  IntStream.range(0, numberOfDice).mapToObj(i -> new Die()).forEach(dice::add);
   }
 
+  @Override
   public int roll() {
-    int sum = 0;
-    for (Die die : dice) {
-      sum += die.roll();
-    }
-    return sum;
+	  return dice.stream().mapToInt(Die::roll).sum();
   }
 
   public int getDie(int dieIndex) {
