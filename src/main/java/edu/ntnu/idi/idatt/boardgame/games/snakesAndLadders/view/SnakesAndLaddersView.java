@@ -3,6 +3,7 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view;
 import edu.ntnu.idi.idatt.boardgame.common.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.common.controller.GameObserver; // Added import
 import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -53,8 +54,8 @@ public class SnakesAndLaddersView implements GameObserver {
   }
 
   @Override
-  public void gameFinished(int winnerId) {
-    logLabel.setText("Player " + winnerId + " wins!");
+  public void gameFinished(Player currentPlayer) {
+    logLabel.setText(currentPlayer.getName() +  " wins!");
     rollDiceButton.setDisable(true);
   }
 
