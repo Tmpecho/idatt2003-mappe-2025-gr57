@@ -1,84 +1,63 @@
 package edu.ntnu.idi.idatt.boardgame.view;
 
 import edu.ntnu.idi.idatt.boardgame.controller.GameController;
+import edu.ntnu.idi.idatt.boardgame.controller.GameObserver; // Added import
 import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-/** The GameView class. */
-public class GameView {
+public class GameView implements GameObserver { // Implement GameObserver
   private final Button rollDiceButton;
   private final Label logLabel;
   private final BorderPane root;
 
-  /**
-   * Constructor for GameView.
-   *
-   * @param controller the game controller
-   * @param gameBoard the game board
-   */
   public GameView(GameController controller, GameBoard gameBoard) {
     this.rollDiceButton = new Button("Roll dice");
     this.logLabel = new Label("Game log:");
 
     VBox mainLayout = new VBox(10);
-
-    mainLayout.getChildren().addAll(gameBoard, rollDiceButton, logLabel);
+    mainLayout.getChildren().addAll(gameBoard.getNode(), rollDiceButton, logLabel);  // Use getNode()
 
     root = new BorderPane();
     root.setCenter(mainLayout);
 
     setupRollDiceButton(controller);
+    controller.addObserver(this);
   }
 
-  /**
-   * Setup the roll dice button.
-   *
-   * @param controller the game controller
-   */
   private void setupRollDiceButton(GameController controller) {
     rollDiceButton.setOnAction(e -> controller.onRoll());
   }
 
-  /**
-   * Get the roll dice button.
-   *
-   * @return the roll dice button
-   */
   public Button getRollDiceButton() {
     return rollDiceButton;
   }
 
-  /**
-   * Get the log label.
-   *
-   * @return the log label
-   */
   public Label getLogLabel() {
     return logLabel;
   }
 
-  /**
-   * Update the log text.
-   *
-   * @param text the text
-   */
-  public void updateLogText(String text) {
+  public void updateLogText(String text) { // Keep for compatibility, but not used directly
     logLabel.setText(text);
   }
 
-  /** Disable the roll button. */
-  public void disableRollButton() {
+  public void disableRollButton() { // Keep for compatibility, but not used directly
     rollDiceButton.setDisable(true);
   }
 
-  /**
-   * Return root pane.
-   *
-   * @return the root pane
-   */
+  @Override
+  public void update(String message) { // Implement observer method
+    logLabel.setText(message);
+  }
+
+  @Override
+  public void gameFinished(int winnerId) { // Implement observer method
+    logLabel.setText("Player " + winnerId + " wins!");
+    rollDiceButton.setDisable(true);
+  }
+
   public BorderPane getRoot() {
     return root;
   }

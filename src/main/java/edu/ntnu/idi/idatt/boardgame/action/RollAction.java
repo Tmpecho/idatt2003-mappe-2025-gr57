@@ -18,7 +18,6 @@ public class RollAction implements Action {
   @Override
   public String execute() {
     int roll = dice.roll();
-
     return gameBoard.incrementPlayerPosition(player, roll);
   }
 }

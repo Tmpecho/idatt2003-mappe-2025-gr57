@@ -3,7 +3,8 @@ package edu.ntnu.idi.idatt.boardgame.domain.dice;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Dice {
+
+public class Dice implements DiceInterface { // Class now implements the interface
   private final List<Die> dice = new ArrayList<>();
 
   public Dice(int numberOfDice) {
@@ -15,6 +16,7 @@ public class Dice {
     }
   }
 
+  @Override
   public int roll() {
     int sum = 0;
     for (Die die : dice) {
