@@ -40,10 +40,15 @@ public class SnakesAndLaddersController extends GameController {
     return players;
   }
 
-  @Override
-  protected String performTurn() {
+  public void rollDice() {
     Action roll = new RollAction(gameBoard, currentPlayer, dice);
-    return roll.execute();
+    roll.execute();
+    notifyObservers(currentPlayer.getName() + " is now at tile " + currentPlayer.getPosition());
+    if (isGameOver()) {
+      onGameFinish();
+    } else {
+      currentPlayer = getNextPlayer();
+    }
   }
 
   @Override
