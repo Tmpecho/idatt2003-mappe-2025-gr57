@@ -1,7 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame;
 
-import edu.ntnu.idi.idatt.boardgame.controller.SnakesAndLaddersController;
-import edu.ntnu.idi.idatt.boardgame.view.GameView;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.controller.SnakesAndLaddersController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view.GameView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
