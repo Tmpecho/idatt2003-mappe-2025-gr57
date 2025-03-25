@@ -43,17 +43,6 @@ public abstract class GameController {
     observers.forEach(observer -> observer.gameFinished(currentPlayer));
   }
 
-  public void onRoll() {
-    String actionMessage = performTurn();
-    notifyObservers(actionMessage);
-    if (isGameOver()) {
-      onGameFinish();
-    } else {
-      currentPlayer = getNextPlayer();
-    }
-  }
-
-  protected abstract String performTurn();
   protected abstract boolean isGameOver();
   protected abstract void onGameFinish();
   protected abstract Player getNextPlayer();

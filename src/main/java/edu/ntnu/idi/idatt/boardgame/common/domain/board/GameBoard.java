@@ -6,7 +6,7 @@ import java.util.Map;
 
 public interface GameBoard {
     void addPlayersToStart(Map<Integer, Player> players);
-    String incrementPlayerPosition(Player player, int increment);
+    void incrementPlayerPosition(Player player, int increment);
     int getBoardSize();
     Node getNode();
 }
