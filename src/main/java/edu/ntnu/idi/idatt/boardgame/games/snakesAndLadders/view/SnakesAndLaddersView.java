@@ -8,12 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public class GameView implements GameObserver {
+public class SnakesAndLaddersView implements GameObserver {
   private final Button rollDiceButton;
   private final Label logLabel;
   private final BorderPane root;
 
-  public GameView(GameController controller, GameBoard gameBoard) {
+  public SnakesAndLaddersView(GameController controller, GameBoard gameBoard) {
     this.rollDiceButton = new Button("Roll dice");
     this.logLabel = new Label("Game log:");
 

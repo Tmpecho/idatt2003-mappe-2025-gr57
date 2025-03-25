@@ -1,7 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame;
 
-import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.controller.SnakesAndLaddersController;
-import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view.GameView;
+import edu.ntnu.idi.idatt.boardgame.common.view.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -9,12 +8,10 @@ import javafx.stage.Stage;
 public class App extends Application {
   @Override
   public void start(Stage stage) {
-    SnakesAndLaddersController gameController = new SnakesAndLaddersController(2);
-    GameView gameView = new GameView(gameController, gameController.getGameBoard());
-
-    Scene scene = new Scene(gameView.getRoot(), 700, 800);
+    MainView mainView = new MainView();
+    Scene scene = new Scene(mainView.getRoot(), 900, 800);
     stage.setScene(scene);
-    stage.setTitle("Snakes and Ladders");
+    stage.setTitle("Board Games Hub");
     stage.show();
   }
 
