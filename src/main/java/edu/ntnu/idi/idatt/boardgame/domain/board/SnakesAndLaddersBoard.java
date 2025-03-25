@@ -1,8 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.domain.board.Connector;
-import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
 import java.util.HashMap;
 import java.util.Map;

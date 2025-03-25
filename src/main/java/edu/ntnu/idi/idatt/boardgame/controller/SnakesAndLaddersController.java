@@ -2,7 +2,6 @@ package edu.ntnu.idi.idatt.boardgame.controller;
 
 import edu.ntnu.idi.idatt.boardgame.action.CompositeAction;
 import edu.ntnu.idi.idatt.boardgame.action.RollAction;
-import edu.ntnu.idi.idatt.boardgame.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.domain.board.SnakesAndLaddersBoard;
 import edu.ntnu.idi.idatt.boardgame.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.domain.player.Player;
@@ -17,9 +16,9 @@ public class SnakesAndLaddersController extends GameController {
     private final List<Color> playerColors = List.of(Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PURPLE);
 
     public SnakesAndLaddersController(int numberOfPlayers) {
-        super(new SnakesAndLaddersBoard(), new Dice(2)); // Pass only gameBoard and dice
+        super(new SnakesAndLaddersBoard(), new Dice(2));
         this.numberOfPlayers = numberOfPlayers;
-        initialize(numberOfPlayers); // Call initialize after fields are set
+        initialize(numberOfPlayers);
     }
 
     @Override
