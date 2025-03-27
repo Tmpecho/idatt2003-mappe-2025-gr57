@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
 import edu.ntnu.idi.idatt.boardgame.common.player.Player;
+import edu.ntnu.idi.idatt.boardgame.common.player.PlayerColor;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Pos;
@@ -9,12 +10,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 public
 class Tile { // todo: make this class implement a common interface for all tiles so we can have
-             // different types of tiles
+  // different types of tiles
   private final StackPane tile;
   private final Label posLabel;
   private final HBox playerBox;
@@ -102,7 +105,23 @@ class Tile { // todo: make this class implement a common interface for all tiles
     if (players.isEmpty()) {
       return;
     }
-    players.forEach(player -> playerBox.getChildren().add(player.getIcon()));
+    players.forEach(
+        player -> {
+          Circle circle = new Circle(7);
+          circle.setFill(mapToJavaFXColor(player.getColor()));
+          playerBox.getChildren().add(circle);
+        });
     tileContainer.getChildren().add(playerBox);
+  }
+
+  private Paint mapToJavaFXColor(PlayerColor color) {
+    return switch (color) {
+      case RED -> Color.RED;
+      case BLUE -> Color.BLUE;
+      case GREEN -> Color.GREEN;
+      case YELLOW -> Color.YELLOW;
+      case ORANGE -> Color.ORANGE;
+      case PURPLE -> Color.PURPLE;
+    };
   }
 }

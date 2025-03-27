@@ -1,22 +1,24 @@
 package edu.ntnu.idi.idatt.boardgame.common.player;
 
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-
 public class Player {
   private final int id;
+  private final String name;
   private int position;
-  private final Circle icon;
+  private final PlayerColor color;
 
-  public Player(int id, Paint color) {
+  public Player(int id, String name, PlayerColor color) {
     this.id = id;
+    this.name = name;
     this.position = 1;
-    this.icon = new Circle(7);
-    this.icon.setFill(color);
+    this.color = color;
   }
 
   public int getId() {
     return id;
+  }
+
+  public String getName() {
+    return name;
   }
 
   public int getPosition() {
@@ -27,12 +29,11 @@ public class Player {
     this.position = position;
   }
 
-  public Circle getIcon() {
-    return icon;
+  public PlayerColor getColor() {
+    return color;
   }
 
-  @Override
   public String toString() {
-    return "Player{" + "id=" + id + ", position=" + position + ", icon=" + icon + '}';
+    return "Player{id=" + id + ", name=" + name + ", position=" + position + ", color=" + color + "}";
   }
 }

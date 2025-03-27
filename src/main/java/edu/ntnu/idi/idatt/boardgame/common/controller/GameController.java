@@ -1,7 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.common.controller;
 
-import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.common.dice.Dice;
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,25 +36,13 @@ public abstract class GameController {
   }
 
   protected void notifyObservers(String message) {
-	  observers.forEach(observer -> observer.update(message));
+    observers.forEach(observer -> observer.update(message));
   }
 
-  protected void notifyGameFinished(int winnerId) {
-	  observers.forEach(observer -> observer.gameFinished(winnerId));
+  protected void notifyGameFinished(Player currentPlayer) {
+    observers.forEach(observer -> observer.gameFinished(currentPlayer));
   }
 
-  public void onRoll() {
-    String actionMessage = performTurn();
-    notifyObservers(actionMessage);
-
-    if (isGameOver()) {
-      onGameFinish();
-    } else {
-      currentPlayer = getNextPlayer();
-    }
-  }
-
-  protected abstract String performTurn();
   protected abstract boolean isGameOver();
   protected abstract void onGameFinish();
   protected abstract Player getNextPlayer();

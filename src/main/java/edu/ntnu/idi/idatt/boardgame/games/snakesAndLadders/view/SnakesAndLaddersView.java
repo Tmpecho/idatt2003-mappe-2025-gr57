@@ -1,8 +1,10 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view;
 
 import edu.ntnu.idi.idatt.boardgame.common.controller.GameController;
-import edu.ntnu.idi.idatt.boardgame.common.controller.GameObserver; // Added import
+import edu.ntnu.idi.idatt.boardgame.common.controller.GameObserver;
 import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.controller.SnakesAndLaddersController;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -16,45 +18,30 @@ public class SnakesAndLaddersView implements GameObserver {
   public SnakesAndLaddersView(GameController controller, GameBoard gameBoard) {
     this.rollDiceButton = new Button("Roll dice");
     this.logLabel = new Label("Game log:");
-
     VBox mainLayout = new VBox(10);
     mainLayout.getChildren().addAll(gameBoard.getNode(), rollDiceButton, logLabel);
-
     root = new BorderPane();
     root.setCenter(mainLayout);
-
     setupRollDiceButton(controller);
     controller.addObserver(this);
   }
 
   private void setupRollDiceButton(GameController controller) {
-    rollDiceButton.setOnAction(e -> controller.onRoll());
-  }
-
-  public Button getRollDiceButton() {
-    return rollDiceButton;
-  }
-
-  public Label getLogLabel() {
-    return logLabel;
-  }
-
-  public void updateLogText(String text) { // Keep for compatibility, but not used directly
-    logLabel.setText(text);
-  }
-
-  public void disableRollButton() { // Keep for compatibility, but not used directly
-    rollDiceButton.setDisable(true);
+    rollDiceButton.setOnAction(e -> {
+      if (controller instanceof SnakesAndLaddersController) {
+        ((SnakesAndLaddersController) controller).rollDice();
+      }
+    });
   }
 
   @Override
-  public void update(String message) { // Implement observer method
+  public void update(String message) {
     logLabel.setText(message);
   }
 
   @Override
-  public void gameFinished(int winnerId) {
-    logLabel.setText("Player " + winnerId + " wins!");
+  public void gameFinished(Player currentPlayer) {
+    logLabel.setText(currentPlayer.getName() + " wins!");
     rollDiceButton.setDisable(true);
   }
 
