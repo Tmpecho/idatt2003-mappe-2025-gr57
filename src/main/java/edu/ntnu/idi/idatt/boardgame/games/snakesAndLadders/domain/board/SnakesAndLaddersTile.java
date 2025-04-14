@@ -15,8 +15,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
-public
-class SnakesAndLaddersTile implements Tile {
+public class SnakesAndLaddersTile implements Tile {
   private final StackPane tile;
   private final Label posLabel;
   private final HBox playerBox;
