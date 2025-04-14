@@ -26,14 +26,9 @@ public interface Tile {
 	void removePlayer(Player player);
 
 	/**
-	 * Whether a player is allowed to enter this tile (e.g., a wall or locked room might disallow entry).
+	 * Whether a player is allowed to enter or exit this tile (e.g., a wall or locked room might disallow entry).
 	 */
-	boolean canEnter(Player player);
-
-	/**
-	 * Whether a player can leave this tile. Usually true, but could be overridden for special constraints.
-	 */
-	boolean canExit(Player player);
+	boolean canTraverse(Player player);
 
 	/**
 	 * An optional identifier for debugging or referencing a tile number, name, etc.

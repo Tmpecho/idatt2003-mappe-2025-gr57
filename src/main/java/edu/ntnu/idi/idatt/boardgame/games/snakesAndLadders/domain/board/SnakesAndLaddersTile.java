@@ -101,12 +101,7 @@ class SnakesAndLaddersTile implements Tile {
   }
 
   @Override
-  public boolean canEnter(Player player) {
-    return false;
-  }
-
-  @Override
-  public boolean canExit(Player player) {
+  public boolean canTraverse(Player player) {
     return false;
   }
 
@@ -132,20 +127,9 @@ class SnakesAndLaddersTile implements Tile {
     players.forEach(
         player -> {
           Circle circle = new Circle(7);
-          circle.setFill(mapToJavaFXColor(player.getColor()));
+          circle.setFill(PlayerColor.mapToJavaFXColor(player.getColor()));
           playerBox.getChildren().add(circle);
         });
     tileContainer.getChildren().add(playerBox);
-  }
-
-  private Paint mapToJavaFXColor(PlayerColor color) {
-    return switch (color) {
-      case RED -> Color.RED;
-      case BLUE -> Color.BLUE;
-      case GREEN -> Color.GREEN;
-      case YELLOW -> Color.YELLOW;
-      case ORANGE -> Color.ORANGE;
-      case PURPLE -> Color.PURPLE;
-    };
   }
 }
