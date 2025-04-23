@@ -49,10 +49,13 @@ public class SnakesAndLaddersBoard implements GameBoard {
 
   @Override
   public void addPlayersToStart(Map<Integer, Player> players) {
-    players.values().forEach(player -> {
-      player.setPosition(1);
-      getTileAtPosition(1).addPlayer(player);
-    });
+    players
+        .values()
+        .forEach(
+            player -> {
+              player.setPosition(1);
+              getTileAtPosition(1).addPlayer(player);
+            });
   }
 
   @Override
@@ -75,6 +78,7 @@ public class SnakesAndLaddersBoard implements GameBoard {
     getTileAtPosition(fromPos).removePlayer(player);
     player.setPosition(toPos);
     getTileAtPosition(toPos).addPlayer(player);
+    refreshView();
   }
 
   private void applyConnectorIfPresent(Player player) {
@@ -92,20 +96,29 @@ public class SnakesAndLaddersBoard implements GameBoard {
   }
 
   private void addSnakesAndLadders() {
-    SNAKES.forEach((start, length) -> {
-      Connector snake = new Snake(start, length);
-      connectors.put(start, snake);
-    });
-    
-    LADDERS.forEach((start, length) -> {
-      Connector ladder = new Ladder(start, length);
-      connectors.put(start, ladder);
-    });
+    SNAKES.forEach(
+        (start, length) -> {
+          Connector snake = new Snake(start, length);
+          connectors.put(start, snake);
+        });
+
+    LADDERS.forEach(
+        (start, length) -> {
+          Connector ladder = new Ladder(start, length);
+          connectors.put(start, ladder);
+        });
   }
 
   @Override
   public void setView(Node view) {
     this.view = view;
+  }
+
+  private void refreshView() {
+    if (view != null) {
+      view.setVisible(false);
+      view.setVisible(true);
+    }
   }
 
   public Map<Integer, SnakesAndLaddersTile> getTiles() {
