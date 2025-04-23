@@ -50,4 +50,7 @@ public abstract class GameController {
   public GameBoard getGameBoard() {
     return gameBoard;
   }
+  
+  public abstract void saveGameState(String filePath);
+  public abstract void loadGameState(String filePath);
 }

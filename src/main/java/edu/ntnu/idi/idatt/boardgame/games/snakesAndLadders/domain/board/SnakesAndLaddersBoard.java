@@ -1,10 +1,11 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
@@ -160,5 +161,13 @@ public class SnakesAndLaddersBoard extends Pane implements GameBoard {
   @Override
   public Node getNode() {
     return this;
+  }
+
+  @Override
+  public void setPlayerPosition(Player player, int position) {
+    int oldPos = player.getPosition();
+    getTileAtPosition(oldPos).removePlayer(player);
+    player.setPosition(position);
+    getTileAtPosition(position).addPlayer(player);
   }
 }

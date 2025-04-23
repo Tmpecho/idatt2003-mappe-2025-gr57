@@ -7,6 +7,15 @@ import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import edu.ntnu.idi.idatt.boardgame.common.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.action.RollAction;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.SnakesAndLaddersBoard;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,5 +73,50 @@ public class SnakesAndLaddersController extends GameController {
   @Override
   protected Player getNextPlayer() {
     return players.get((currentPlayer.getId() % numberOfPlayers) + 1);
+  }
+
+  @Override
+  public void saveGameState(String filePath) {
+    JsonObject gameState = new JsonObject();
+    gameState.addProperty("currentTurn", currentPlayer.getId());
+
+    JsonArray playersArray = new JsonArray();
+    for (Player player : players.values()) {
+      JsonObject playerObj = new JsonObject();
+      playerObj.addProperty("id", player.getId());
+      playerObj.addProperty("position", player.getPosition());
+      playersArray.add(playerObj);
+    }
+    gameState.add("players", playersArray);
+
+    try (FileWriter writer = new FileWriter(filePath)) {
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      gson.toJson(gameState, writer);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void loadGameState(String filePath) {
+    try (FileReader reader = new FileReader(filePath)) {
+      JsonObject gameState = JsonParser.parseReader(reader).getAsJsonObject();
+      int currentTurnId = gameState.get("currentTurn").getAsInt();
+      currentPlayer = players.get(currentTurnId);
+
+      JsonArray playersArray = gameState.get("players").getAsJsonArray();
+      for (JsonElement elem : playersArray) {
+        JsonObject playerObj = elem.getAsJsonObject();
+        int id = playerObj.get("id").getAsInt();
+        int position = playerObj.get("position").getAsInt();
+        Player player = players.get(id);
+        if (player != null) {
+          gameBoard.setPlayerPosition(player, position);
+        }
+      }
+      notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }
