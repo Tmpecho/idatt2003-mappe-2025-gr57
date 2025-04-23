@@ -6,7 +6,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.core.engine.action.Action;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.core.persistence.GameStateRepository;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnakesAndLaddersBoard;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAction;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnLMapper;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class SnakesAndLaddersController extends GameController {
+public class SnLController extends GameController {
   private final GameStateRepository<SnLGameStateDTO> repo;
 
   private final int numberOfPlayers;
@@ -30,9 +30,9 @@ public class SnakesAndLaddersController extends GameController {
           PlayerColor.ORANGE,
           PlayerColor.PURPLE);
 
-  public SnakesAndLaddersController(
+  public SnLController(
       int numberOfPlayers, GameStateRepository<SnLGameStateDTO> repo) {
-    super(new SnakesAndLaddersBoard(), new Dice(2));
+    super(new SnLBoard(), new Dice(2));
     this.numberOfPlayers = numberOfPlayers;
     this.repo = Objects.requireNonNull(repo);
     initialize(numberOfPlayers);

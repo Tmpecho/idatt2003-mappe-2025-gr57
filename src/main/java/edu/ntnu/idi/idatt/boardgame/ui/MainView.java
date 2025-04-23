@@ -1,9 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.ui;
 
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnakesAndLaddersController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnakesAndLaddersView;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnLView;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -149,10 +149,10 @@ public class MainView {
         try { Files.createDirectories(savesDir); } catch (IOException ignored) {}
 
         var repo = new JsonSnLGameStateRepository();
-        SnakesAndLaddersController controller = new SnakesAndLaddersController(2, repo);
+        SnLController controller = new SnLController(2, repo);
 
         this.currentController = controller;
-        SnakesAndLaddersView view = new SnakesAndLaddersView(controller);
+        SnLView view = new SnLView(controller);
         contentWrapper.getChildren().setAll(view.getRoot());
 
         saveGameButton.setDisable(false);
