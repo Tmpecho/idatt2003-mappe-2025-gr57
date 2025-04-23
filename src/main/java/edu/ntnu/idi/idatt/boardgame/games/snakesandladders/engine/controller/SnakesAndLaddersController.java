@@ -1,52 +1,65 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import edu.ntnu.idi.idatt.boardgame.core.engine.action.Action;
-import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAction;
+import edu.ntnu.idi.idatt.boardgame.core.engine.action.Action;
+import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
+import edu.ntnu.idi.idatt.boardgame.core.persistence.GameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnakesAndLaddersBoard;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAction;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnLMapper;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
 public class SnakesAndLaddersController extends GameController {
+  private final GameStateRepository<SnLGameStateDTO> repo;
+
   private final int numberOfPlayers;
-  private final List<PlayerColor> playerColors = List.of(
+  private final List<PlayerColor> playerColors =
+      List.of(
           PlayerColor.RED,
           PlayerColor.BLUE,
           PlayerColor.GREEN,
           PlayerColor.YELLOW,
           PlayerColor.ORANGE,
-          PlayerColor.PURPLE
-  );
+          PlayerColor.PURPLE);
 
-  public SnakesAndLaddersController(int numberOfPlayers) {
+  public SnakesAndLaddersController(
+      int numberOfPlayers, GameStateRepository<SnLGameStateDTO> repo) {
     super(new SnakesAndLaddersBoard(), new Dice(2));
     this.numberOfPlayers = numberOfPlayers;
+    this.repo = Objects.requireNonNull(repo);
     initialize(numberOfPlayers);
+  }
+
+  public Map<Integer, Player> getPlayers() {
+    return players;
+  }
+
+  public Player getCurrentPlayer() {
+    return currentPlayer;
+  }
+
+  public void setCurrentPlayer(Player player) {
+    this.currentPlayer = player;
   }
 
   @Override
   protected Map<Integer, Player> createPlayers(int numberOfPlayers) {
     Map<Integer, Player> players = new HashMap<>();
-    IntStream.rangeClosed(1, numberOfPlayers).forEach(playerId -> {
-      PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-      Player player = new Player(playerId, "Player " + playerId, color);
-      players.put(playerId, player);
-    });
+    IntStream.rangeClosed(1, numberOfPlayers)
+        .forEach(
+            playerId -> {
+              PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
+              Player player = new Player(playerId, "Player " + playerId, color);
+              players.put(playerId, player);
+            });
     return players;
   }
 
@@ -77,55 +90,21 @@ public class SnakesAndLaddersController extends GameController {
   }
 
   @Override
-  public void saveGameState(String filePath) {
-    JsonObject gameState = new JsonObject();
-    gameState.addProperty("currentTurn", currentPlayer.getId());
-
-    JsonArray playersArray = new JsonArray();
-    players.values().forEach(player -> {
-      JsonObject playerObj = new JsonObject();
-      playerObj.addProperty("id", player.getId());
-      playerObj.addProperty("position", player.getPosition());
-      playerObj.addProperty("color", player.getColor().name());
-      playersArray.add(playerObj);
-    });
-    gameState.add("players", playersArray);
-
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    String jsonOutput = gson.toJson(gameState);
-
-    try (FileWriter writer = new FileWriter(filePath)) {
-      writer.write(jsonOutput);
-    } catch (IOException e) {
-      System.err.println("Error writing game state to file: " + e.getMessage());
-      e.printStackTrace();
+  public void saveGameState(String path) {
+    try {
+      repo.save(SnLMapper.toDto(this), Path.of(path));
+    } catch (Exception e) {
+      System.err.println("Save failed: " + e.getMessage());
     }
   }
 
   @Override
-  public void loadGameState(String filePath) {
-    try (FileReader reader = new FileReader(filePath)) {
-      JsonObject gameState = JsonParser.parseReader(reader).getAsJsonObject();
-      int currentTurnId = gameState.get("currentTurn").getAsInt();
-      currentPlayer = players.get(currentTurnId);
-
-      JsonArray playersArray = gameState.get("players").getAsJsonArray();
-      playersArray.forEach(elem -> {
-        JsonObject playerObj = elem.getAsJsonObject();
-        int id = playerObj.get("id").getAsInt();
-        int position = playerObj.get("position").getAsInt();
-        Player player = players.get(id);
-        if (player != null) {
-          gameBoard.setPlayerPosition(player, position);
-        }
-      });
+  public void loadGameState(String path) {
+    try {
+      SnLMapper.apply(repo.load(Path.of(path)), this);
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
-    } catch (IOException e) {
-      System.err.println("Error reading game state from file: " + e.getMessage());
-      e.printStackTrace();
     } catch (Exception e) {
-        System.err.println("Error parsing game state file: " + e.getMessage());
-        e.printStackTrace();
+      System.err.println("Load failed: " + e.getMessage());
     }
   }
 }
