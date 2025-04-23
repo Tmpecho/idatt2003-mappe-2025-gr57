@@ -89,7 +89,7 @@ public class MainView {
   /** Loads the Snakes and Ladders game and sets its view in the center of the root layout. */
   private void loadSnakesAndLadders() {
     SnakesAndLaddersController controller = new SnakesAndLaddersController(2);
-    SnakesAndLaddersView view = new SnakesAndLaddersView(controller, controller.getGameBoard());
+    SnakesAndLaddersView view = new SnakesAndLaddersView(controller);
     contentWrapper.getChildren().setAll(view.getRoot());
   }
 }
