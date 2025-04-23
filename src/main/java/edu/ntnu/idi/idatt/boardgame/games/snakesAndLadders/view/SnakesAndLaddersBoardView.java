@@ -1,0 +1,90 @@
+package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view;
+
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.Tile;
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.TileObserver;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.Connector;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.SnakesAndLaddersBoard;
+import java.util.HashMap;
+import java.util.Map;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.shape.Line;
+
+public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
+  private static final int TILE_SIZE = 60;
+  private static final int GAP_SIZE = 5;
+  private final GridPane grid;
+  private final Group connectorGroup;
+  private final SnakesAndLaddersBoard model;
+  private final Map<Integer, SnakesAndLaddersTileView> tileViews;
+
+  public SnakesAndLaddersBoardView(SnakesAndLaddersBoard model) {
+    this.model = model;
+    this.grid = new GridPane();
+    this.connectorGroup = new Group();
+    this.tileViews = new HashMap<>();
+
+    grid.setHgap(GAP_SIZE);
+    grid.setVgap(GAP_SIZE);
+
+    initializeBoard();
+    getChildren().addAll(grid, connectorGroup);
+    model.setView(this);
+  }
+
+  private void initializeBoard() {
+    model
+        .getTiles()
+        .forEach(
+            (pos, tile) -> {
+              int[] gridPos = getGridCoordinates(pos);
+              SnakesAndLaddersTileView tileView = new SnakesAndLaddersTileView(tile, TILE_SIZE);
+              tileViews.put(pos, tileView);
+              grid.add(tileView.getNode(), gridPos[0], gridPos[1]);
+              // Register this board view as an observer of the tile
+              tile.addObserver(this);
+            });
+
+    model.getConnectors().forEach(this::drawConnector);
+  }
+
+  private int[] getGridCoordinates(int pos) {
+    int index = pos - 1;
+    int rowFromBottom = index / model.getCols();
+    int col;
+
+    if (rowFromBottom % 2 == 0) {
+      col = index % model.getCols();
+    } else {
+      col = model.getCols() - 1 - (index % model.getCols());
+    }
+    int gridRow = model.getRows() - 1 - rowFromBottom;
+    return new int[] {col, gridRow};
+  }
+
+  private void drawConnector(Connector connector) {
+    double[] startCenter = getTileCenter(connector.getStart());
+    double[] endCenter = getTileCenter(connector.getEnd());
+    Line line = new Line(startCenter[0], startCenter[1], endCenter[0], endCenter[1]);
+    line.setStroke(connector.getColor());
+    line.setStrokeWidth(3);
+    connectorGroup.getChildren().add(line);
+  }
+
+  private double[] getTileCenter(int pos) {
+    int[] coords = getGridCoordinates(pos);
+    double x = coords[0] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
+    double y = coords[1] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
+    return new double[] {x, y};
+  }
+
+  @Override
+  public void onTileChanged(Tile tile) {
+  }
+
+  public Node getNode() {
+    return this;
+  }
+}

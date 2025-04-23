@@ -2,9 +2,9 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view;
 
 import edu.ntnu.idi.idatt.boardgame.common.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.common.controller.GameObserver;
-import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.controller.SnakesAndLaddersController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.SnakesAndLaddersBoard;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -15,23 +15,29 @@ public class SnakesAndLaddersView implements GameObserver {
   private final Label logLabel;
   private final BorderPane root;
 
-  public SnakesAndLaddersView(GameController controller, GameBoard gameBoard) {
+  public SnakesAndLaddersView(SnakesAndLaddersController controller) {
     this.rollDiceButton = new Button("Roll dice");
     this.logLabel = new Label("Game log:");
+
+    SnakesAndLaddersBoard board = (SnakesAndLaddersBoard) controller.getGameBoard();
+    SnakesAndLaddersBoardView boardView = new SnakesAndLaddersBoardView(board);
+
     VBox mainLayout = new VBox(10);
-    mainLayout.getChildren().addAll(gameBoard.getNode(), rollDiceButton, logLabel);
+    mainLayout.getChildren().addAll(boardView.getNode(), rollDiceButton, logLabel);
     root = new BorderPane();
     root.setCenter(mainLayout);
+
     setupRollDiceButton(controller);
     controller.addObserver(this);
   }
 
   private void setupRollDiceButton(GameController controller) {
-    rollDiceButton.setOnAction(e -> {
-      if (controller instanceof SnakesAndLaddersController) {
-        ((SnakesAndLaddersController) controller).rollDice();
-      }
-    });
+    rollDiceButton.setOnAction(
+        e -> {
+          if (controller instanceof SnakesAndLaddersController) {
+            ((SnakesAndLaddersController) controller).rollDice();
+          }
+        });
   }
 
   @Override
