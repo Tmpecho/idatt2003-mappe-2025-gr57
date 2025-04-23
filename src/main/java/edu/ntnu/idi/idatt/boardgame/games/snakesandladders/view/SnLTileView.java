@@ -3,7 +3,7 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view;
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnakesAndLaddersTile;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLTile;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -14,14 +14,14 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
-public class SnakesAndLaddersTileView implements TileObserver {
+public class SnLTileView implements TileObserver {
   private final StackPane tilePane;
   private final Label posLabel;
   private final HBox playerBox;
   private final VBox tileContainer;
-  private final SnakesAndLaddersTile tileModel;
+  private final SnLTile tileModel;
 
-  public SnakesAndLaddersTileView(SnakesAndLaddersTile tileModel, int tileSize) {
+  public SnLTileView(SnLTile tileModel, int tileSize) {
     this.tileModel = tileModel;
     tileModel.addObserver(this);
 

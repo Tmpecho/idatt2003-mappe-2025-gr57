@@ -3,20 +3,20 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view;
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.Connector;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnakesAndLaddersBoard;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard;
 import javafx.scene.Group;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 
-public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
+public class SnLBoardView extends Pane implements TileObserver {
   private static final int TILE_SIZE = 60;
   private static final int GAP_SIZE = 5;
   private final GridPane grid;
   private final Group connectorGroup;
-  private final SnakesAndLaddersBoard boardModel;
+  private final SnLBoard boardModel;
 
-  public SnakesAndLaddersBoardView(SnakesAndLaddersBoard boardModel) {
+  public SnLBoardView(SnLBoard boardModel) {
     this.boardModel = boardModel;
     this.grid = new GridPane();
     this.connectorGroup = new Group();
@@ -34,7 +34,7 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
         .forEach(
             (pos, tile) -> {
               int[] gridPos = getGridCoordinates(pos);
-              SnakesAndLaddersTileView tileView = new SnakesAndLaddersTileView(tile, TILE_SIZE);
+              SnLTileView tileView = new SnLTileView(tile, TILE_SIZE);
               grid.add(tileView.getNode(), gridPos[0], gridPos[1]);
               // Register this board view as an observer of the tile
               tile.addObserver(this);

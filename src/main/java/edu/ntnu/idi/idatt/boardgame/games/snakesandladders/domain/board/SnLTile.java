@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SnakesAndLaddersTile implements Tile {
+public class SnLTile implements Tile {
   private final List<Player> players;
   private final int position;
   private final List<TileObserver> observers = new ArrayList<>();
 
-  public SnakesAndLaddersTile(int position) {
+  public SnLTile(int position) {
     this.position = position;
     this.players = new ArrayList<>();
   }
