@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import edu.ntnu.idi.idatt.boardgame.common.player.PlayerColor;
 import java.util.ArrayList;
@@ -10,19 +11,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
-public
-class Tile { // todo: make this class implement a common interface for all tiles so we can have
-  // different types of tiles
+public class SnakesAndLaddersTile implements Tile {
   private final StackPane tile;
   private final Label posLabel;
   private final HBox playerBox;
   private final VBox tileContainer;
   private final List<Player> players;
+  private final int pos;
 
   /**
    * Constructs a Tile at a given board position with a specified size. The tile is initially empty
@@ -31,7 +30,8 @@ class Tile { // todo: make this class implement a common interface for all tiles
    * @param pos the board position (e.g. 1, 2, 3, …)
    * @param tileSize the size (width and height) of the tile
    */
-  public Tile(int pos, int tileSize) {
+  public SnakesAndLaddersTile(int pos, int tileSize) {
+    this.pos = pos;
     this.players = new ArrayList<>();
 
     // Label showing the tile's position
@@ -68,11 +68,17 @@ class Tile { // todo: make this class implement a common interface for all tiles
     return tile;
   }
 
+  @Override
+  public List<Tile> getAdjacentTiles() {
+    return List.of();
+  }
+
   /**
    * Adds a player to the tile if it is not already present, then updates the display.
    *
    * @param player the player to add
    */
+  @Override
   public void addPlayer(Player player) {
     if (!players.contains(player)) {
       players.add(player);
@@ -85,10 +91,21 @@ class Tile { // todo: make this class implement a common interface for all tiles
    *
    * @param player the player to remove
    */
+  @Override
   public void removePlayer(Player player) {
     if (players.remove(player)) {
       updateDisplay();
     }
+  }
+
+  @Override
+  public boolean canTraverse(Player player) {
+    return false;
+  }
+
+  @Override
+  public String getIdentifier() {
+    return "Tile #" + pos;
   }
 
   /**
@@ -108,20 +125,9 @@ class Tile { // todo: make this class implement a common interface for all tiles
     players.forEach(
         player -> {
           Circle circle = new Circle(7);
-          circle.setFill(mapToJavaFXColor(player.getColor()));
+          circle.setFill(PlayerColor.mapToJavaFXColor(player.getColor()));
           playerBox.getChildren().add(circle);
         });
     tileContainer.getChildren().add(playerBox);
-  }
-
-  private Paint mapToJavaFXColor(PlayerColor color) {
-    return switch (color) {
-      case RED -> Color.RED;
-      case BLUE -> Color.BLUE;
-      case GREEN -> Color.GREEN;
-      case YELLOW -> Color.YELLOW;
-      case ORANGE -> Color.ORANGE;
-      case PURPLE -> Color.PURPLE;
-    };
   }
 }
