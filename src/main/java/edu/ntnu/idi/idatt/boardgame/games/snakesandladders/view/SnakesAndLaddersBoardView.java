@@ -5,7 +5,6 @@ import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.Connector;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnakesAndLaddersBoard;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
@@ -27,7 +26,6 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
 
     initializeBoard();
     getChildren().addAll(grid, connectorGroup);
-    boardModel.setView(this);
   }
 
   private void initializeBoard() {
@@ -77,9 +75,5 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
 
   @Override
   public void onTileChanged(Tile tile) {
-  }
-
-  public Node getNode() {
-    return this;
   }
 }

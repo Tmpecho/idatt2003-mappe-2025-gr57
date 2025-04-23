@@ -8,7 +8,6 @@ import java.util.stream.IntStream;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
-import javafx.scene.Node;
 
 public class SnakesAndLaddersBoard implements GameBoard {
   private static final int ROWS = 10;
@@ -17,7 +16,6 @@ public class SnakesAndLaddersBoard implements GameBoard {
 
   private final Map<Integer, SnakesAndLaddersTile> tiles = new HashMap<>();
   private final Map<Integer, Connector> connectors = new HashMap<>();
-  private Node view;
 
   private static final Map<Integer, Integer> SNAKES = Map.of(
       30, 14,
@@ -88,7 +86,6 @@ public class SnakesAndLaddersBoard implements GameBoard {
     if (toTile != null) {
       toTile.addPlayer(player);
     }
-    refreshView();
   }
 
   private void applyConnectorIfPresent(Player player) {
@@ -125,23 +122,6 @@ public class SnakesAndLaddersBoard implements GameBoard {
         });
   }
 
-  @Override
-  public void setView(Node view) {
-    this.view = view;
-  }
-
-  private void refreshView() {
-    if (view != null) {
-      view.setVisible(false);
-      view.setVisible(true);
-    }
-  }
-
-  @Override
-  public Node getNode() {
-    return this.view;
-  }
-
   public Map<Integer, SnakesAndLaddersTile> getTiles() {
     return Collections.unmodifiableMap(tiles);
   }
@@ -161,14 +141,6 @@ public class SnakesAndLaddersBoard implements GameBoard {
   @Override
   public void setPlayerPosition(Player player, int position) {
     int oldPos = player.getPosition();
-    SnakesAndLaddersTile oldTile = getTileAtPosition(oldPos);
-    if (oldTile != null) {
-      oldTile.removePlayer(player);
-    }
-    player.setPosition(position);
-    SnakesAndLaddersTile newTile = getTileAtPosition(position);
-    if (newTile != null) {
-      newTile.addPlayer(player);
-    }
+    movePlayer(player, oldPos, position);
   }
 }
