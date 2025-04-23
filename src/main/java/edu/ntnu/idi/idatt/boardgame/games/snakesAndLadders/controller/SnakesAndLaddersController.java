@@ -1,18 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.controller;
 
-import edu.ntnu.idi.idatt.boardgame.common.action.Action;
-import edu.ntnu.idi.idatt.boardgame.common.controller.GameController;
-import edu.ntnu.idi.idatt.boardgame.common.dice.Dice;
-import edu.ntnu.idi.idatt.boardgame.common.player.Player;
-import edu.ntnu.idi.idatt.boardgame.common.player.PlayerColor;
-import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.action.RollAction;
-import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.SnakesAndLaddersBoard;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,6 +7,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import edu.ntnu.idi.idatt.boardgame.common.action.Action;
+import edu.ntnu.idi.idatt.boardgame.common.controller.GameController;
+import edu.ntnu.idi.idatt.boardgame.common.dice.Dice;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
+import edu.ntnu.idi.idatt.boardgame.common.player.PlayerColor;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.action.RollAction;
+import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.SnakesAndLaddersBoard;
 
 public class SnakesAndLaddersController extends GameController {
   private final int numberOfPlayers;
@@ -81,14 +82,13 @@ public class SnakesAndLaddersController extends GameController {
     gameState.addProperty("currentTurn", currentPlayer.getId());
 
     JsonArray playersArray = new JsonArray();
-    for (Player player : players.values()) {
+    players.values().forEach(player -> {
       JsonObject playerObj = new JsonObject();
       playerObj.addProperty("id", player.getId());
       playerObj.addProperty("position", player.getPosition());
-      // playerObj.addProperty("name", player.getName()); \\ name
-      // playerObj.addProperty("color", player.getColor().name()); \\ color 
+      playerObj.addProperty("color", player.getColor().name());
       playersArray.add(playerObj);
-    }
+    });
     gameState.add("players", playersArray);
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -110,19 +110,15 @@ public class SnakesAndLaddersController extends GameController {
       currentPlayer = players.get(currentTurnId);
 
       JsonArray playersArray = gameState.get("players").getAsJsonArray();
-      for (JsonElement elem : playersArray) {
+      playersArray.forEach(elem -> {
         JsonObject playerObj = elem.getAsJsonObject();
         int id = playerObj.get("id").getAsInt();
         int position = playerObj.get("position").getAsInt();
-        // String name = playerObj.get("name").getAsString(); // name
-        // PlayerColor color = PlayerColor.valueOf(playerObj.get("color").getAsString()); // color 
         Player player = players.get(id);
         if (player != null) {
           gameBoard.setPlayerPosition(player, position);
-          // player.setName(name); \\ update color
-          // player.setColor(color); \\ update name
         }
-      }
+      });
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (IOException e) {
       System.err.println("Error reading game state from file: " + e.getMessage());
