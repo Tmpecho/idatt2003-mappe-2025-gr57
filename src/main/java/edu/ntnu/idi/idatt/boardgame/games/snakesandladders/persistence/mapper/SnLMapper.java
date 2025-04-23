@@ -1,7 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper;
 
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnakesAndLaddersController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public final class SnLMapper {
 
-  public static SnLGameStateDTO toDto(SnakesAndLaddersController controller) {
+  public static SnLGameStateDTO toDto(SnLController controller) {
     SnLGameStateDTO dto = new SnLGameStateDTO();
     dto.currentPlayerTurn = controller.getCurrentPlayer().getId();
 
@@ -25,7 +25,7 @@ public final class SnLMapper {
     return dto;
   }
 
-  public static void apply(SnLGameStateDTO dto, SnakesAndLaddersController controller) {
+  public static void apply(SnLGameStateDTO dto, SnLController controller) {
 	  // restore board state
     dto.players.forEach(ps -> {
       Player player = controller.getPlayers().get(ps.id);

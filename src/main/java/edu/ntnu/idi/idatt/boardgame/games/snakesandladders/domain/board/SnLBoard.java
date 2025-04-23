@@ -9,12 +9,12 @@ import java.util.stream.IntStream;
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 
-public class SnakesAndLaddersBoard implements GameBoard {
+public class SnLBoard implements GameBoard {
   private static final int ROWS = 10;
   private static final int COLS = 9;
   private static final int BOARD_SIZE = ROWS * COLS;
 
-  private final Map<Integer, SnakesAndLaddersTile> tiles = new HashMap<>();
+  private final Map<Integer, SnLTile> tiles = new HashMap<>();
   private final Map<Integer, Connector> connectors = new HashMap<>();
 
   private static final Map<Integer, Integer> SNAKES = Map.of(
@@ -34,14 +34,14 @@ public class SnakesAndLaddersBoard implements GameBoard {
       70, 9,
       81, 2);
 
-  public SnakesAndLaddersBoard() {
+  public SnLBoard() {
     initializeTiles();
     addSnakesAndLadders();
   }
 
   private void initializeTiles() {
     IntStream.rangeClosed(1, BOARD_SIZE)
-        .forEach(pos -> tiles.put(pos, new SnakesAndLaddersTile(pos)));
+        .forEach(pos -> tiles.put(pos, new SnLTile(pos)));
   }
 
   @Override
@@ -51,7 +51,7 @@ public class SnakesAndLaddersBoard implements GameBoard {
         .forEach(
             player -> {
               player.setPosition(1);
-              SnakesAndLaddersTile startTile = getTileAtPosition(1);
+              SnLTile startTile = getTileAtPosition(1);
               if (startTile != null) {
                 startTile.addPlayer(player);
               }
@@ -77,12 +77,12 @@ public class SnakesAndLaddersBoard implements GameBoard {
   }
 
   private void movePlayer(Player player, int fromPos, int toPos) {
-    SnakesAndLaddersTile fromTile = getTileAtPosition(fromPos);
+    SnLTile fromTile = getTileAtPosition(fromPos);
     if (fromTile != null) {
       fromTile.removePlayer(player);
     }
     player.setPosition(toPos);
-    SnakesAndLaddersTile toTile = getTileAtPosition(toPos);
+    SnLTile toTile = getTileAtPosition(toPos);
     if (toTile != null) {
       toTile.addPlayer(player);
     }
@@ -103,7 +103,7 @@ public class SnakesAndLaddersBoard implements GameBoard {
   }
 
   // Define getTileAtPosition only once
-  private SnakesAndLaddersTile getTileAtPosition(int pos) {
+  private SnLTile getTileAtPosition(int pos) {
     return tiles.get(pos);
   }
 
@@ -122,7 +122,7 @@ public class SnakesAndLaddersBoard implements GameBoard {
         });
   }
 
-  public Map<Integer, SnakesAndLaddersTile> getTiles() {
+  public Map<Integer, SnLTile> getTiles() {
     return Collections.unmodifiableMap(tiles);
   }
 
