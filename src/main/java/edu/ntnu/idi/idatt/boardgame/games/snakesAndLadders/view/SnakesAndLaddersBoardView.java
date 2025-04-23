@@ -15,10 +15,10 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
   private static final int GAP_SIZE = 5;
   private final GridPane grid;
   private final Group connectorGroup;
-  private final SnakesAndLaddersBoard model;
+  private final SnakesAndLaddersBoard boardModel;
 
-  public SnakesAndLaddersBoardView(SnakesAndLaddersBoard model) {
-    this.model = model;
+  public SnakesAndLaddersBoardView(SnakesAndLaddersBoard boardModel) {
+    this.boardModel = boardModel;
     this.grid = new GridPane();
     this.connectorGroup = new Group();
 
@@ -27,11 +27,11 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
 
     initializeBoard();
     getChildren().addAll(grid, connectorGroup);
-    model.setView(this);
+    boardModel.setView(this);
   }
 
   private void initializeBoard() {
-    model
+    boardModel
         .getTiles()
         .forEach(
             (pos, tile) -> {
@@ -42,20 +42,20 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
               tile.addObserver(this);
             });
 
-    model.getConnectors().forEach(this::drawConnector);
+    boardModel.getConnectors().forEach(this::drawConnector);
   }
 
   private int[] getGridCoordinates(int pos) {
     int index = pos - 1;
-    int rowFromBottom = index / model.getCols();
+    int rowFromBottom = index / boardModel.getCols();
     int col;
 
     if (rowFromBottom % 2 == 0) {
-      col = index % model.getCols();
+      col = index % boardModel.getCols();
     } else {
-      col = model.getCols() - 1 - (index % model.getCols());
+      col = boardModel.getCols() - 1 - (index % boardModel.getCols());
     }
-    int gridRow = model.getRows() - 1 - rowFromBottom;
+    int gridRow = boardModel.getRows() - 1 - rowFromBottom;
     return new int[] {col, gridRow};
   }
 
