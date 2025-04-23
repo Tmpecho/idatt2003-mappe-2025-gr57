@@ -23,7 +23,7 @@ public class SnakesAndLaddersView implements GameObserver {
     SnakesAndLaddersBoardView boardView = new SnakesAndLaddersBoardView(board);
 
     VBox mainLayout = new VBox(10);
-    mainLayout.getChildren().addAll(boardView.getNode(), rollDiceButton, logLabel);
+    mainLayout.getChildren().addAll(boardView, rollDiceButton, logLabel);
     root = new BorderPane();
     root.setCenter(mainLayout);
 
