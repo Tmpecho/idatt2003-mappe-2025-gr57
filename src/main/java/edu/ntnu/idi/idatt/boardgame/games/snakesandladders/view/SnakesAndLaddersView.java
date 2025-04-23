@@ -43,6 +43,10 @@ public class SnakesAndLaddersView implements GameObserver {
   @Override
   public void update(String message) {
     logLabel.setText(message);
+
+    if (rollDiceButton.isDisable()) {
+      rollDiceButton.setDisable(false);
+    }
   }
 
   @Override
