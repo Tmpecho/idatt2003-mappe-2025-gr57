@@ -1,12 +1,13 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import edu.ntnu.idi.idatt.boardgame.common.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.common.player.Player;
 import javafx.scene.Node;
 
 public class SnakesAndLaddersBoard implements GameBoard {
@@ -18,24 +19,22 @@ public class SnakesAndLaddersBoard implements GameBoard {
   private final Map<Integer, Connector> connectors = new HashMap<>();
   private Node view;
 
-  private static final Map<Integer, Integer> SNAKES =
-      Map.of(
-          30, 14,
-          34, 7,
-          47, 7,
-          54, 35,
-          65, 5,
-          87, 31);
+  private static final Map<Integer, Integer> SNAKES = Map.of(
+      30, 14,
+      34, 7,
+      47, 7,
+      54, 35,
+      65, 5,
+      87, 31);
 
-  private static final Map<Integer, Integer> LADDERS =
-      Map.of(
-          8, 6,
-          21, 10,
-          33, 5,
-          48, 7,
-          61, 8,
-          70, 9,
-          81, 2);
+  private static final Map<Integer, Integer> LADDERS = Map.of(
+      8, 6,
+      21, 10,
+      33, 5,
+      48, 7,
+      61, 8,
+      70, 9,
+      81, 2);
 
   public SnakesAndLaddersBoard() {
     initializeTiles();
@@ -54,7 +53,10 @@ public class SnakesAndLaddersBoard implements GameBoard {
         .forEach(
             player -> {
               player.setPosition(1);
-              getTileAtPosition(1).addPlayer(player);
+              SnakesAndLaddersTile startTile = getTileAtPosition(1);
+              if (startTile != null) {
+                startTile.addPlayer(player);
+              }
             });
   }
 
@@ -65,6 +67,8 @@ public class SnakesAndLaddersBoard implements GameBoard {
     if (newPos > getBoardSize()) {
       newPos = getBoardSize() - (newPos - getBoardSize());
     }
+    if (newPos < 1)
+      newPos = 1;
     movePlayer(player, oldPos, newPos);
     applyConnectorIfPresent(player);
   }
@@ -75,9 +79,15 @@ public class SnakesAndLaddersBoard implements GameBoard {
   }
 
   private void movePlayer(Player player, int fromPos, int toPos) {
-    getTileAtPosition(fromPos).removePlayer(player);
+    SnakesAndLaddersTile fromTile = getTileAtPosition(fromPos);
+    if (fromTile != null) {
+      fromTile.removePlayer(player);
+    }
     player.setPosition(toPos);
-    getTileAtPosition(toPos).addPlayer(player);
+    SnakesAndLaddersTile toTile = getTileAtPosition(toPos);
+    if (toTile != null) {
+      toTile.addPlayer(player);
+    }
     refreshView();
   }
 
@@ -88,13 +98,19 @@ public class SnakesAndLaddersBoard implements GameBoard {
     }
     Connector connector = connectors.get(pos);
     int destination = connector.getEnd();
+    if (destination < 1)
+      destination = 1;
+    if (destination > getBoardSize())
+      destination = getBoardSize();
     movePlayer(player, pos, destination);
   }
 
+  // Define getTileAtPosition only once
   private SnakesAndLaddersTile getTileAtPosition(int pos) {
     return tiles.get(pos);
   }
 
+  // Define addSnakesAndLadders only once
   private void addSnakesAndLadders() {
     SNAKES.forEach(
         (start, length) -> {
@@ -121,6 +137,11 @@ public class SnakesAndLaddersBoard implements GameBoard {
     }
   }
 
+  @Override
+  public Node getNode() {
+    return this.view;
+  }
+
   public Map<Integer, SnakesAndLaddersTile> getTiles() {
     return Collections.unmodifiableMap(tiles);
   }
@@ -135,5 +156,19 @@ public class SnakesAndLaddersBoard implements GameBoard {
 
   public int getCols() {
     return COLS;
+  }
+
+  @Override
+  public void setPlayerPosition(Player player, int position) {
+    int oldPos = player.getPosition();
+    SnakesAndLaddersTile oldTile = getTileAtPosition(oldPos);
+    if (oldTile != null) {
+      oldTile.removePlayer(player);
+    }
+    player.setPosition(position);
+    SnakesAndLaddersTile newTile = getTileAtPosition(position);
+    if (newTile != null) {
+      newTile.addPlayer(player);
+    }
   }
 }
