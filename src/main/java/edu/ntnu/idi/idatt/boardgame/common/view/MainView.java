@@ -1,5 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.common.view;
 
+import java.io.File;
+
 import edu.ntnu.idi.idatt.boardgame.common.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.controller.SnakesAndLaddersController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.view.SnakesAndLaddersView;
@@ -12,6 +14,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 /**
  * The {@code MainView} class serves as the primary container for the
@@ -58,19 +62,85 @@ public class MainView {
         saveGameButton.setDisable(true);
         saveGameButton.setOnAction(e -> {
             if (currentController != null) {
-                currentController.saveGameState("saves/game_state.json");
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Save Game State");
+                // Ensure the 'saves' directory exists or handle potential errors
+                File savesDir = new File("saves");
+                if (!savesDir.exists()) {
+                    savesDir.mkdirs(); // Create directory if it doesn't exist
+                }
+                fileChooser.setInitialDirectory(savesDir);
+                fileChooser.setInitialFileName("game_state.json");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+                Stage stage = getStage();
+                if (stage != null) {
+                    File file = fileChooser.showSaveDialog(stage);
+                    if (file != null) {
+                        currentController.saveGameState(file.getPath());
+                    } else {
+                        System.out.println("Save cancelled.");
+                    }
+                } else {
+                    System.err.println("Could not get the stage to show save dialog.");
+                }
             } else {
                 System.out.println("No game loaded to save.");
             }
         });
 
         loadGameButton = new Button("Load game");
-        loadGameButton.setDisable(true);
+        loadGameButton.setDisable(true); // Initially disabled, enabled when a game is loaded
         loadGameButton.setOnAction(e -> {
-            if (currentController != null) {
-                currentController.loadGameState("saves/game_state.json");
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Load Game State");
+            // Ensure the 'saves' directory exists or handle potential errors
+            File savesDir = new File("saves");
+            if (!savesDir.exists()) {
+                System.out.println("Saves directory does not exist. Cannot load game.");
+                return; // Or handle differently, e.g., allow navigating elsewhere
+            }
+            fileChooser.setInitialDirectory(savesDir);
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+            Stage stage = getStage();
+            if (stage != null) {
+                File file = fileChooser.showOpenDialog(stage);
+                if (file != null) {
+                    // Determine which game type to load based on file or context if needed
+                    // For now, assuming loading into the current game type context
+                    if (currentController == null) {
+                        // If no game is active, potentially load Snakes and Ladders as default or based
+                        // on file
+                        // This part might need more sophisticated logic depending on requirements
+                        System.out.println("Loading default game (Snakes and Ladders) for the save file.");
+                        loadSnakesAndLadders(); // Load the game structure first
+                    }
+
+                    if (currentController != null) {
+                        currentController.loadGameState(file.getPath());
+                        // After loading, the view might need to be refreshed to reflect the loaded
+                        // state.
+                        // This depends on how loadGameState and the view interact.
+                        // If loadGameState updates the model and the view observes it, it might update
+                        // automatically.
+                        // Otherwise, manual refresh logic is needed here.
+                        System.out.println("Game state loaded. View refresh might be needed.");
+                        // Example: if view needs explicit refresh:
+                        // if (currentController instanceof SnakesAndLaddersController &&
+                        // contentWrapper.getChildren().get(0) instanceof SnakesAndLaddersView) {
+                        // SnakesAndLaddersView currentView = (SnakesAndLaddersView)
+                        // contentWrapper.getChildren().get(0);
+                        // currentView.refreshView(); // Assuming such a method exists
+                        // }
+                        saveGameButton.setDisable(false); // Ensure save is enabled after load
+                        loadGameButton.setDisable(false); // Ensure load stays enabled
+                    } else {
+                        System.err.println("Failed to initialize a game controller for loading.");
+                    }
+                } else {
+                    System.out.println("Load cancelled.");
+                }
             } else {
-                System.out.println("No game loaded to load.");
+                System.err.println("Could not get the stage to show load dialog.");
             }
         });
 
@@ -100,5 +170,17 @@ public class MainView {
         // Enable the save and load buttons once a game is loaded
         saveGameButton.setDisable(false);
         loadGameButton.setDisable(false);
+    }
+
+    /**
+     * Helper method to get the Stage from the root pane.
+     * 
+     * @return The Stage, or null if the scene or window is not available.
+     */
+    private Stage getStage() {
+        if (root.getScene() != null && root.getScene().getWindow() != null) {
+            return (Stage) root.getScene().getWindow();
+        }
+        return null;
     }
 }
