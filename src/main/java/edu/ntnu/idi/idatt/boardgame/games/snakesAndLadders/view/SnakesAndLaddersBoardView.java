@@ -4,8 +4,6 @@ import edu.ntnu.idi.idatt.boardgame.common.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.common.domain.board.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.Connector;
 import edu.ntnu.idi.idatt.boardgame.games.snakesAndLadders.domain.board.SnakesAndLaddersBoard;
-import java.util.HashMap;
-import java.util.Map;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
@@ -18,13 +16,11 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
   private final GridPane grid;
   private final Group connectorGroup;
   private final SnakesAndLaddersBoard model;
-  private final Map<Integer, SnakesAndLaddersTileView> tileViews;
 
   public SnakesAndLaddersBoardView(SnakesAndLaddersBoard model) {
     this.model = model;
     this.grid = new GridPane();
     this.connectorGroup = new Group();
-    this.tileViews = new HashMap<>();
 
     grid.setHgap(GAP_SIZE);
     grid.setVgap(GAP_SIZE);
@@ -41,7 +37,6 @@ public class SnakesAndLaddersBoardView extends Pane implements TileObserver {
             (pos, tile) -> {
               int[] gridPos = getGridCoordinates(pos);
               SnakesAndLaddersTileView tileView = new SnakesAndLaddersTileView(tile, TILE_SIZE);
-              tileViews.put(pos, tileView);
               grid.add(tileView.getNode(), gridPos[0], gridPos[1]);
               // Register this board view as an observer of the tile
               tile.addObserver(this);
