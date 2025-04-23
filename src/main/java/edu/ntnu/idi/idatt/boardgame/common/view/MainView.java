@@ -64,10 +64,9 @@ public class MainView {
             if (currentController != null) {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Save Game State");
-                // Ensure the 'saves' directory exists or handle potential errors
                 File savesDir = new File("saves");
                 if (!savesDir.exists()) {
-                    savesDir.mkdirs(); // Create directory if it doesn't exist
+                    savesDir.mkdirs();
                 }
                 fileChooser.setInitialDirectory(savesDir);
                 fileChooser.setInitialFileName("game_state.json");
@@ -89,15 +88,14 @@ public class MainView {
         });
 
         loadGameButton = new Button("Load game");
-        loadGameButton.setDisable(true); // Initially disabled, enabled when a game is loaded
+        loadGameButton.setDisable(true);
         loadGameButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Load Game State");
-            // Ensure the 'saves' directory exists or handle potential errors
             File savesDir = new File("saves");
             if (!savesDir.exists()) {
                 System.out.println("Saves directory does not exist. Cannot load game.");
-                return; // Or handle differently, e.g., allow navigating elsewhere
+                return;
             }
             fileChooser.setInitialDirectory(savesDir);
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
@@ -105,34 +103,16 @@ public class MainView {
             if (stage != null) {
                 File file = fileChooser.showOpenDialog(stage);
                 if (file != null) {
-                    // Determine which game type to load based on file or context if needed
-                    // For now, assuming loading into the current game type context
                     if (currentController == null) {
-                        // If no game is active, potentially load Snakes and Ladders as default or based
-                        // on file
-                        // This part might need more sophisticated logic depending on requirements
                         System.out.println("Loading default game (Snakes and Ladders) for the save file.");
-                        loadSnakesAndLadders(); // Load the game structure first
+                        loadSnakesAndLadders();
                     }
 
                     if (currentController != null) {
                         currentController.loadGameState(file.getPath());
-                        // After loading, the view might need to be refreshed to reflect the loaded
-                        // state.
-                        // This depends on how loadGameState and the view interact.
-                        // If loadGameState updates the model and the view observes it, it might update
-                        // automatically.
-                        // Otherwise, manual refresh logic is needed here.
                         System.out.println("Game state loaded. View refresh might be needed.");
-                        // Example: if view needs explicit refresh:
-                        // if (currentController instanceof SnakesAndLaddersController &&
-                        // contentWrapper.getChildren().get(0) instanceof SnakesAndLaddersView) {
-                        // SnakesAndLaddersView currentView = (SnakesAndLaddersView)
-                        // contentWrapper.getChildren().get(0);
-                        // currentView.refreshView(); // Assuming such a method exists
-                        // }
-                        saveGameButton.setDisable(false); // Ensure save is enabled after load
-                        loadGameButton.setDisable(false); // Ensure load stays enabled
+                        saveGameButton.setDisable(false);
+                        loadGameButton.setDisable(false);
                     } else {
                         System.err.println("Failed to initialize a game controller for loading.");
                     }
@@ -163,20 +143,13 @@ public class MainView {
 
     private void loadSnakesAndLadders() {
         SnakesAndLaddersController controller = new SnakesAndLaddersController(2);
-        // Store the controller instance
         this.currentController = controller;
-        SnakesAndLaddersView view = new SnakesAndLaddersView(controller, controller.getGameBoard());
+        SnakesAndLaddersView view = new SnakesAndLaddersView(controller);
         contentWrapper.getChildren().setAll(view.getRoot());
-        // Enable the save and load buttons once a game is loaded
         saveGameButton.setDisable(false);
         loadGameButton.setDisable(false);
     }
 
-    /**
-     * Helper method to get the Stage from the root pane.
-     * 
-     * @return The Stage, or null if the scene or window is not available.
-     */
     private Stage getStage() {
         if (root.getScene() != null && root.getScene().getWindow() != null) {
             return (Stage) root.getScene().getWindow();

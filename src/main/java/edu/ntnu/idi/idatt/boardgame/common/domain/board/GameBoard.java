@@ -15,5 +15,7 @@ public interface GameBoard {
 
     Node getNode();
 
+    void setView(Node view);
+
     void setPlayerPosition(Player player, int position);
 }
