@@ -1,4 +1,4 @@
-package edu.ntnu.idi.idatt.boardgame.model;
+package edu.ntnu.idi.idatt.boardgame.core.domain.dice;
 
 import java.util.Random;
 

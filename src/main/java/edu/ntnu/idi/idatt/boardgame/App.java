@@ -1,19 +1,17 @@
 package edu.ntnu.idi.idatt.boardgame;
 
+import edu.ntnu.idi.idatt.boardgame.ui.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class App extends Application {
   @Override
   public void start(Stage stage) {
-    Game game = new Game();
-
-    VBox root = new VBox(game.getGameBoard(), game.getRollDiceButton());
-    Scene scene = new Scene(root, 700, 800);
+    MainView mainView = new MainView();
+    Scene scene = new Scene(mainView.getRoot(), 900, 800);
     stage.setScene(scene);
-    stage.setTitle("JavaFX Maven App");
+    stage.setTitle("Board Games Hub");
     stage.show();
   }
 
