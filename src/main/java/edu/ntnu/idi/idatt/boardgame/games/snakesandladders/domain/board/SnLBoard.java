@@ -1,13 +1,12 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
-
-import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 
 public class SnLBoard implements GameBoard {
   private static final int ROWS = 10;
@@ -58,7 +57,6 @@ public class SnLBoard implements GameBoard {
             });
   }
 
-  @Override
   public void incrementPlayerPosition(Player player, int increment) {
     int oldPos = player.getPosition();
     int newPos = oldPos + increment;

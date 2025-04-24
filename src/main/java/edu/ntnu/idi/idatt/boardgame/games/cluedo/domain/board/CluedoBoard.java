@@ -1,11 +1,12 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
-
 import java.util.Map;
 
-public final class CluedoBoard {
+public final class CluedoBoard implements GameBoard {
+
   private static final int BOARD_SIZE = 25;
 
   private static int PLAYER_WHITE_START_POSITION;
@@ -15,7 +16,6 @@ public final class CluedoBoard {
   private static int PLAYER_YELLOW_START_POSITION;
   private static int PLAYER_PURPLE_START_POSITION;
 
-
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
   public CluedoBoard() {
@@ -23,8 +23,10 @@ public final class CluedoBoard {
   }
 
   private void initializeTiles() {
+    // First add the rooms
+    insertRooms();
+    // then add the corridors
     insertCorridorTiles();
-    insertRoomTiles();
 
     // Placeholder values
     PLAYER_WHITE_START_POSITION = 0;
@@ -35,16 +37,27 @@ public final class CluedoBoard {
     PLAYER_PURPLE_START_POSITION = 5;
   }
 
-  private void insertRoomTiles() {
-
+  private void insertRooms() {
+    // todo
   }
 
   private void insertCorridorTiles() {
-
+    // todo
   }
 
+  @Override
+  public int getBoardSize() {
+    return BOARD_SIZE;
+  }
+
+  @Override
+  public void setPlayerPosition(Player player, int position) {
+    int oldPos = player.getPosition();
+    movePlayer(player, oldPos, position);
+  }
+
+  @Override
   public void addPlayersToStart(Map<Integer, Player> players) {
-    // each player color starts in their respective starting tile on the edge of the board
     players
         .values()
         .forEach(
@@ -58,8 +71,46 @@ public final class CluedoBoard {
             });
   }
 
-  private AbstractCluedoTile getTileAtPosition(int playerStartPosition) {
-    return null;
+  private AbstractCluedoTile getTileAtPosition(int playerPosition) {
+    // todo: use real logic
+    AbstractCluedoTile tile;
+    if (playerPositionInRoom(playerPosition)) {
+      tile = (RoomTile) board[playerPosition / BOARD_SIZE][playerPosition % BOARD_SIZE];
+      return tile;
+    }
+    tile = (CorridorTile) board[playerPosition / BOARD_SIZE][playerPosition % BOARD_SIZE];
+    return tile;
+  }
+
+  private boolean playerPositionInRoom(int playerPosition) {
+    return false; // todo: implement logic to check if the player is in a room
+  }
+
+  private void movePlayer(Player player, int fromPos, int toPos) {
+    if (!isAdjacent(fromPos, toPos)) {
+      return;
+    }
+
+    AbstractCluedoTile fromTile = getTileAtPosition(fromPos);
+    if (fromTile != null) {
+      fromTile.removePlayer(player);
+    }
+    player.setPosition(toPos);
+    AbstractCluedoTile toTile = getTileAtPosition(toPos);
+    if (toTile != null) {
+      toTile.addPlayer(player);
+    }
+  }
+
+  private boolean isAdjacent(int fromPos, int toPos) {
+    int fromRow = fromPos / BOARD_SIZE;
+    int fromCol = fromPos % BOARD_SIZE;
+
+    int toRow = toPos / BOARD_SIZE;
+    int toCol = toPos % BOARD_SIZE;
+
+    return (Math.abs(fromRow - toRow) == 1 && fromCol == toCol)
+        || (Math.abs(fromCol - toCol) == 1 && fromRow == toRow);
   }
 
   private int getPlayerStartPosition(Player player) {
