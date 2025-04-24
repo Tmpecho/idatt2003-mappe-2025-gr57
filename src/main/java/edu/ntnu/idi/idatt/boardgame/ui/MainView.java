@@ -142,7 +142,6 @@ public class MainView {
             return;
           }
           currentController.loadGameState(file.getPath());
-          System.out.println("Game state loaded. View refresh might be needed.");
           saveGameButton.setDisable(false);
           loadGameButton.setDisable(false);
         });
