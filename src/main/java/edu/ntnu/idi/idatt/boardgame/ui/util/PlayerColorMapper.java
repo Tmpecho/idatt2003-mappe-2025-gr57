@@ -6,8 +6,9 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.Color;
 
 public final class PlayerColorMapper {
-	public static Paint toPaint(PlayerColor c) {
-		return switch(c) {
+	public static Paint toPaint(PlayerColor playerColor) {
+		return switch(playerColor) {
+			case WHITE  -> Color.WHITE;
 			case RED    -> Color.RED;
 			case BLUE   -> Color.BLUE;
 			case GREEN  -> Color.GREEN;
