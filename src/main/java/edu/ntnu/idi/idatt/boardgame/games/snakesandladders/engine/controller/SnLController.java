@@ -64,7 +64,7 @@ public class SnLController extends GameController {
   }
 
   public void rollDice() {
-    Action roll = new RollAction(gameBoard, currentPlayer, dice);
+    Action roll = new RollAction((SnLBoard) gameBoard, currentPlayer, dice);
     roll.execute();
     notifyObservers(currentPlayer.getName() + " is now at tile " + currentPlayer.getPosition());
     if (isGameOver()) {
