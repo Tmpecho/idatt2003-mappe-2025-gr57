@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLTile;
+import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerColorMapper;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -74,7 +75,7 @@ public class SnLTileView implements TileObserver {
         .forEach(
             player -> {
               Circle circle = new Circle(7);
-              circle.setFill(PlayerColor.mapToJavaFXColor(player.getColor()));
+              circle.setFill(PlayerColorMapper.toPaint(player.getColor()));
               playerBox.getChildren().add(circle);
             });
     tileContainer.getChildren().add(playerBox);
