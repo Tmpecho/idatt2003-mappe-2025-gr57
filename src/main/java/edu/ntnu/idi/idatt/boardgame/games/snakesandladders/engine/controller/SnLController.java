@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.core.engine.action.Action;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class SnLController extends GameController {
+public class SnLController extends GameController<LinearPos> {
   private final GameStateRepository<SnLGameStateDTO> repo;
 
   private final int numberOfPlayers;
@@ -38,33 +39,34 @@ public class SnLController extends GameController {
     initialize(numberOfPlayers);
   }
 
-  public Map<Integer, Player> getPlayers() {
+  public Map<Integer, Player<LinearPos>> getPlayers() {
     return players;
   }
 
-  public Player getCurrentPlayer() {
+  public Player<LinearPos> getCurrentPlayer() {
     return currentPlayer;
   }
 
-  public void setCurrentPlayer(Player player) {
+  public void setCurrentPlayer(Player<LinearPos> player) {
     this.currentPlayer = player;
   }
 
   @Override
-  protected Map<Integer, Player> createPlayers(int numberOfPlayers) {
-    Map<Integer, Player> players = new HashMap<>();
+  protected Map<Integer, Player<LinearPos>> createPlayers(int numberOfPlayers) {
+    Map<Integer, Player<LinearPos>> players = new HashMap<>();
     IntStream.rangeClosed(1, numberOfPlayers)
         .forEach(
             playerId -> {
               PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-              Player player = new Player(playerId, "Player " + playerId, color);
+              Player<LinearPos> player =
+                  new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
               players.put(playerId, player);
             });
     return players;
   }
 
   public void rollDice() {
-    Action roll = new RollAction(gameBoard, currentPlayer, dice);
+    Action roll = new RollAction<>(gameBoard, currentPlayer, dice);
     roll.execute();
     notifyObservers(currentPlayer.getName() + " is now at tile " + currentPlayer.getPosition());
     if (isGameOver()) {
@@ -76,7 +78,7 @@ public class SnLController extends GameController {
 
   @Override
   protected boolean isGameOver() {
-    return currentPlayer.getPosition() == gameBoard.getBoardSize();
+    return currentPlayer.getPosition().index() == gameBoard.getBoardSize();
   }
 
   @Override
@@ -85,7 +87,7 @@ public class SnLController extends GameController {
   }
 
   @Override
-  protected Player getNextPlayer() {
+  protected Player<LinearPos> getNextPlayer() {
     return players.get((currentPlayer.getId() % numberOfPlayers) + 1);
   }
 

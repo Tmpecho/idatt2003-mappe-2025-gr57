@@ -1,14 +1,15 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
-import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
+import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SnLTile implements Tile {
-  private final List<Player> players;
+public class SnLTile implements Tile<LinearPos> {
+  private final List<Player<LinearPos>> players;
   private final int position;
   private final List<TileObserver> observers = new ArrayList<>();
 
@@ -18,7 +19,7 @@ public class SnLTile implements Tile {
   }
 
   @Override
-  public void addPlayer(Player player) {
+  public void addPlayer(Player<LinearPos> player) {
     if (!players.contains(player)) {
       players.add(player);
       notifyObservers();
@@ -26,7 +27,7 @@ public class SnLTile implements Tile {
   }
 
   @Override
-  public void removePlayer(Player player) {
+  public void removePlayer(Player<LinearPos> player) {
     if (players.remove(player)) {
       notifyObservers();
     }
@@ -57,7 +58,7 @@ public class SnLTile implements Tile {
     return position;
   }
 
-  public List<Player> getPlayers() {
+  public List<Player<LinearPos>> getPlayers() {
     return Collections.unmodifiableList(players);
   }
 }
