@@ -1,20 +1,22 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import java.util.Map;
 
-public final class CluedoBoard implements GameBoard {
+import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
+
+public final class CluedoBoard implements GameBoard<GridPos> {
 
   private static final int BOARD_SIZE = 25;
 
-  private static int PLAYER_WHITE_START_POSITION;
-  private static int PLAYER_RED_START_POSITION;
-  private static int PLAYER_BLUE_START_POSITION;
-  private static int PLAYER_GREEN_START_POSITION;
-  private static int PLAYER_YELLOW_START_POSITION;
-  private static int PLAYER_PURPLE_START_POSITION;
+  private static final GridPos PLAYER_WHITE_START_POSITION = new GridPos(0, 0);
+  private static final GridPos PLAYER_RED_START_POSITION = new GridPos(0, 1);
+  private static final GridPos PLAYER_BLUE_START_POSITION = new GridPos(0, 2);
+  private static final GridPos PLAYER_GREEN_START_POSITION = new GridPos(0, 3);
+  private static final GridPos PLAYER_YELLOW_START_POSITION = new GridPos(0, 4);
+  private static final GridPos PLAYER_PURPLE_START_POSITION = new GridPos(0, 5);
 
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
@@ -23,26 +25,23 @@ public final class CluedoBoard implements GameBoard {
   }
 
   private void initializeTiles() {
-    // First add the rooms
-    insertRooms();
-    // then add the corridors
+    // Basic implementation to avoid null tiles
     insertCorridorTiles();
-
-    // Placeholder values
-    PLAYER_WHITE_START_POSITION = 0;
-    PLAYER_RED_START_POSITION = 1;
-    PLAYER_BLUE_START_POSITION = 2;
-    PLAYER_GREEN_START_POSITION = 3;
-    PLAYER_YELLOW_START_POSITION = 4;
-    PLAYER_PURPLE_START_POSITION = 5;
+    insertRooms();
   }
 
   private void insertRooms() {
-    // todo
+    // TODO: Implement room placement logic
   }
 
   private void insertCorridorTiles() {
-    // todo
+    for (int row = 0; row < BOARD_SIZE; row++) {
+      for (int col = 0; col < BOARD_SIZE; col++) {
+        if (board[row][col] == null) {
+          board[row][col] = new CorridorTile(row, col);
+        }
+      }
+    }
   }
 
   @Override
@@ -51,46 +50,43 @@ public final class CluedoBoard implements GameBoard {
   }
 
   @Override
-  public void setPlayerPosition(Player player, int position) {
-    int oldPos = player.getPosition();
+  public void setPlayerPosition(Player<GridPos> player, GridPos position) {
+    GridPos oldPos = player.getPosition();
     movePlayer(player, oldPos, position);
   }
 
   @Override
-  public void addPlayersToStart(Map<Integer, Player> players) {
-    players
-        .values()
-        .forEach(
-            player -> {
-              int playerStartPosition = getPlayerStartPosition(player);
-              player.setPosition(playerStartPosition);
-              AbstractCluedoTile startTile = getTileAtPosition(playerStartPosition);
-              if (startTile != null) {
-                startTile.addPlayer(player);
-              }
-            });
+  public void addPlayersToStart(Map<Integer, Player<GridPos>> players) {
+    players.values().forEach(player -> {
+      GridPos startPos = getPlayerStartPosition(player);
+      player.setPosition(startPos);
+      AbstractCluedoTile startTile = getTileAtPosition(startPos);
+      if (startTile != null) {
+        startTile.addPlayer(player);
+      }
+    });
   }
 
-  private AbstractCluedoTile getTileAtPosition(int playerPosition) {
-    // todo: use real logic
-    AbstractCluedoTile tile;
-    if (playerPositionInRoom(playerPosition)) {
-      tile = (RoomTile) board[playerPosition / BOARD_SIZE][playerPosition % BOARD_SIZE];
-      return tile;
+  @Override
+  public void incrementPlayerPosition(Player<GridPos> player, int increment) {
+    // For Cluedo, movement is typically grid-based, not incremental like SnL
+    // Placeholder: move player by 'increment' steps right (simplified)
+    GridPos current = player.getPosition();
+    GridPos newPos = new GridPos(current.row(), Math.min(current.col() + increment, BOARD_SIZE - 1));
+    setPlayerPosition(player, newPos);
+  }
+
+  private AbstractCluedoTile getTileAtPosition(GridPos pos) {
+    if (pos.row() >= 0 && pos.row() < BOARD_SIZE && pos.col() >= 0 && pos.col() < BOARD_SIZE) {
+      return board[pos.row()][pos.col()];
     }
-    tile = (CorridorTile) board[playerPosition / BOARD_SIZE][playerPosition % BOARD_SIZE];
-    return tile;
+    return null; // Out of bounds
   }
 
-  private boolean playerPositionInRoom(int playerPosition) {
-    return false; // todo: implement logic to check if the player is in a room
-  }
-
-  private void movePlayer(Player player, int fromPos, int toPos) {
+  private void movePlayer(Player<GridPos> player, GridPos fromPos, GridPos toPos) {
     if (!isAdjacent(fromPos, toPos)) {
-      return;
+      return; // Only allow adjacent moves
     }
-
     AbstractCluedoTile fromTile = getTileAtPosition(fromPos);
     if (fromTile != null) {
       fromTile.removePlayer(player);
@@ -102,18 +98,13 @@ public final class CluedoBoard implements GameBoard {
     }
   }
 
-  private boolean isAdjacent(int fromPos, int toPos) {
-    int fromRow = fromPos / BOARD_SIZE;
-    int fromCol = fromPos % BOARD_SIZE;
-
-    int toRow = toPos / BOARD_SIZE;
-    int toCol = toPos % BOARD_SIZE;
-
-    return (Math.abs(fromRow - toRow) == 1 && fromCol == toCol)
-        || (Math.abs(fromCol - toCol) == 1 && fromRow == toRow);
+  private boolean isAdjacent(GridPos from, GridPos to) {
+    int rowDiff = Math.abs(from.row() - to.row());
+    int colDiff = Math.abs(from.col() - to.col());
+    return (rowDiff == 1 && colDiff == 0) || (rowDiff == 0 && colDiff == 1);
   }
 
-  private int getPlayerStartPosition(Player player) {
+  private GridPos getPlayerStartPosition(Player<GridPos> player) {
     PlayerColor color = player.getColor();
     return switch (color) {
       case WHITE -> PLAYER_WHITE_START_POSITION;

@@ -1,14 +1,16 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class SnLBoard implements GameBoard {
+import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
+
+public final class SnLBoard implements GameBoard<LinearPos> {
   private static final int ROWS = 10;
   private static final int COLS = 9;
   private static final int BOARD_SIZE = ROWS * COLS;
@@ -39,34 +41,31 @@ public class SnLBoard implements GameBoard {
   }
 
   private void initializeTiles() {
-    IntStream.rangeClosed(1, BOARD_SIZE)
-        .forEach(pos -> tiles.put(pos, new SnLTile(pos)));
+    IntStream.rangeClosed(1, BOARD_SIZE).forEach(pos -> tiles.put(pos, new SnLTile(pos)));
   }
 
   @Override
-  public void addPlayersToStart(Map<Integer, Player> players) {
+  public void addPlayersToStart(Map<Integer, Player<LinearPos>> players) {
     players
         .values()
         .forEach(
-            player -> {
-              player.setPosition(1);
-              SnLTile startTile = getTileAtPosition(1);
-              if (startTile != null) {
-                startTile.addPlayer(player);
-              }
+            p -> {
+              p.setPosition(new LinearPos(1));
+              tiles.get(1).addPlayer(p);
             });
   }
 
-  public void incrementPlayerPosition(Player player, int increment) {
-    int oldPos = player.getPosition();
-    int newPos = oldPos + increment;
-    if (newPos > getBoardSize()) {
-      newPos = getBoardSize() - (newPos - getBoardSize());
-    }
-    if (newPos < 1)
-      newPos = 1;
-    movePlayer(player, oldPos, newPos);
-    applyConnectorIfPresent(player);
+  @Override
+  public void incrementPlayerPosition(Player<LinearPos> player, int inc) {
+    int from = player.getPosition().index();
+    int to = computeDestination(from + inc);
+    move(player, from, to);
+    applyConnector(player);
+  }
+
+  @Override
+  public void setPlayerPosition(Player<LinearPos> player, LinearPos pos) {
+    move(player, player.getPosition().index(), pos.index());
   }
 
   @Override
@@ -74,38 +73,32 @@ public class SnLBoard implements GameBoard {
     return BOARD_SIZE;
   }
 
-  private void movePlayer(Player player, int fromPos, int toPos) {
-    SnLTile fromTile = getTileAtPosition(fromPos);
-    if (fromTile != null) {
-      fromTile.removePlayer(player);
+  private int computeDestination(int raw) {
+    if (raw > BOARD_SIZE) {
+      return BOARD_SIZE - (raw - BOARD_SIZE); // bounce back
     }
-    player.setPosition(toPos);
-    SnLTile toTile = getTileAtPosition(toPos);
-    if (toTile != null) {
-      toTile.addPlayer(player);
-    }
+    return Math.max(raw, 1);
   }
 
-  private void applyConnectorIfPresent(Player player) {
-    int pos = player.getPosition();
-    if (!connectors.containsKey(pos)) {
+  private void move(Player<LinearPos> p, int from, int to) {
+    tiles.get(from).removePlayer(p);
+    p.setPosition(new LinearPos(to));
+    tiles.get(to).addPlayer(p);
+  }
+
+  private void applyConnector(Player<LinearPos> p) {
+    int pos = p.getPosition().index();
+    Connector c = connectors.get(pos);
+    if (c == null) {
       return;
     }
-    Connector connector = connectors.get(pos);
-    int destination = connector.getEnd();
-    if (destination < 1)
-      destination = 1;
-    if (destination > getBoardSize())
-      destination = getBoardSize();
-    movePlayer(player, pos, destination);
+    move(p, pos, computeDestination(c.getEnd()));
   }
 
-  // Define getTileAtPosition only once
   private SnLTile getTileAtPosition(int pos) {
     return tiles.get(pos);
   }
 
-  // Define addSnakesAndLadders only once
   private void addSnakesAndLadders() {
     SNAKES.forEach(
         (start, length) -> {
@@ -134,11 +127,5 @@ public class SnLBoard implements GameBoard {
 
   public int getCols() {
     return COLS;
-  }
-
-  @Override
-  public void setPlayerPosition(Player player, int position) {
-    int oldPos = player.getPosition();
-    movePlayer(player, oldPos, position);
   }
 }
