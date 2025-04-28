@@ -1,16 +1,17 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view;
 
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public class SnLView implements GameObserver {
+public class SnLView implements GameObserver<LinearPos> {
   private final Button rollDiceButton;
   private final Label logLabel;
   private final BorderPane root;
@@ -31,7 +32,7 @@ public class SnLView implements GameObserver {
     controller.addObserver(this);
   }
 
-  private void setupRollDiceButton(GameController controller) {
+  private void setupRollDiceButton(GameController<LinearPos> controller) {
     rollDiceButton.setOnAction(
         e -> {
           if (controller instanceof SnLController) {
@@ -50,7 +51,7 @@ public class SnLView implements GameObserver {
   }
 
   @Override
-  public void gameFinished(Player currentPlayer) {
+  public void gameFinished(Player<LinearPos> currentPlayer) {
     logLabel.setText(currentPlayer.getName() + " wins!");
     rollDiceButton.setDisable(true);
   }
