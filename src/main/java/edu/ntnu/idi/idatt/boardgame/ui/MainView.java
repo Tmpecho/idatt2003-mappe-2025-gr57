@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.ui;
 
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
@@ -27,7 +28,7 @@ import javafx.stage.Stage;
 public class MainView {
   private final BorderPane root;
   private final StackPane contentWrapper;
-  private GameController currentController;
+  private GameController<LinearPos> currentController;
   private Button saveGameButton;
   private Button loadGameButton;
 
