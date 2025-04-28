@@ -1,15 +1,15 @@
 package edu.ntnu.idi.idatt.boardgame.core.domain.player;
 
-public class Player {
+public class Player<P extends Position> {
   private final int id;
   private final String name;
-  private int position;
+  private P position;
   private final PlayerColor color;
 
-  public Player(int id, String name, PlayerColor color) {
+  public Player(int id, String name, PlayerColor color, P startPos) {
     this.id = id;
     this.name = name;
-    this.position = 1;
+    this.position = startPos;
     this.color = color;
   }
 
@@ -21,11 +21,11 @@ public class Player {
     return name;
   }
 
-  public int getPosition() {
+  public P getPosition() {
     return position;
   }
 
-  public void setPosition(int position) {
+  public void setPosition(P position) {
     this.position = position;
   }
 
@@ -34,6 +34,14 @@ public class Player {
   }
 
   public String toString() {
-    return "Player{id=" + id + ", name=" + name + ", position=" + position + ", color=" + color + "}";
+    return "Player{id="
+        + id
+        + ", name="
+        + name
+        + ", position="
+        + position
+        + ", color="
+        + color
+        + "}";
   }
 }
