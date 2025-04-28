@@ -1,16 +1,16 @@
 package edu.ntnu.idi.idatt.boardgame.core.domain.board;
 
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Position;
 import java.util.Map;
 
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
+public interface GameBoard<P extends Position> {
 
-public interface GameBoard {
+  void addPlayersToStart(Map<Integer, Player<P>> players);
 
-    void addPlayersToStart(Map<Integer, Player> players);
-
-    void incrementPlayerPosition(Player player, int increment);
+  void incrementPlayerPosition(Player<P> player, int increment);
 
     int getBoardSize();
 
-    void setPlayerPosition(Player player, int position);
+  void setPlayerPosition(Player<P> player, P position);
 }

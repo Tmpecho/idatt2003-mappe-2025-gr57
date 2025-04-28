@@ -1,32 +1,41 @@
 package edu.ntnu.idi.idatt.boardgame.core.engine.controller;
 
-import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
+import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.Position;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class GameController {
-  protected final GameBoard gameBoard;
+/**
+ * Generic controller for a turn-based game.
+ *
+ * @param <P> concrete {@link Position} implementation used by the game
+ */
+public abstract class GameController<P extends Position> {
+  protected final GameBoard<P> gameBoard;
   protected final Dice dice;
-  protected Map<Integer, Player> players;
-  protected Player currentPlayer;
+
+  protected Map<Integer, Player<P>> players;
+  protected Player<P> currentPlayer;
+
   private final List<GameObserver> observers = new ArrayList<>();
 
-  public GameController(GameBoard gameBoard, Dice dice) {
+  protected GameController(GameBoard<P> gameBoard, Dice dice) {
     this.gameBoard = gameBoard;
     this.dice = dice;
   }
 
-  protected abstract Map<Integer, Player> createPlayers(int numberOfPlayers);
+  /** Implementations must create the players that participate in the game. */
+  protected abstract Map<Integer, Player<P>> createPlayers(int numberOfPlayers);
 
-  public void initialize(int numberOfPlayers) {
+  /** Must be called by subclass constructor after fields are set up. */
+  protected void initialize(int numberOfPlayers) {
     this.players = createPlayers(numberOfPlayers);
     gameBoard.addPlayersToStart(players);
-    this.currentPlayer = players.get(1);
+    currentPlayer = players.get(1);
   }
 
   public void addObserver(GameObserver observer) {
@@ -41,18 +50,21 @@ public abstract class GameController {
     observers.forEach(observer -> observer.update(message));
   }
 
-  protected void notifyGameFinished(Player currentPlayer) {
+  protected void notifyGameFinished(Player<P> currentPlayer) {
     observers.forEach(observer -> observer.gameFinished(currentPlayer));
   }
 
   protected abstract boolean isGameOver();
-  protected abstract void onGameFinish();
-  protected abstract Player getNextPlayer();
 
-  public GameBoard getGameBoard() {
+  protected abstract void onGameFinish();
+
+  protected abstract Player<P> getNextPlayer();
+
+  public GameBoard<P> getGameBoard() {
     return gameBoard;
   }
-  
+
   public abstract void saveGameState(String filePath);
+
   public abstract void loadGameState(String filePath);
 }
