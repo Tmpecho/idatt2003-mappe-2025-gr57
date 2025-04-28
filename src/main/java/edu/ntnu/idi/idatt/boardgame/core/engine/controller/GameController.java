@@ -21,7 +21,7 @@ public abstract class GameController<P extends Position> {
   protected Map<Integer, Player<P>> players;
   protected Player<P> currentPlayer;
 
-  private final List<GameObserver> observers = new ArrayList<>();
+  private final List<GameObserver<P>> observers = new ArrayList<>();
 
   protected GameController(GameBoard<P> gameBoard, Dice dice) {
     this.gameBoard = gameBoard;
@@ -38,11 +38,11 @@ public abstract class GameController<P extends Position> {
     currentPlayer = players.get(1);
   }
 
-  public void addObserver(GameObserver observer) {
+  public void addObserver(GameObserver<P> observer) {
     observers.add(observer);
   }
 
-  public void removeObserver(GameObserver observer) {
+  public void removeObserver(GameObserver<P> observer) {
     observers.remove(observer);
   }
 

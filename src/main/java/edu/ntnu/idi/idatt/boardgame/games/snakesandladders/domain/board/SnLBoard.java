@@ -96,12 +96,10 @@ public final class SnLBoard implements GameBoard<LinearPos> {
     move(p, pos, computeDestination(c.getEnd()));
   }
 
-  // Define getTileAtPosition only once
   private SnLTile getTileAtPosition(int pos) {
     return tiles.get(pos);
   }
 
-  // Define addSnakesAndLadders only once
   private void addSnakesAndLadders() {
     SNAKES.forEach(
         (start, length) -> {
