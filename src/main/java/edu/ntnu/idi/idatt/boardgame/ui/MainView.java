@@ -85,7 +85,12 @@ public class MainView {
           chooser.setTitle("Save Game State");
           File dir = new File("saves");
           if (!dir.exists()) {
-            dir.mkdirs();
+            boolean success = dir.mkdirs();
+
+            if (!success) {
+              System.out.println("Failed to create saves directory.");
+              return;
+            }
           }
           chooser.setInitialDirectory(dir);
           chooser.setInitialFileName("game_state.json");
