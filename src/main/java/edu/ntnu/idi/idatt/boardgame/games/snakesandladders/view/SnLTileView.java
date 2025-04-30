@@ -1,7 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLTile;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerColorMapper;
@@ -55,7 +54,7 @@ public class SnLTileView implements TileObserver {
   }
 
   @Override
-  public void onTileChanged(Tile<LinearPos> tile) {
+  public void onTileChanged(Tile<?> tile) {
     if (tile == this.tileModel) {
       updateDisplay();
     }
