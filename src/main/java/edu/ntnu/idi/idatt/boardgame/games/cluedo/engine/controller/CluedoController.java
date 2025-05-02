@@ -15,7 +15,6 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 public class CluedoController extends GameController<GridPos> {
 
     private final int numberOfPlayers;
-    // Standard Cluedo player colors
     private final List<PlayerColor> playerColors = List.of(
             PlayerColor.WHITE, // Miss Scarlett
             PlayerColor.RED, // Col. Mustard
@@ -25,7 +24,6 @@ public class CluedoController extends GameController<GridPos> {
             PlayerColor.PURPLE // Prof. Plum
     );
 
-    // Map player colors to names for clarity
     private final Map<PlayerColor, String> playerNames = Map.of(
             PlayerColor.WHITE, "Miss Scarlett",
             PlayerColor.RED, "Col. Mustard",
@@ -35,27 +33,25 @@ public class CluedoController extends GameController<GridPos> {
             PlayerColor.PURPLE, "Prof. Plum");
 
     public CluedoController(int numberOfPlayers) {
-        // Cluedo uses 2 dice
         super(new CluedoBoard(), new Dice(2));
         if (numberOfPlayers < 2 || numberOfPlayers > 6) {
             throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
         }
         this.numberOfPlayers = numberOfPlayers;
-        initialize(numberOfPlayers); // Call initialize from superclass
+        initialize(numberOfPlayers);
     }
 
     @Override
     protected Map<Integer, Player<GridPos>> createPlayers(int numPlayers) {
         Map<Integer, Player<GridPos>> playersMap = new HashMap<>();
-        CluedoBoard board = (CluedoBoard) this.gameBoard; // Cast to access specific methods if needed
+        CluedoBoard board = (CluedoBoard) this.gameBoard;
 
         IntStream.range(0, numPlayers)
                 .forEach(i -> {
-                    int playerId = i + 1; // Player IDs typically start from 1
+                    int playerId = i + 1;
                     PlayerColor color = playerColors.get(i % playerColors.size());
                     String name = playerNames.getOrDefault(color, "Player " + playerId);
-                    // Start position is determined by CluedoBoard based on color
-                    GridPos startPos = new GridPos(0, 0); // Placeholder, board sets actual start pos
+                    GridPos startPos = new GridPos(0, 0);
                     Player<GridPos> player = new Player<>(playerId, name, color, startPos);
                     playersMap.put(playerId, player);
                 });
@@ -70,7 +66,8 @@ public class CluedoController extends GameController<GridPos> {
         return currentPlayer;
     }
 
-    // --- Abstract Method Implementations (Basic Placeholders) ---
+    // PLACEHOLDERS:
+    // TODO: Implement game-specific logic for Cluedo
 
     @Override
     protected boolean isGameOver() {

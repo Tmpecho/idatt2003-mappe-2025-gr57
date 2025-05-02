@@ -15,8 +15,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 public class CluedoBoardView extends Pane {
-    private static final int TILE_SIZE = 30; // Adjust size as needed
-    private static final int GAP_SIZE = 1; // Small gap between tiles
+    private static final int TILE_SIZE = 30;
+    private static final int GAP_SIZE = 1;
     private final GridPane grid;
     private final CluedoBoard boardModel;
 
@@ -26,8 +26,6 @@ public class CluedoBoardView extends Pane {
 
         grid.setHgap(GAP_SIZE);
         grid.setVgap(GAP_SIZE);
-        // Optional: Add padding around the grid
-        // grid.setPadding(new Insets(10));
 
         initializeBoard();
         getChildren().add(grid);
@@ -42,36 +40,26 @@ public class CluedoBoardView extends Pane {
         for (int row = 0; row < numRows; row++) {
             for (int col = 0; col < numCols; col++) {
                 if (visited[row][col]) {
-                    continue; // Skip if already part of a larger room tile
+                    continue;
                 }
 
                 AbstractCluedoTile tileModel = boardGrid[row][col];
 
                 if (tileModel instanceof RoomTile roomTile) {
-                    // Found the top-left corner of a room (or the first encountered part)
-                    // Now find its boundaries
                     int minR = row, minC = col, maxR = row, maxC = col;
 
-                    // Search right and down for the same RoomTile instance
                     for (int r = row; r < numRows; r++) {
                         for (int c = col; c < numCols; c++) {
-                            if (boardGrid[r][c] == roomTile) { // Check for the same instance
+                            if (boardGrid[r][c] == roomTile) {
                                 if (r > maxR)
                                     maxR = r;
                                 if (c > maxC)
                                     maxC = c;
-                                // Also need to check potentially missed cells if the room isn't perfectly
-                                // rectangular
-                                // For simplicity, assume rooms fill a rectangular block for now.
-                                // A more robust search might be needed for complex room shapes.
                             } else if (c > col && boardGrid[r][c - 1] == roomTile) {
-                                // Stop searching right in this row if we hit a non-room tile after seeing the
-                                // room
                                 break;
                             }
                         }
                         if (r > row && boardGrid[r][col] != roomTile && boardGrid[r - 1][col] == roomTile) {
-                            // Stop searching down if we hit a non-room tile after seeing the room
                             break;
                         }
                     }
@@ -79,7 +67,6 @@ public class CluedoBoardView extends Pane {
                     int rowSpan = maxR - minR + 1;
                     int colSpan = maxC - minC + 1;
 
-                    // Create a single node for the room
                     Rectangle roomBackground = new Rectangle(colSpan * TILE_SIZE + (colSpan - 1) * GAP_SIZE,
                             rowSpan * TILE_SIZE + (rowSpan - 1) * GAP_SIZE);
                     roomBackground.setFill(Color.LIGHTSLATEGRAY);
@@ -95,55 +82,44 @@ public class CluedoBoardView extends Pane {
                     StackPane roomPane = new StackPane(roomBackground, roomLabel);
                     roomPane.setAlignment(Pos.CENTER);
 
-                    // Add the single room node spanning multiple cells
                     grid.add(roomPane, col, row, colSpan, rowSpan);
 
-                    // Mark all cells covered by this room as visited
                     for (int r = minR; r <= maxR; r++) {
                         for (int c = minC; c <= maxC; c++) {
-                            if (r < numRows && c < numCols) { // Bounds check
+                            if (r < numRows && c < numCols) {
                                 visited[r][c] = true;
                             }
                         }
                     }
 
-                    // Add player tokens for this room (simplified: add to top-left cell's view
-                    // logic)
                     // TODO: A better approach would be a dedicated layer or pane for player tokens
                     // that can be positioned anywhere on the board, not tied to specific grid
                     // cells.
-                    // For now, let's try adding them to the roomPane.
                     addPlayerTokensToPane(roomPane, roomTile);
 
                 } else if (tileModel instanceof CorridorTile) {
                     // Handle corridor tiles as before
                     CluedoTileView tileView = new CluedoTileView(tileModel, TILE_SIZE);
                     grid.add(tileView.getNode(), col, row);
-                    visited[row][col] = true; // Mark as visited
+                    visited[row][col] = true;
                 } else {
-                    // Handle null or other tile types (e.g., empty placeholder)
                     Pane emptyPane = new Pane();
                     emptyPane.setPrefSize(TILE_SIZE, TILE_SIZE);
-                    // Optionally set a background color for debugging
-                    // emptyPane.setStyle("-fx-background-color: black;");
                     grid.add(emptyPane, col, row);
-                    visited[row][col] = true; // Mark as visited
+                    visited[row][col] = true;
                 }
             }
         }
     }
 
-    // Helper method to add player tokens (circles) to a pane (like the roomPane)
-    // This is a simplified approach.
     private void addPlayerTokensToPane(StackPane pane, AbstractCluedoTile tileModel) {
         if (!tileModel.getPlayers().isEmpty()) {
-            // Use a FlowPane inside the StackPane to hold player tokens
             javafx.scene.layout.FlowPane playerTokenPane = new javafx.scene.layout.FlowPane();
-            playerTokenPane.setAlignment(Pos.BOTTOM_CENTER); // Position tokens at the bottom
+            playerTokenPane.setAlignment(Pos.BOTTOM_CENTER);
             playerTokenPane.setHgap(2);
             playerTokenPane.setVgap(2);
             playerTokenPane.setPadding(new javafx.geometry.Insets(5));
-            playerTokenPane.setMaxWidth(pane.getWidth() - 10); // Limit width
+            playerTokenPane.setMaxWidth(pane.getWidth() - 10);
 
             tileModel.getPlayers().forEach(player -> {
                 javafx.scene.shape.Circle circle = new javafx.scene.shape.Circle(Math.max(5, TILE_SIZE * 0.2));
@@ -152,12 +128,12 @@ public class CluedoBoardView extends Pane {
                 circle.setStrokeWidth(1);
                 playerTokenPane.getChildren().add(circle);
             });
-            pane.getChildren().add(playerTokenPane); // Add player pane on top
+            pane.getChildren().add(playerTokenPane);
         }
     }
 
     public void updateView() {
-        grid.getChildren().clear(); // Clear existing grid content
-        initializeBoard(); // Re-initialize the board display
+        grid.getChildren().clear();
+        initializeBoard();
     }
 }
