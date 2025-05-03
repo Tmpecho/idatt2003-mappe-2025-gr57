@@ -11,13 +11,8 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 
 public final class CluedoBoard implements GameBoard<GridPos> {
 
-  // Grid size is typically 24 squares wide + 1 for the outer border/start
-  // positions often
-  // included
-  // Let's stick to 25x25 as defined. Coordinates are [row][col] (y, x).
   private static final int BOARD_SIZE = 25;
 
-  // Start positions based on visual inspection of the provided board image:
   private static final GridPos PLAYER_WHITE_START_POSITION = new GridPos(0, 9); // Mrs. White (Yellow Token) - Top edge
                                                                                 // near Kitchen/Ballroom
   private static final GridPos PLAYER_RED_START_POSITION = new GridPos(17, 0); // Col. Mustard (Red Token) - Left edge
@@ -27,22 +22,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos PLAYER_GREEN_START_POSITION = new GridPos(0, 14); // Rev. Green (Green Token) - Top edge
                                                                                  // near Ballroom/Conservatory
   private static final GridPos PLAYER_YELLOW_START_POSITION = new GridPos(24, 7); // Miss Scarlett (Yellow Token) -
-                                                                                  // Bottom edge near Hall/Lounge (Note:
-                                                                                  // Mismatch between color name and
-                                                                                  // character usually assigned yellow -
-                                                                                  // often Miss Scarlett gets Red token,
-                                                                                  // but following code naming) -> LET'S
-                                                                                  // ASSUME YELLOW TOKEN IS SCARLETT
-                                                                                  // based on code name. **Correction**:
-                                                                                  // Image says "START MISS SCARLETT"
-                                                                                  // here, and "START MRS. WHITE" at
-                                                                                  // (0,9). Let's swap the characters in
-                                                                                  // the comments to match the image and
-                                                                                  // typical assignments.
   private static final GridPos PLAYER_PURPLE_START_POSITION = new GridPos(19, 24); // Prof. Plum (Purple Token) - Right
                                                                                    // edge near Study/Library
 
-  // Corrected Start Positions matching Image labels and typical characters:
   private static final GridPos START_POS_MISS_SCARLETT = new GridPos(24, 7); // Red Token (uses PlayerColor.WHITE in
                                                                              // code?) - Check PlayerColor enum mapping
   private static final GridPos START_POS_COL_MUSTARD = new GridPos(17, 0); // Yellow Token (uses PlayerColor.RED in
@@ -54,16 +36,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 24); // Purple Token (uses PlayerColor.PURPLE in
                                                                           // code)
 
-  // Map PlayerColor to the correct start position based on standard character
-  // assignments
-  // Assuming PlayerColor enum maps as follows (adjust if different):
-  // WHITE = Miss Scarlett (Red Token)
-  // RED = Col. Mustard (Yellow Token)
-  // BLUE = Mrs. Peacock (Blue Token)
-  // GREEN = Rev. Green (Green Token)
-  // YELLOW = Mrs. White (White Token)
-  // PURPLE = Prof. Plum (Purple Token)
-
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
   public CluedoBoard() {
@@ -73,7 +45,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private void initializeTiles() {
     insertRooms();
     insertCorridorTiles();
-    // Note: Secret passages and doors are not yet implemented here
+    // TODO: Secret passages and doors are not yet implemented here
   }
 
   private List<RoomTile.Point> createRectangularOutline(RoomDimensions roomDimensions) {
@@ -101,9 +73,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   private void insertRooms() {
-    // Room dimensions are estimates based on the classic board layout (inclusive)
-    // [Top Row, Left Col, Bottom Row, Right Col]
-
     // Kitchen (Top-Left)
     RoomDimensions kitchenDimensions = new RoomDimensions(0, 0, 5, 6); // Adjusted width
     List<RoomTile.Point> kitchenOutline = createRectangularOutline(kitchenDimensions);
@@ -171,11 +140,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private void insertCorridorTiles() {
     for (int row = 0; row < BOARD_SIZE; row++) {
       for (int col = 0; col < BOARD_SIZE; col++) {
-        if (board[row][col] == null) { // Only fill if not already part of a room
-          // Add boundary checks for safety
+        if (board[row][col] == null) {
           if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
             board[row][col] = new CorridorTile(row, col);
-            // Corridor tiles are walkable by default
           }
         }
       }
@@ -212,24 +179,20 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     }
     GridPos oldPos = player.getPosition();
 
-    // Remove from old tile if valid position and tile exists
     if (isValidPosition(oldPos)) {
       AbstractCluedoTile oldTile = getTileAtPosition(oldPos);
       if (oldTile != null) {
         oldTile.removePlayer(player);
       } else {
-        // This might happen if the player wasn't placed correctly initially
         System.err.println("Warning: Player " + player.getName() + " had no valid old tile at " + oldPos);
       }
     }
 
-    // Set new position and add to new tile
     player.setPosition(position);
     AbstractCluedoTile newTile = getTileAtPosition(position);
     if (newTile != null) {
       newTile.addPlayer(player);
     } else {
-      // This shouldn't happen if isValidPosition passed, unless board init failed
       System.err.println("Error: New tile is null at valid position " + position + " for player " + player.getName());
     }
   }
@@ -240,7 +203,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         .values()
         .forEach(
             player -> {
-              GridPos startPos = getPlayerStartPosition(player); // Uses the corrected logic
+              GridPos startPos = getPlayerStartPosition(player);
               if (isValidPosition(startPos)) {
                 // Don't call setPlayerPosition here, as it tries to remove from the old
                 // position (null)
@@ -270,8 +233,10 @@ public final class CluedoBoard implements GameBoard<GridPos> {
             });
   }
 
+  // PLACEHOLDER METHOD
   @Override
   public void incrementPlayerPosition(Player<GridPos> player, int increment) {
+    // TODO: Implement movement in cluedo
     // This method is generally unsuitable for Cluedo's free movement.
     // Players roll dice and choose path, not move fixed steps on a linear track.
     System.out.println(
@@ -329,14 +294,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         && pos.col() < BOARD_SIZE;
   }
 
-  // Corrected logic to get start position based on PlayerColor,
-  // mapping to the standard character start points.
   private GridPos getPlayerStartPosition(Player<GridPos> player) {
     PlayerColor color = player.getColor();
     return switch (color) {
-      // Map PlayerColor enum values to the character start positions
-      // Adjust this mapping if your PlayerColor enum represents characters
-      // differently
       case WHITE -> START_POS_MISS_SCARLETT; // Assuming WHITE maps to Scarlett (Red Token)
       case RED -> START_POS_COL_MUSTARD; // Assuming RED maps to Mustard (Yellow Token)
       case BLUE -> START_POS_MRS_PEACOCK; // Assuming BLUE maps to Peacock (Blue Token)
@@ -344,7 +304,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       case YELLOW -> START_POS_MRS_WHITE; // Assuming YELLOW maps to Mrs. White (White Token)
       case PURPLE -> START_POS_PROF_PLUM; // Assuming PURPLE maps to Plum (Purple Token)
       default ->
-        // Provide a default or throw error for unmapped/null colors
         throw new IllegalArgumentException("Invalid or unmapped player color: " + color);
     };
   }
