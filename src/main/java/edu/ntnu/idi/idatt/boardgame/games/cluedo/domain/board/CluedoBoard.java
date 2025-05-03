@@ -32,18 +32,17 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   private List<RoomTile.Point> createRectangularOutline(RoomDimensions roomDimensions) {
     List<RoomTile.Point> outline = new ArrayList<>();
-    outline.add(new RoomTile.Point(roomDimensions.getTop(), roomDimensions.getLeft()));
-    outline.add(new RoomTile.Point(roomDimensions.getTop(), roomDimensions.getRight()));
-    outline.add(new RoomTile.Point(roomDimensions.getBottom(), roomDimensions.getRight()));
-    outline.add(new RoomTile.Point(roomDimensions.getBottom(), roomDimensions.getLeft()));
-    outline.add(
-        new RoomTile.Point(roomDimensions.getTop(), roomDimensions.getLeft())); // Close the loop
+    outline.add(new RoomTile.Point(roomDimensions.top, roomDimensions.left));
+    outline.add(new RoomTile.Point(roomDimensions.top, roomDimensions.right));
+    outline.add(new RoomTile.Point(roomDimensions.bottom, roomDimensions.right));
+    outline.add(new RoomTile.Point(roomDimensions.bottom, roomDimensions.left));
+    outline.add(new RoomTile.Point(roomDimensions.top, roomDimensions.left)); // Close the loop
     return outline;
   }
 
   private void populateRoomTiles(RoomDimensions roomDimensions, RoomTile room) {
-    for (int r = roomDimensions.getTop(); r <= roomDimensions.getBottom(); r++) {
-      for (int c = roomDimensions.getLeft(); c <= roomDimensions.getRight(); c++) {
+    for (int r = roomDimensions.top; r <= roomDimensions.bottom; r++) {
+      for (int c = roomDimensions.left; c <= roomDimensions.right; c++) {
         board[r][c] = room;
         room.setWalkable(false);
       }
@@ -109,26 +108,38 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   @Override
   public void addPlayersToStart(Map<Integer, Player<GridPos>> players) {
-    players.values().forEach(player -> {
-      GridPos startPos = getPlayerStartPosition(player);
-      if (isValidPosition(startPos)) {
-        player.setPosition(startPos);
-        AbstractCluedoTile startTile = getTileAtPosition(startPos);
-        if (startTile != null) {
-          startTile.addPlayer(player);
-        } else {
-          System.err.println("Error: Start tile is null for player " + player.getName() + " at " + startPos);
-        }
-      } else {
-        System.err.println("Error: Invalid start position " + startPos + " for player " + player.getName());
-      }
-    });
+    players
+        .values()
+        .forEach(
+            player -> {
+              GridPos startPos = getPlayerStartPosition(player);
+              if (isValidPosition(startPos)) {
+                player.setPosition(startPos);
+                AbstractCluedoTile startTile = getTileAtPosition(startPos);
+                if (startTile != null) {
+                  startTile.addPlayer(player);
+                } else {
+                  System.err.println(
+                      "Error: Start tile is null for player "
+                          + player.getName()
+                          + " at "
+                          + startPos);
+                }
+              } else {
+                System.err.println(
+                    "Error: Invalid start position "
+                        + startPos
+                        + " for player "
+                        + player.getName());
+              }
+            });
   }
 
   @Override
   public void incrementPlayerPosition(Player<GridPos> player, int increment) {
     // TODO: Implement proper Cluedo movement logic
-    System.out.println("Warning: incrementPlayerPosition is not suitable for Cluedo movement logic.");
+    System.out.println(
+        "Warning: incrementPlayerPosition is not suitable for Cluedo movement logic.");
     GridPos current = player.getPosition();
     int steps = 0;
     GridPos tempPos = current;
@@ -154,8 +165,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   private void movePlayer(Player<GridPos> player, GridPos fromPos, GridPos toPos) {
-    if (!isValidPosition(fromPos) || !isValidPosition(toPos))
-      return;
+    if (!isValidPosition(fromPos) || !isValidPosition(toPos)) return;
 
     AbstractCluedoTile toTile = getTileAtPosition(toPos);
     if (toTile == null || !toTile.walkable) {
@@ -179,7 +189,11 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   private boolean isValidPosition(GridPos pos) {
-    return pos != null && pos.row() >= 0 && pos.row() < BOARD_SIZE && pos.col() >= 0 && pos.col() < BOARD_SIZE;
+    return pos != null
+        && pos.row() >= 0
+        && pos.row() < BOARD_SIZE
+        && pos.col() >= 0
+        && pos.col() < BOARD_SIZE;
   }
 
   private GridPos getPlayerStartPosition(Player<GridPos> player) {
@@ -199,21 +213,5 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     return board;
   }
 
-  private record RoomDimensions(int top, int left, int bottom, int right) {
-    public int getTop() {
-      return top;
-    }
-
-    public int getLeft() {
-      return left;
-    }
-
-    public int getBottom() {
-      return bottom;
-    }
-
-    public int getRight() {
-      return right;
-    }
-  }
+  private record RoomDimensions(int top, int left, int bottom, int right) {}
 }
