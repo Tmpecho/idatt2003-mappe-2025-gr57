@@ -1,13 +1,12 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public final class CluedoBoard implements GameBoard<GridPos> {
 
@@ -74,7 +73,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   private void insertRooms() {
     // Kitchen (Top-Left)
-    RoomDimensions kitchenDimensions = new RoomDimensions(0, 0, 5, 6); // Adjusted width
+    RoomDimensions kitchenDimensions = new RoomDimensions(0, 0, 5, 6);
     List<RoomTile.Point> kitchenOutline = createRectangularOutline(kitchenDimensions);
     RoomTile kitchen = new RoomTile("Kitchen", kitchenOutline);
     // TODO: Add secret passage to Study
@@ -94,32 +93,32 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     populateRoomTiles(conservatoryDimensions, conservatory);
 
     // Dining Room (Middle Left)
-    RoomDimensions diningRoomDimensions = new RoomDimensions(8, 0, 15, 7); // Adjusted height/position
+    RoomDimensions diningRoomDimensions = new RoomDimensions(8, 0, 15, 7);
     List<RoomTile.Point> diningRoomOutline = createRectangularOutline(diningRoomDimensions);
     RoomTile diningRoom = new RoomTile("Dining Room", diningRoomOutline);
     populateRoomTiles(diningRoomDimensions, diningRoom);
 
     // Billiard Room (Middle Right)
-    RoomDimensions billiardRoomDimensions = new RoomDimensions(7, 18, 12, 24); // Adjusted position
+    RoomDimensions billiardRoomDimensions = new RoomDimensions(7, 18, 12, 24);
     List<RoomTile.Point> billiardRoomOutline = createRectangularOutline(billiardRoomDimensions);
     RoomTile billiardRoom = new RoomTile("Billiard Room", billiardRoomOutline);
     populateRoomTiles(billiardRoomDimensions, billiardRoom);
 
     // Library (Lower Middle Right)
-    RoomDimensions libraryDimensions = new RoomDimensions(14, 17, 18, 24); // Adjusted position/size
+    RoomDimensions libraryDimensions = new RoomDimensions(14, 17, 18, 24);
     List<RoomTile.Point> libraryOutline = createRectangularOutline(libraryDimensions);
     RoomTile library = new RoomTile("Library", libraryOutline);
     populateRoomTiles(libraryDimensions, library);
 
     // Study (Bottom Right)
-    RoomDimensions studyDimensions = new RoomDimensions(21, 17, 24, 24); // Corrected position
+    RoomDimensions studyDimensions = new RoomDimensions(21, 17, 24, 24);
     List<RoomTile.Point> studyOutline = createRectangularOutline(studyDimensions);
     RoomTile study = new RoomTile("Study", studyOutline);
     // TODO: Add secret passage to Kitchen
     populateRoomTiles(studyDimensions, study);
 
     // Hall (Bottom Center)
-    RoomDimensions hallDimensions = new RoomDimensions(18, 9, 24, 15); // Adjusted position
+    RoomDimensions hallDimensions = new RoomDimensions(18, 9, 24, 15);
     List<RoomTile.Point> hallOutline = createRectangularOutline(hallDimensions);
     RoomTile hall = new RoomTile("Hall", hallOutline);
     populateRoomTiles(hallDimensions, hall);
@@ -128,7 +127,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     RoomDimensions loungeDimensions = new RoomDimensions(19, 0, 24, 6);
     List<RoomTile.Point> loungeOutline = createRectangularOutline(loungeDimensions);
     RoomTile lounge = new RoomTile("Lounge", loungeOutline);
-    // TODO: Add secret passage to Conservatory
+    // TODO: Myabe add secret passage to Conservatory
     populateRoomTiles(loungeDimensions, lounge);
 
     // Center Area (Cellar/Stairs - Not a room for suggestions)
@@ -141,9 +140,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     for (int row = 0; row < BOARD_SIZE; row++) {
       for (int col = 0; col < BOARD_SIZE; col++) {
         if (board[row][col] == null) {
-          if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
-            board[row][col] = new CorridorTile(row, col);
-          }
+	        board[row][col] = new CorridorTile(row, col);
         }
       }
     }
