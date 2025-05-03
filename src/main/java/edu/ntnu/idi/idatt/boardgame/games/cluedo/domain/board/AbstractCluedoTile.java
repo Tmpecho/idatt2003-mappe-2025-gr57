@@ -1,11 +1,12 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
-import java.util.ArrayList;
-import java.util.List;
 
 /** Grid-based tile with (row,col) coordinates and default observer support. */
 public abstract class AbstractCluedoTile implements Tile<GridPos> {
@@ -68,5 +69,9 @@ public abstract class AbstractCluedoTile implements Tile<GridPos> {
 
   public void setWalkable(boolean value) {
     walkable = value;
+  }
+
+  public boolean isWalkable() {
+    return walkable;
   }
 }
