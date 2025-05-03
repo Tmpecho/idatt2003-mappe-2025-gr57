@@ -30,19 +30,20 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     insertCorridorTiles();
   }
 
-  private List<RoomTile.Point> createRectangularOutline(int topRow, int leftCol, int bottomRow, int rightCol) {
+  private List<RoomTile.Point> createRectangularOutline(RoomDimensions roomDimensions) {
     List<RoomTile.Point> outline = new ArrayList<>();
-    outline.add(new RoomTile.Point(topRow, leftCol));
-    outline.add(new RoomTile.Point(topRow, rightCol));
-    outline.add(new RoomTile.Point(bottomRow, rightCol));
-    outline.add(new RoomTile.Point(bottomRow, leftCol));
-    outline.add(new RoomTile.Point(topRow, leftCol)); // Close the loop
+    outline.add(new RoomTile.Point(roomDimensions.getTop(), roomDimensions.getLeft()));
+    outline.add(new RoomTile.Point(roomDimensions.getTop(), roomDimensions.getRight()));
+    outline.add(new RoomTile.Point(roomDimensions.getBottom(), roomDimensions.getRight()));
+    outline.add(new RoomTile.Point(roomDimensions.getBottom(), roomDimensions.getLeft()));
+    outline.add(
+        new RoomTile.Point(roomDimensions.getTop(), roomDimensions.getLeft())); // Close the loop
     return outline;
   }
 
-  private void populateRoomTiles(int topRow, int leftCol, int bottomRow, int rightCol, RoomTile room) {
-    for (int r = topRow; r <= bottomRow; r++) {
-      for (int c = leftCol; c <= rightCol; c++) {
+  private void populateRoomTiles(RoomDimensions roomDimensions, RoomTile room) {
+    for (int r = roomDimensions.getTop(); r <= roomDimensions.getBottom(); r++) {
+      for (int c = roomDimensions.getLeft(); c <= roomDimensions.getRight(); c++) {
         board[r][c] = room;
         room.setWalkable(false);
       }
@@ -51,19 +52,18 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   private void insertRooms() {
     // Example Room: Kitchen (Top-Left)
-    int kitchenTop = 0, kitchenLeft = 0, kitchenBottom = 5, kitchenRight = 5;
-    List<RoomTile.Point> kitchenOutline = createRectangularOutline(kitchenTop, kitchenLeft, kitchenBottom,
-        kitchenRight);
+    RoomDimensions kitchenDimentions = new RoomDimensions(0, 0, 5, 5);
+    List<RoomTile.Point> kitchenOutline = createRectangularOutline(kitchenDimentions);
     RoomTile kitchen = new RoomTile("Kitchen", kitchenOutline);
     // Add doors (example)
     // kitchen.addDoor(new RoomTile.Point(kitchenBottom, kitchenRight - 1), new
     // RoomTile.Point(kitchenBottom + 1, kitchenRight - 1)); // Door leading down
-    populateRoomTiles(kitchenTop, kitchenLeft, kitchenBottom, kitchenRight, kitchen);
+    populateRoomTiles(kitchenDimentions, kitchen);
 
-    int studyTop = 20, studyLeft = 0, studyBottom = 24, studyRight = 6;
-    List<RoomTile.Point> studyOutline = createRectangularOutline(studyTop, studyLeft, studyBottom, studyRight);
+    RoomDimensions studyDimentions = new RoomDimensions(20, 0, 24, 6);
+    List<RoomTile.Point> studyOutline = createRectangularOutline(studyDimentions);
     RoomTile study = new RoomTile("Study", studyOutline);
-    populateRoomTiles(studyTop, studyLeft, studyBottom, studyRight, study);
+    populateRoomTiles(studyDimentions, study);
   }
 
   private void insertCorridorTiles() {
@@ -197,5 +197,23 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   public AbstractCluedoTile[][] getBoardGrid() {
     return board;
+  }
+
+  private record RoomDimensions(int top, int left, int bottom, int right) {
+    public int getTop() {
+      return top;
+    }
+
+    public int getLeft() {
+      return left;
+    }
+
+    public int getBottom() {
+      return bottom;
+    }
+
+    public int getRight() {
+      return right;
+    }
   }
 }
