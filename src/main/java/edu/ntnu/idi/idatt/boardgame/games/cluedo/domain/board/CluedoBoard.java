@@ -1,13 +1,12 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.GameBoard;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public final class CluedoBoard implements GameBoard<GridPos> {
 
@@ -27,8 +26,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   private void initializeTiles() {
-    insertCorridorTiles();
     insertRooms();
+    insertCorridorTiles();
   }
 
   private List<RoomTile.Point> createRectangularOutline(int topRow, int leftCol, int bottomRow, int rightCol) {
@@ -190,9 +189,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       case RED -> PLAYER_RED_START_POSITION; // Mustard
       case BLUE -> PLAYER_BLUE_START_POSITION; // Peacock
       case GREEN -> PLAYER_GREEN_START_POSITION; // Green
-      case YELLOW -> PLAYER_YELLOW_START_POSITION;// White
-      case PURPLE -> PLAYER_PURPLE_START_POSITION;// Plum
-      case ORANGE -> throw new IllegalArgumentException("Invalid player color for Cluedo: " + color);
+      case YELLOW -> PLAYER_YELLOW_START_POSITION; // White
+      case PURPLE -> PLAYER_PURPLE_START_POSITION; // Plum
       default -> throw new IllegalArgumentException("Invalid player color: " + color);
     };
   }
