@@ -90,19 +90,22 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   @Override
   public void setPlayerPosition(Player<GridPos> player, GridPos position) {
-    if (isValidPosition(position)) {
-      GridPos oldPos = player.getPosition();
-      if (isValidPosition(oldPos)) {
-        AbstractCluedoTile oldTile = getTileAtPosition(oldPos);
-        if (oldTile != null) {
-          oldTile.removePlayer(player);
-        }
-      }
-      player.setPosition(position);
-      AbstractCluedoTile newTile = getTileAtPosition(position);
-      if (newTile != null) {
-        newTile.addPlayer(player);
-      }
+    if (!isValidPosition(position)) {
+      return;
+    }
+    GridPos oldPos = player.getPosition();
+    if (!isValidPosition(oldPos)) {
+      return;
+    }
+
+    AbstractCluedoTile oldTile = getTileAtPosition(oldPos);
+    if (oldTile != null) {
+      oldTile.removePlayer(player);
+    }
+    player.setPosition(position);
+    AbstractCluedoTile newTile = getTileAtPosition(position);
+    if (newTile != null) {
+      newTile.addPlayer(player);
     }
   }
 
@@ -172,14 +175,15 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       return;
     }
 
-    if (isAdjacent(fromPos, toPos)) {
-      AbstractCluedoTile fromTile = getTileAtPosition(fromPos);
-      if (fromTile != null) {
-        fromTile.removePlayer(player);
-      }
-      player.setPosition(toPos);
-      toTile.addPlayer(player);
+    if (!isAdjacent(fromPos, toPos)) {
+      return;
     }
+    AbstractCluedoTile fromTile = getTileAtPosition(fromPos);
+    if (fromTile != null) {
+      fromTile.removePlayer(player);
+    }
+    player.setPosition(toPos);
+    toTile.addPlayer(player);
   }
 
   private boolean isAdjacent(GridPos from, GridPos to) {
