@@ -33,7 +33,19 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_REV_GREEN = new GridPos(0, 14); // Green Token (uses PlayerColor.GREEN in code)
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 24); // Blue Token (uses PlayerColor.BLUE in code)
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 24); // Purple Token (uses PlayerColor.PURPLE in
-                                                                          // code)
+  // code)
+
+  private static final List<RoomSpec> ROOM_SPECS =
+      List.of(
+          new RoomSpec("Kitchen", new RoomDimensions(0, 0, 5, 6), true),
+          new RoomSpec("Ball Room", new RoomDimensions(0, 8, 7, 16), false),
+          new RoomSpec("Conservatory", new RoomDimensions(0, 18, 4, 24), true),
+          new RoomSpec("Dining Room", new RoomDimensions(8, 0, 15, 7), false),
+          new RoomSpec("Billiard Room", new RoomDimensions(7, 18, 12, 24), false),
+          new RoomSpec("Library", new RoomDimensions(14, 17, 18, 24), false),
+          new RoomSpec("Study", new RoomDimensions(21, 17, 24, 24), true),
+          new RoomSpec("Hall", new RoomDimensions(18, 9, 24, 15), false),
+          new RoomSpec("Lounge", new RoomDimensions(19, 0, 24, 6), true));
 
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
@@ -72,68 +84,13 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   private void insertRooms() {
-    // Kitchen (Top-Left)
-    RoomDimensions kitchenDimensions = new RoomDimensions(0, 0, 5, 6);
-    List<RoomTile.Point> kitchenOutline = createRectangularOutline(kitchenDimensions);
-    RoomTile kitchen = new RoomTile("Kitchen", kitchenOutline);
-    // TODO: Add secret passage to Study
-    populateRoomTiles(kitchenDimensions, kitchen);
-
-    // Ball Room (Top Center)
-    RoomDimensions ballRoomDimensions = new RoomDimensions(0, 8, 7, 16);
-    List<RoomTile.Point> ballRoomOutline = createRectangularOutline(ballRoomDimensions);
-    RoomTile ballRoom = new RoomTile("Ball Room", ballRoomOutline);
-    populateRoomTiles(ballRoomDimensions, ballRoom);
-
-    // Conservatory (Top Right)
-    RoomDimensions conservatoryDimensions = new RoomDimensions(0, 18, 4, 24);
-    List<RoomTile.Point> conservatoryOutline = createRectangularOutline(conservatoryDimensions);
-    RoomTile conservatory = new RoomTile("Conservatory", conservatoryOutline);
-    // TODO: Add secret passage to Lounge
-    populateRoomTiles(conservatoryDimensions, conservatory);
-
-    // Dining Room (Middle Left)
-    RoomDimensions diningRoomDimensions = new RoomDimensions(8, 0, 15, 7);
-    List<RoomTile.Point> diningRoomOutline = createRectangularOutline(diningRoomDimensions);
-    RoomTile diningRoom = new RoomTile("Dining Room", diningRoomOutline);
-    populateRoomTiles(diningRoomDimensions, diningRoom);
-
-    // Billiard Room (Middle Right)
-    RoomDimensions billiardRoomDimensions = new RoomDimensions(7, 18, 12, 24);
-    List<RoomTile.Point> billiardRoomOutline = createRectangularOutline(billiardRoomDimensions);
-    RoomTile billiardRoom = new RoomTile("Billiard Room", billiardRoomOutline);
-    populateRoomTiles(billiardRoomDimensions, billiardRoom);
-
-    // Library (Lower Middle Right)
-    RoomDimensions libraryDimensions = new RoomDimensions(14, 17, 18, 24);
-    List<RoomTile.Point> libraryOutline = createRectangularOutline(libraryDimensions);
-    RoomTile library = new RoomTile("Library", libraryOutline);
-    populateRoomTiles(libraryDimensions, library);
-
-    // Study (Bottom Right)
-    RoomDimensions studyDimensions = new RoomDimensions(21, 17, 24, 24);
-    List<RoomTile.Point> studyOutline = createRectangularOutline(studyDimensions);
-    RoomTile study = new RoomTile("Study", studyOutline);
-    // TODO: Add secret passage to Kitchen
-    populateRoomTiles(studyDimensions, study);
-
-    // Hall (Bottom Center)
-    RoomDimensions hallDimensions = new RoomDimensions(18, 9, 24, 15);
-    List<RoomTile.Point> hallOutline = createRectangularOutline(hallDimensions);
-    RoomTile hall = new RoomTile("Hall", hallOutline);
-    populateRoomTiles(hallDimensions, hall);
-
-    // Lounge (Bottom Left)
-    RoomDimensions loungeDimensions = new RoomDimensions(19, 0, 24, 6);
-    List<RoomTile.Point> loungeOutline = createRectangularOutline(loungeDimensions);
-    RoomTile lounge = new RoomTile("Lounge", loungeOutline);
-    // TODO: Myabe add secret passage to Conservatory
-    populateRoomTiles(loungeDimensions, lounge);
-
-    // Center Area (Cellar/Stairs - Not a room for suggestions)
-    // This area will be filled with nulls initially, then corridor tiles
-    // or potentially special non-walkable tiles if needed later.
-    // Based on other rooms, roughly: top=8, left=9, bottom=17, right=15
+    ROOM_SPECS.forEach(
+        spec -> {
+          List<RoomTile.Point> outline = createRectangularOutline(spec.dims);
+          RoomTile room = new RoomTile(spec.name, outline);
+          populateRoomTiles(spec.dims, room);
+          // TODO: if (spec.hasSecretPassage) addSecretPassage(room);
+        });
   }
 
   private void insertCorridorTiles() {
@@ -312,6 +269,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   // Helper record for clarity
-  private record RoomDimensions(int top, int left, int bottom, int right) {
-  }
+  private record RoomDimensions(int top, int left, int bottom, int right) {}
+
+  // Helper class for room specifications
+  private record RoomSpec(String name, RoomDimensions dims, boolean hasSecretPassage) {}
 }
