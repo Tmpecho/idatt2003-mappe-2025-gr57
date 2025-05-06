@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.view;
 
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.BorderTile; // Import BorderTile
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
@@ -32,10 +33,11 @@ public class CluedoBoardView extends Pane {
     }
 
     private void initializeBoard() {
+        grid.getChildren().clear(); // Clear previous children if re-initializing
         int numRows = boardModel.getRows();
         int numCols = boardModel.getCols();
         AbstractCluedoTile[][] boardGrid = boardModel.getBoardGrid();
-        boolean[][] visited = new boolean[numRows][numCols]; // Track visited cells
+        boolean[][] visited = new boolean[numRows][numCols]; // Track visited cells for room spanning
 
         for (int row = 0; row < numRows; row++) {
             for (int col = 0; col < numCols; col++) {
@@ -45,22 +47,34 @@ public class CluedoBoardView extends Pane {
 
                 AbstractCluedoTile tileModel = boardGrid[row][col];
 
+                if (tileModel == null) { // Handle potential null tiles (though CluedoBoard aims to fill all)
+                    Pane emptyPane = new Pane();
+                    emptyPane.setPrefSize(TILE_SIZE, TILE_SIZE);
+                    emptyPane.setStyle("-fx-background-color: #333;"); // Dark color for uninitialized
+                    grid.add(emptyPane, col, row);
+                    visited[row][col] = true;
+                    continue;
+                }
+
+
                 if (tileModel instanceof RoomTile roomTile) {
+                    // Logic for finding room span and drawing RoomTile
+                    // (Assuming this part correctly identifies all cells belonging to the same RoomTile instance)
                     int minR = row, minC = col, maxR = row, maxC = col;
 
-                    for (int r = row; r < numRows; r++) {
-                        for (int c = col; c < numCols; c++) {
-                            if (boardGrid[r][c] == roomTile) {
-                                if (r > maxR)
-                                    maxR = r;
-                                if (c > maxC)
-                                    maxC = c;
-                            } else if (c > col && boardGrid[r][c - 1] == roomTile) {
-                                break;
+                    // Simple BFS/DFS or iteration needed here to correctly find all connected parts of THE SAME room instance
+                    // The provided loop might not be robust for complex room shapes or if boardGrid[r][c] could be a *different* RoomTile
+                    // For rectangular rooms defined as one instance, the existing logic might work if boardGrid[r][c] == roomTile is the check.
+
+                    // To correctly find the span of a single RoomTile instance:
+                    for(int rScan = 0; rScan < numRows; rScan++) {
+                        for(int cScan = 0; cScan < numCols; cScan++) {
+                            if (boardGrid[rScan][cScan] == roomTile) { // Check for the same instance
+                                minR = Math.min(minR, rScan);
+                                maxR = Math.max(maxR, rScan);
+                                minC = Math.min(minC, cScan);
+                                maxC = Math.max(maxC, cScan);
                             }
-                        }
-                        if (r > row && boardGrid[r][col] != roomTile && boardGrid[r - 1][col] == roomTile) {
-                            break;
                         }
                     }
 
@@ -82,44 +96,58 @@ public class CluedoBoardView extends Pane {
                     StackPane roomPane = new StackPane(roomBackground, roomLabel);
                     roomPane.setAlignment(Pos.CENTER);
 
-                    grid.add(roomPane, col, row, colSpan, rowSpan);
+                    grid.add(roomPane, minC, minR, colSpan, rowSpan); // Use minC, minR for grid placement
 
                     for (int r = minR; r <= maxR; r++) {
                         for (int c = minC; c <= maxC; c++) {
-                            if (r < numRows && c < numCols) {
+                            if (r < numRows && c < numCols && boardGrid[r][c] == roomTile) { // Mark all parts of this room instance as visited
                                 visited[r][c] = true;
                             }
                         }
                     }
-
-                    // TODO: A better approach would be a dedicated layer or pane for player tokens
-                    // that can be positioned anywhere on the board, not tied to specific grid
-                    // cells.
                     addPlayerTokensToPane(roomPane, roomTile);
 
                 } else if (tileModel instanceof CorridorTile) {
-                    // Handle corridor tiles as before
                     CluedoTileView tileView = new CluedoTileView(tileModel, TILE_SIZE);
                     grid.add(tileView.getNode(), col, row);
                     visited[row][col] = true;
-                } else {
-                    Pane emptyPane = new Pane();
-                    emptyPane.setPrefSize(TILE_SIZE, TILE_SIZE);
-                    grid.add(emptyPane, col, row);
+                } else if (tileModel instanceof BorderTile) { // Handle BorderTile
+                    Rectangle borderRect = new Rectangle(TILE_SIZE, TILE_SIZE);
+                    borderRect.setFill(Color.DARKSLATEGRAY); // Color for the border
+                    borderRect.setStroke(Color.BLACK);
+                    StackPane borderPane = new StackPane(borderRect); // Use StackPane for consistency if needed later
+                    grid.add(borderPane, col, row);
                     visited[row][col] = true;
+                } else {
+                    // Fallback for any other AbstractCluedoTile type not explicitly handled
+                    Pane unknownTilePane = new Pane();
+                    unknownTilePane.setPrefSize(TILE_SIZE, TILE_SIZE);
+                    unknownTilePane.setStyle("-fx-background-color: #FF00FF;"); // Magenta for unknown
+                    Label unknownLabel = new Label("?");
+                    StackPane.setAlignment(unknownLabel, Pos.CENTER);
+                    StackPane wrapper = new StackPane(unknownTilePane, unknownLabel);
+                    grid.add(wrapper, col, row);
+                    visited[row][col] = true;
+                    System.err.println("CluedoBoardView: Unhandled tile type at ("+row+","+col+"): " + tileModel.getClass().getSimpleName());
                 }
             }
         }
     }
 
     private void addPlayerTokensToPane(StackPane pane, AbstractCluedoTile tileModel) {
+        // This method adds tokens to a room's StackPane.
+        // It might need adjustment if players can be on individual border/corridor tiles and need visual representation there too.
+        // The CluedoTileView handles player tokens for CorridorTiles.
         if (!tileModel.getPlayers().isEmpty()) {
             javafx.scene.layout.FlowPane playerTokenPane = new javafx.scene.layout.FlowPane();
-            playerTokenPane.setAlignment(Pos.BOTTOM_CENTER);
+            playerTokenPane.setAlignment(Pos.BOTTOM_CENTER); // Or Pos.CENTER for rooms
             playerTokenPane.setHgap(2);
             playerTokenPane.setVgap(2);
             playerTokenPane.setPadding(new javafx.geometry.Insets(5));
-            playerTokenPane.setMaxWidth(pane.getWidth() - 10);
+            // Ensure playerTokenPane does not obscure room name if room is small
+            playerTokenPane.setMaxWidth(Math.max(0, pane.getPrefWidth() - 10));
+            playerTokenPane.setMaxHeight(Math.max(0, pane.getPrefHeight()/2 - 5));
+
 
             tileModel.getPlayers().forEach(player -> {
                 javafx.scene.shape.Circle circle = new javafx.scene.shape.Circle(Math.max(5, TILE_SIZE * 0.2));
@@ -129,11 +157,16 @@ public class CluedoBoardView extends Pane {
                 playerTokenPane.getChildren().add(circle);
             });
             pane.getChildren().add(playerTokenPane);
+            // Ensure it doesn't overlay label too much
+            StackPane.setAlignment(playerTokenPane, Pos.BOTTOM_CENTER);
+
         }
     }
 
     public void updateView() {
-        grid.getChildren().clear();
+        // The current implementation of initializeBoard clears and redraws everything.
+        // For more dynamic updates (e.g., player movement only), a more targeted update would be better.
+        // But for now, this is a full refresh.
         initializeBoard();
     }
 }
