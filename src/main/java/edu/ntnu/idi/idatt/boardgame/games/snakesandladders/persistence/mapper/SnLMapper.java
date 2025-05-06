@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public final class SnLMapper {
     // restore current turn
     Player<LinearPos> current = controller.getPlayers().get(dto.currentPlayerTurn);
     if (current == null) {
+      LoggingNotification.error("Save-file error", "No player with id " + dto.currentPlayerTurn);
       throw new IllegalStateException(
           "Save-file error: no player with id " + dto.currentPlayerTurn);
     }
