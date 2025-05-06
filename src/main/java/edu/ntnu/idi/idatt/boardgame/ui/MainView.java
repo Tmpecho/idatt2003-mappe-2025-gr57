@@ -5,6 +5,7 @@ import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnLView;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -80,6 +81,7 @@ public class MainView {
         e -> {
           if (currentController == null) {
             System.out.println("No game loaded to save.");
+            LoggingNotification.error("No game loaded", "Cannot save game.");
             return;
           }
           FileChooser chooser = new FileChooser();
@@ -89,7 +91,7 @@ public class MainView {
             boolean success = dir.mkdirs();
 
             if (!success) {
-              System.out.println("Failed to create saves directory.");
+              LoggingNotification.error("Failed to create saves directory", "Cannot save game.");
               return;
             }
           }
@@ -101,11 +103,13 @@ public class MainView {
           Stage stage = getStage();
           if (stage == null) {
             System.err.println("Could not get the stage to show save dialog.");
+            LoggingNotification.error("Failed to save game", "Could not get the stage.");
             return;
           }
           File file = chooser.showSaveDialog(stage);
           if (file == null) {
             System.out.println("Save cancelled.");
+            LoggingNotification.info("Save cancelled", "No file selected.");
             return;
           }
           currentController.saveGameState(file.getPath());
@@ -123,6 +127,7 @@ public class MainView {
           File dir = new File("saves");
           if (!dir.exists()) {
             System.out.println("Saves directory does not exist. Cannot load game.");
+            LoggingNotification.error("Failed to load game", "Saves directory does not exist.");
             return;
           }
           chooser.setInitialDirectory(dir);
@@ -132,19 +137,22 @@ public class MainView {
           Stage stage = getStage();
           if (stage == null) {
             System.err.println("Could not get the stage to show load dialog.");
+            LoggingNotification.error("Failed to load game", "Could not get the stage.");
             return;
           }
           File file = chooser.showOpenDialog(stage);
           if (file == null) {
-            System.out.println("Load cancelled.");
             return;
           }
           if (currentController == null) {
             System.out.println("Loading default game (Snakes and Ladders) for the save file.");
+            LoggingNotification.error(
+                "No game loaded", "Loading default game (Snakes and Ladders) for the save file.");
             loadSnakesAndLadders();
           }
           if (currentController == null) {
             System.err.println("Failed to initialize a game controller for loading.");
+            LoggingNotification.error("Failed to load game", "No game controller available.");
             return;
           }
           currentController.loadGameState(file.getPath());
@@ -170,6 +178,7 @@ public class MainView {
       Files.createDirectories(savesDir);
     } catch (IOException e) {
       System.err.println("Failed to create saves directory: " + e.getMessage());
+      LoggingNotification.error("Failed to create saves directory", "Cannot load game.");
       return;
     }
 

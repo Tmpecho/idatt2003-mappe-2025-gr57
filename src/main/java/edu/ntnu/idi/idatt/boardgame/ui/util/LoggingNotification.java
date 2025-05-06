@@ -32,6 +32,26 @@ public final class LoggingNotification {
     show(LoggingType.ERROR, title, message);
   }
 
+  /** Convenience overload for fatal errors. */
+  public static void fatal(String title, String message) {
+    show(LoggingType.FATAL, title, message);
+  }
+
+  /** Convenience overload for warnings. */
+  public static void warn(String title, String message) {
+    show(LoggingType.WARN, title, message);
+  }
+
+  /** Convenience overload for info messages. */
+  public static void info(String title, String message) {
+    show(LoggingType.INFO, title, message);
+  }
+
+  /** Convenience overload for debug messages. */
+  public static void debug(String title, String message) {
+    show(LoggingType.DEBUG, title, message);
+  }
+
   private static Notifications build(LoggingType type, String title, String message) {
     Notifications notifications =
         Notifications.create()
