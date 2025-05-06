@@ -17,7 +17,7 @@ import javafx.scene.text.TextAlignment;
 
 public class CluedoBoardView extends Pane {
     private static final int TILE_SIZE = 30;
-    private static final int GAP_SIZE = 1;
+    private static final int GAP_SIZE = 0;
     private final GridPane grid;
     private final CluedoBoard boardModel;
 
