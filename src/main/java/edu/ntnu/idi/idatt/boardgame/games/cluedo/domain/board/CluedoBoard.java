@@ -54,6 +54,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     insertBorderTiles(); // Place border tiles first
     insertRooms();
     insertCorridorTiles(); // Fills remaining nulls with corridors
+    placeStartPosAdjacentBorders(); // Add specific borders around start positions
     // TODO: Secret passages and doors are not yet implemented here
   }
 
@@ -132,6 +133,49 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         if (isValidPosition(new GridPos(r, c)) && board[r][c] instanceof CorridorTile) {
           board[r][c].setWalkable(false); // Mark cellar area tiles non-walkable
         }
+      }
+    }
+  }
+
+  private void placeStartPosAdjacentBorders() {
+    // PlayerColor.WHITE (Miss Scarlett) -> START_POS_MISS_SCARLETT = new GridPos(23, 7);
+    // Bottom edge: place borders left (23,6) and right (23,8)
+    replaceWithBorderIfCorridor(23, 6);
+    replaceWithBorderIfCorridor(23, 8);
+
+    // PlayerColor.RED (Col. Mustard) -> START_POS_COL_MUSTARD = new GridPos(17, 1);
+    // Left edge: place borders above (16,1) and below (18,1)
+    replaceWithBorderIfCorridor(16, 1);
+    replaceWithBorderIfCorridor(18, 1);
+
+    // PlayerColor.YELLOW (Mrs. White) -> START_POS_MRS_WHITE = new GridPos(1, 9);
+    // Top edge: place borders left (1,8) and right (1,10)
+    replaceWithBorderIfCorridor(1, 8);
+    replaceWithBorderIfCorridor(1, 10);
+
+    // PlayerColor.GREEN (Rev. Green) -> START_POS_REV_GREEN = new GridPos(1, 14);
+    // Top edge: place borders left (1,13) and right (1,15)
+    replaceWithBorderIfCorridor(1, 13);
+    replaceWithBorderIfCorridor(1, 15);
+
+    // PlayerColor.BLUE (Mrs. Peacock) -> START_POS_MRS_PEACOCK = new GridPos(6, 23);
+    // Right edge: place borders above (5,23) and below (7,23)
+    replaceWithBorderIfCorridor(5, 23);
+    replaceWithBorderIfCorridor(7, 23);
+
+    // PlayerColor.PURPLE (Prof. Plum) -> START_POS_PROF_PLUM = new GridPos(19, 23);
+    // Right edge: place borders above (18,23) and below (20,23)
+    replaceWithBorderIfCorridor(18, 23);
+    replaceWithBorderIfCorridor(20, 23);
+  }
+
+  private void replaceWithBorderIfCorridor(int r, int c) {
+    if (isValidPosition(new GridPos(r, c))) {
+      AbstractCluedoTile tile = board[r][c];
+      // Only replace if it's a CorridorTile and not part of a room or already a border.
+      // The initial border is at 0 and BOARD_SIZE-1. These replacements are for tiles within the playable area.
+      if (tile instanceof CorridorTile) {
+        board[r][c] = new BorderTile(r, c);
       }
     }
   }
