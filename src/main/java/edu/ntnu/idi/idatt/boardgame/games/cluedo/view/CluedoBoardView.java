@@ -114,7 +114,7 @@ public class CluedoBoardView extends Pane {
                 } else if (tileModel instanceof BorderTile) { // Handle BorderTile
                     Rectangle borderRect = new Rectangle(TILE_SIZE, TILE_SIZE);
                     borderRect.setFill(Color.DARKSLATEGRAY); // Color for the border
-                    borderRect.setStroke(Color.BLACK);
+                    borderRect.setStroke(null);
                     StackPane borderPane = new StackPane(borderRect); // Use StackPane for consistency if needed later
                     grid.add(borderPane, col, row);
                     visited[row][col] = true;
