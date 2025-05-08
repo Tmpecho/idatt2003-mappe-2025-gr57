@@ -29,20 +29,17 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 23);  // PlayerColor.BLUE (Mrs. Peacock)
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 23);   // PlayerColor.PURPLE (Prof. Plum)
 
-
-  // Adjusted Room Specifications (coordinates shifted inwards by 1 if they touched the old border)
   private static final List<RoomSpec> ROOM_SPECS =
       List.of(
-          new RoomSpec("Kitchen", new RoomDimensions(1, 1, 5, 6), true), // Was (0,0,5,6)
-          new RoomSpec("Ball Room", new RoomDimensions(1, 8, 7, 16), false), // Was (0,8,7,16)
-          new RoomSpec("Conservatory", new RoomDimensions(1, 18, 4, 23), true), // Was (0,18,4,24)
-          new RoomSpec("Dining Room", new RoomDimensions(8, 1, 15, 7), false), // Was (8,0,15,7)
-          new RoomSpec("Billiard Room", new RoomDimensions(7, 18, 12, 23), false), // Was (7,18,12,24)
-          new RoomSpec("Library", new RoomDimensions(14, 17, 18, 23), false), // Was (14,17,18,24)
-          new RoomSpec("Study", new RoomDimensions(21, 17, 23, 23), true), // Was (21,17,24,24)
-          new RoomSpec("Hall", new RoomDimensions(18, 9, 23, 15), false), // Was (18,9,24,15)
-          new RoomSpec("Lounge", new RoomDimensions(19, 1, 23, 6), true) // Was (19,0,24,6)
-          );
+          new RoomSpec("Kitchen", new RoomDimensions(1, 1, 6, 5), true),
+          new RoomSpec("Ball Room", new RoomDimensions(1, 8, 7, 15), false),
+          new RoomSpec("Conservatory", new RoomDimensions(1, 18, 4, 23), true),
+          new RoomSpec("Dining Room", new RoomDimensions(10, 1, 15, 7), false),
+          new RoomSpec("Billiard Room", new RoomDimensions(7, 18, 12, 23), false),
+          new RoomSpec("Library", new RoomDimensions(14, 17, 18, 23), false),
+          new RoomSpec("Study", new RoomDimensions(21, 17, 23, 23), true),
+          new RoomSpec("Hall", new RoomDimensions(18, 9, 23, 14), false),
+          new RoomSpec("Lounge", new RoomDimensions(19, 1, 23, 6), true));
 
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
