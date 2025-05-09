@@ -71,11 +71,16 @@ public final class LoggingNotification {
     return notifications;
   }
 
-  private static void runOnFxThread(Runnable runnable) {
-    if (Platform.isFxApplicationThread()) {
-      runnable.run();
-    } else {
-      Platform.runLater(runnable);
+  private static void runOnFxThread(Runnable r) {
+    try {
+      if (Platform.isFxApplicationThread()) {
+        r.run();
+      } else {
+        Platform.runLater(r);
+      }
+    } catch (IllegalStateException e) {
+      // (toolkit not initialized) — swallow or log to console
+      r.run();
     }
   }
 

@@ -1,6 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.core.domain.dice;
 
-import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -10,7 +9,6 @@ public class Dice implements DiceInterface {
 
   public Dice(int numberOfDice) {
     if (numberOfDice < 1) {
-      LoggingNotification.error("Dice error", "Number of dice must be at least 1");
       throw new IllegalArgumentException("Number of dice must be at least 1");
     }
 	  IntStream.range(0, numberOfDice).mapToObj(i -> new Die()).forEach(dice::add);
@@ -23,7 +21,6 @@ public class Dice implements DiceInterface {
 
   public int getDie(int dieIndex) {
     if (dieIndex < 0 || dieIndex >= dice.size()) {
-      LoggingNotification.error("Dice error", "Die number out of bounds");
       throw new IllegalArgumentException("Die number out of bounds");
     }
     return dice.get(dieIndex).getLastRolledValue();
