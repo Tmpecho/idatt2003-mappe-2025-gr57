@@ -1,8 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.core.domain.board;
 
+import java.util.Map;
+
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Position;
-import java.util.Map;
 
 public interface GameBoard<P extends Position> {
 
@@ -10,7 +11,7 @@ public interface GameBoard<P extends Position> {
 
   void incrementPlayerPosition(Player<P> player, int increment);
 
-    int getBoardSize();
+  int getBoardSize();
 
   void setPlayerPosition(Player<P> player, P position);
 }

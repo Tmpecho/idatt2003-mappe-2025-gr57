@@ -10,7 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 
-public class SnLBoardView extends Pane implements TileObserver {
+public class SnLBoardView extends Pane implements TileObserver<LinearPos> {
   private static final int TILE_SIZE = 60;
   private static final int GAP_SIZE = 5;
   private final GridPane grid;

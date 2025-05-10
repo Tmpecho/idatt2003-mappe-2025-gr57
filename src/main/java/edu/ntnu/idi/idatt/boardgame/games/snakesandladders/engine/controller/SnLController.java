@@ -1,5 +1,12 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller;
 
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
@@ -12,25 +19,18 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAct
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnLMapper;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.IntStream;
 
 public class SnLController extends GameController<LinearPos> {
   private final GameStateRepository<SnLGameStateDTO> repo;
 
   private final int numberOfPlayers;
-  private final List<PlayerColor> playerColors =
-      List.of(
-          PlayerColor.RED,
-          PlayerColor.BLUE,
-          PlayerColor.GREEN,
-          PlayerColor.YELLOW,
-          PlayerColor.ORANGE,
-          PlayerColor.PURPLE);
+  private final List<PlayerColor> playerColors = List.of(
+      PlayerColor.RED,
+      PlayerColor.BLUE,
+      PlayerColor.GREEN,
+      PlayerColor.YELLOW,
+      PlayerColor.ORANGE,
+      PlayerColor.PURPLE);
 
   public SnLController(
       int numberOfPlayers, GameStateRepository<SnLGameStateDTO> repo) {
@@ -59,8 +59,7 @@ public class SnLController extends GameController<LinearPos> {
         .forEach(
             playerId -> {
               PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-              Player<LinearPos> player =
-                  new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
+              Player<LinearPos> player = new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
               players.put(playerId, player);
             });
     return players;

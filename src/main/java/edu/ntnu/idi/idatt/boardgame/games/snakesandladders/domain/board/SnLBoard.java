@@ -17,24 +17,22 @@ public final class SnLBoard implements GameBoard<LinearPos> {
   private final Map<Integer, SnLTile> tiles = new HashMap<>();
   private final Map<Integer, Connector> connectors = new HashMap<>();
 
-  private static final Map<Integer, Integer> SNAKES =
-      Map.of(
-          30, 14,
-          34, 7,
-          47, 7,
-          54, 35,
-          65, 5,
-          87, 31);
+  private static final Map<Integer, Integer> SNAKES = Map.of(
+      30, 14,
+      34, 7,
+      47, 7,
+      54, 35,
+      65, 5,
+      87, 31);
 
-  private static final Map<Integer, Integer> LADDERS =
-      Map.of(
-          8, 6,
-          21, 10,
-          33, 5,
-          48, 7,
-          61, 8,
-          70, 9,
-          81, 2);
+  private static final Map<Integer, Integer> LADDERS = Map.of(
+      8, 6,
+      21, 10,
+      33, 5,
+      48, 7,
+      61, 8,
+      70, 9,
+      81, 2);
 
   public SnLBoard() {
     initializeTiles();

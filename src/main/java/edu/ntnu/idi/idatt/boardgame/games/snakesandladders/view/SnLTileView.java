@@ -15,7 +15,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
-public class SnLTileView implements TileObserver {
+public class SnLTileView implements TileObserver<LinearPos> {
   private final StackPane tilePane;
   private final Label posLabel;
   private final HBox playerBox;
