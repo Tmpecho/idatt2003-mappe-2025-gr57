@@ -18,6 +18,7 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAction;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnLMapper;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 
 public class SnLController extends GameController<LinearPos> {
   private final GameStateRepository<SnLGameStateDTO> repo;
@@ -96,6 +97,7 @@ public class SnLController extends GameController<LinearPos> {
       repo.save(SnLMapper.toDto(this), Path.of(path));
     } catch (Exception e) {
       System.err.println("Save failed: " + e.getMessage());
+      LoggingNotification.error("Save failed", e.getMessage());
     }
   }
 
@@ -106,6 +108,7 @@ public class SnLController extends GameController<LinearPos> {
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (Exception e) {
       System.err.println("Load failed: " + e.getMessage());
+      LoggingNotification.error("Load failed", e.getMessage());
     }
   }
 }

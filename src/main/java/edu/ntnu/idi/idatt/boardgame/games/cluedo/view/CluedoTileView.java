@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.view;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
@@ -16,7 +17,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-public class CluedoTileView implements TileObserver {
+public class CluedoTileView implements TileObserver<GridPos> {
     private final StackPane tilePane;
     private final Rectangle tileBackground;
     private final Label infoLabel;
@@ -58,7 +59,7 @@ public class CluedoTileView implements TileObserver {
     }
 
     @Override
-    public void onTileChanged(Tile<?> tile) {
+    public void onTileChanged(Tile<GridPos> tile) {
         if (tile == this.tileModel) {
             updateDisplay();
         }
