@@ -12,16 +12,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   private static final int BOARD_SIZE = 25; // This size INCLUDES the 1-tile thick border
 
-  // Adjusted Start Positions (moved 1 tile inwards from the border)
-  private static final GridPos PLAYER_WHITE_START_POSITION = new GridPos(1, 9); // Mrs. White (Yellow Token)
-  private static final GridPos PLAYER_RED_START_POSITION = new GridPos(17, 1); // Col. Mustard (Red Token)
-  private static final GridPos PLAYER_BLUE_START_POSITION = new GridPos(6, 23); // Mrs. Peacock (Blue Token)
-  private static final GridPos PLAYER_GREEN_START_POSITION = new GridPos(1, 14); // Rev. Green (Green Token)
-  private static final GridPos PLAYER_YELLOW_START_POSITION = new GridPos(23, 7); // Miss Scarlett (Yellow Token)
-  private static final GridPos PLAYER_PURPLE_START_POSITION = new GridPos(19, 23); // Prof. Plum (Purple Token)
-
-
-  // Adjusted START_POS constants to match the character names more clearly and adjusted positions
   private static final GridPos START_POS_MISS_SCARLETT = new GridPos(23, 7); // PlayerColor.WHITE (Scarlett)
   private static final GridPos START_POS_COL_MUSTARD = new GridPos(17, 1);   // PlayerColor.RED (Mustard)
   private static final GridPos START_POS_MRS_WHITE = new GridPos(1, 9);     // PlayerColor.YELLOW (Mrs. White)
@@ -39,7 +29,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
           new RoomSpec("Library", new RoomDimensions(14, 17, 18, 23), false),
           new RoomSpec("Study", new RoomDimensions(21, 17, 23, 23), true),
           new RoomSpec("Hall", new RoomDimensions(18, 9, 23, 14), false),
-          new RoomSpec("Lounge", new RoomDimensions(19, 1, 23, 6), true));
+          new RoomSpec("Lounge", new RoomDimensions(19, 1, 23, 6), true),
+          new RoomSpec("Cluedo", new RoomDimensions(10, 11, 14, 13), true));
 
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
@@ -48,20 +39,18 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   private void initializeTiles() {
-    insertBorderTiles(); // Place border tiles first
+    insertBorderTiles();
     insertRooms();
-    insertCorridorTiles(); // Fills remaining nulls with corridors
-    placeStartPosAdjacentBorders(); // Add specific borders around start positions
+    insertCorridorTiles();
+    placeStartPosAdjacentBorders();
     // TODO: Secret passages and doors are not yet implemented here
   }
 
   private void insertBorderTiles() {
     for (int i = 0; i < BOARD_SIZE; i++) {
-      // Top and bottom rows
       if (board[0][i] == null) board[0][i] = new BorderTile(0, i);
       if (board[BOARD_SIZE - 1][i] == null) board[BOARD_SIZE - 1][i] = new BorderTile(BOARD_SIZE - 1, i);
 
-      // Left and right columns (excluding corners already set)
       if (i > 0 && i < BOARD_SIZE - 1) {
         if (board[i][0] == null) board[i][0] = new BorderTile(i, 0);
         if (board[i][BOARD_SIZE - 1] == null) board[i][BOARD_SIZE - 1] = new BorderTile(i, BOARD_SIZE - 1);
@@ -83,16 +72,13 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private void populateRoomTiles(RoomDimensions roomDimensions, RoomTile room) {
     for (int r = roomDimensions.top; r <= roomDimensions.bottom; r++) {
       for (int c = roomDimensions.left; c <= roomDimensions.right; c++) {
-        // Basic bounds check before assignment
         if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
           if (board[r][c] != null) {
-             // This might happen if a room specification overlaps with border or another room
-             // Given the adjustments, rooms should be within the non-border area.
              System.err.println("Warning: Overwriting existing tile at (" + r + ", " + c + ") while populating room " + room.getRoomName()
                                 + ". Existing: " + board[r][c].getIdentifier());
           }
           board[r][c] = room;
-          room.setWalkable(false); // Room interiors are not walkable squares in Cluedo movement
+          room.setWalkable(false);
         } else {
           System.err.println("Warning: Attempted to populate room tile outside board bounds at (" + r + ", " + c + ")");
         }
@@ -106,7 +92,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
           // Validate room dimensions against border
           if (spec.dims.top < 1 || spec.dims.left < 1 || spec.dims.bottom >= BOARD_SIZE -1 || spec.dims.right >= BOARD_SIZE -1) {
               System.err.println("CRITICAL Error: Room " + spec.name + " with dimensions " + spec.dims + " extends into the border area or outside bounds.");
-              return; // Skip this room to prevent errors
+              return;
           }
           List<RoomTile.Point> outline = createRectangularOutline(spec.dims);
           RoomTile room = new RoomTile(spec.name, outline);

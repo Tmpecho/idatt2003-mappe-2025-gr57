@@ -199,7 +199,7 @@ public class MainView {
   }
 
   private void loadCluedo() {
-    int numberOfPlayers = 3;
+    int numberOfPlayers = 6;
     try {
       CluedoController cluedoController = new CluedoController(numberOfPlayers);
       this.currentController = cluedoController;
