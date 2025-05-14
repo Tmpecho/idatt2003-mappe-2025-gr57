@@ -21,6 +21,9 @@ public final class RoomTile extends AbstractCluedoTile {
   /** Set of edges that are open doorways. */
   private final Set<Edge> doorEdges = new HashSet<>();
 
+  private final int minRow, maxRow, minCol, maxCol;
+
+
   /**
    * @param roomName logical name (“Kitchen”)
    * @param outlinePerimeter ordered points, first = last (minimum 4)
@@ -34,29 +37,72 @@ public final class RoomTile extends AbstractCluedoTile {
       throw new IllegalArgumentException("First and last outline point must match");
     this.roomName = Objects.requireNonNull(roomName);
     this.outline = List.copyOf(outlinePerimeter);
+
+    this.minRow = outlinePerimeter.stream().mapToInt(Point::row).min().orElseThrow();
+    this.maxRow = outlinePerimeter.stream().mapToInt(Point::row).max().orElseThrow();
+    this.minCol = outlinePerimeter.stream().mapToInt(Point::col).min().orElseThrow();
+    this.maxCol = outlinePerimeter.stream().mapToInt(Point::col).max().orElseThrow();
   }
 
-  /** Marks the edge (p1 → p2) as a doorway. Call after construction. */
-  public void addDoor(Point p1, Point p2) {
-    Edge e = new Edge(p1, p2);
-    if (!isPerimeterEdge(e))
-      throw new IllegalArgumentException("Edge " + e + " not on room perimeter");
-    doorEdges.add(e);
+  /**
+   * Marks the edge between a room boundary point and an adjacent corridor point as a doorway.
+   *
+   * @param roomBoundaryPoint The point on the room's boundary.
+   * @param adjacentCorridorPoint The adjacent point in the corridor.
+   */
+  public void addDoor(Point roomBoundaryPoint, Point adjacentCorridorPoint) {
+    // Check roomBoundaryPoint is actually on the boundary of this room
+    boolean onHorizontalEdge = (roomBoundaryPoint.row() == this.minRow || roomBoundaryPoint.row() == this.maxRow) &&
+            (roomBoundaryPoint.col() >= this.minCol && roomBoundaryPoint.col() <= this.maxCol);
+    boolean onVerticalEdge = (roomBoundaryPoint.col() == this.minCol || roomBoundaryPoint.col() == this.maxCol) &&
+            (roomBoundaryPoint.row() >= this.minRow && roomBoundaryPoint.row() <= this.maxRow);
+
+    if (! (onHorizontalEdge || onVerticalEdge) ) {
+      throw new IllegalArgumentException("Room boundary point " + roomBoundaryPoint +
+              " is not on the calculated perimeter (minR:" + this.minRow +
+              ", maxR:" + this.maxRow + ", minC:" + this.minCol +
+              ", maxC:" + this.maxCol + ") of room " + roomName);
+    }
+
+    // Check adjacentCorridorPoint is outside the room's bounds
+    boolean corridorIsOutside = adjacentCorridorPoint.row() < this.minRow || adjacentCorridorPoint.row() > this.maxRow ||
+            adjacentCorridorPoint.col() < this.minCol || adjacentCorridorPoint.col() > this.maxCol;
+    if (!corridorIsOutside) {
+      throw new IllegalArgumentException("Corridor point " + adjacentCorridorPoint +
+              " is not outside room " + roomName + " (bounds: minR:" + this.minRow +
+              ", maxR:" + this.maxRow + ", minC:" + this.minCol +
+              ", maxC:" + this.maxCol + ")");
+    }
+
+    // Edge constructor checks for adjacency between roomBoundaryPoint and adjacentCorridorPoint
+    Edge doorEdge = new Edge(roomBoundaryPoint, adjacentCorridorPoint);
+    doorEdges.add(doorEdge);
   }
 
-  /** Corridor square (r,c) may enter if its edge to this room is a door. */
-  public boolean canEnterFrom(int r, int c) {
-    Point corridor = new Point(r, c);
-    // look for a perimeter edge adjoining the corridor square
-    return perimeterEdges().stream().anyMatch(e -> doorEdges.contains(e) && e.adjacentTo(corridor));
+
+  /** Checks if a player can enter this room from the given corridor coordinates. */
+  public boolean canEnterFrom(int corridorRow, int corridorCol) {
+    Point corridorPoint = new Point(corridorRow, corridorCol);
+    for (Edge door : doorEdges) {
+      // A door edge connects a room point and a corridor point.
+      // If the given corridorPoint is one of the points in a door edge.
+      if (door.a().equals(corridorPoint) || door.b().equals(corridorPoint)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private List<Edge> perimeterEdges() {
-	  return IntStream.range(0, outline.size() - 1)
-	      .mapToObj(i -> new Edge(outline.get(i), outline.get(i + 1)))
-	      .collect(Collectors.toList());
+    return IntStream.range(0, outline.size() - 1)
+            .mapToObj(i -> new Edge(outline.get(i), outline.get(i + 1)))
+            .collect(Collectors.toList());
   }
 
+  /**
+   * Checks if the given edge 'e' is one of the main structural perimeter edges
+   * (connecting corners) of the room. Not generally used for door validation.
+   */
   private boolean isPerimeterEdge(Edge e) {
     return perimeterEdges().contains(e);
   }
@@ -79,7 +125,7 @@ public final class RoomTile extends AbstractCluedoTile {
   public record Edge(Point a, Point b) {
     public Edge {
       if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1)
-        throw new IllegalArgumentException("Edge must connect adjacent squares");
+        throw new IllegalArgumentException("Edge must connect adjacent squares: " + a + ", " + b);
     }
 
     boolean adjacentTo(Point p) {
@@ -89,7 +135,7 @@ public final class RoomTile extends AbstractCluedoTile {
     @Override
     public boolean equals(Object o) {
       return o instanceof Edge e
-          && (e.a.equals(a) && e.b.equals(b) || e.a.equals(b) && e.b.equals(a));
+              && (e.a.equals(a) && e.b.equals(b) || e.a.equals(b) && e.b.equals(a));
     }
 
     @Override
