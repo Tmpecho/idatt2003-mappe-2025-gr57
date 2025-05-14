@@ -14,8 +14,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   private static final GridPos START_POS_MISS_SCARLETT = new GridPos(23, 7); // PlayerColor.WHITE (Scarlett)
   private static final GridPos START_POS_COL_MUSTARD = new GridPos(17, 1);   // PlayerColor.RED (Mustard)
-  private static final GridPos START_POS_MRS_WHITE = new GridPos(1, 9);     // PlayerColor.YELLOW (Mrs. White)
-  private static final GridPos START_POS_REV_GREEN = new GridPos(1, 14);    // PlayerColor.GREEN (Rev. Green)
+  private static final GridPos START_POS_MRS_WHITE = new GridPos(1, 7);     // PlayerColor.YELLOW (Mrs. White)
+  private static final GridPos START_POS_REV_GREEN = new GridPos(1, 16);    // PlayerColor.GREEN (Rev. Green)
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 23);  // PlayerColor.BLUE (Mrs. Peacock)
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 23);   // PlayerColor.PURPLE (Prof. Plum)
 
