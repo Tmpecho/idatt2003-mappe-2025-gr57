@@ -30,7 +30,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
           new RoomSpec("Study", new RoomDimensions(21, 17, 23, 23), true),
           new RoomSpec("Hall", new RoomDimensions(18, 9, 23, 14), false),
           new RoomSpec("Lounge", new RoomDimensions(19, 1, 23, 6), true),
-          new RoomSpec("Cluedo", new RoomDimensions(10, 11, 14, 13), true));
+          new RoomSpec("Cluedo", new RoomDimensions(10, 10, 14, 14), true));
 
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
