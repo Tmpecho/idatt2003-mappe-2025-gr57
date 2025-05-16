@@ -158,6 +158,17 @@ public final class CluedoBoard implements GameBoard<GridPos> {
           List<RoomTile.Point> outline = createRectangularOutline(spec.dims);
           RoomTile room = new RoomTile(spec.name, outline);
           populateRoomTiles(spec.dims, room);
+
+          for (DoorDefinition doorDef : spec.doors) {
+            try {
+              room.addDoor(doorDef.roomSide(), doorDef.corridorSide());
+            } catch (IllegalArgumentException e) {
+              System.err.println("Error adding door for room "
+                      + spec.name
+                      + ": "
+                      + e.getMessage());
+            }
+          }
           // TODO: if (spec.hasSecretPassage) addSecretPassage(room);
         });
   }
