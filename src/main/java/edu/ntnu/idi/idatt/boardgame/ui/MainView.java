@@ -1,6 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.ui;
 
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
@@ -10,6 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
+
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -23,13 +26,14 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
- * The {@code MainView} class serves as the primary container for the application, featuring a
+ * The {@code MainView} class serves as the primary container for the
+ * application, featuring a
  * sidebar with game selection and placeholders for save/load functionality.
  */
 public class MainView {
   private final BorderPane root;
   private final StackPane contentWrapper;
-  private GameController<LinearPos> currentController;
+  private GameController<?> currentController;
   private Button saveGameButton;
   private Button loadGameButton;
 
@@ -142,6 +146,7 @@ public class MainView {
           }
           File file = chooser.showOpenDialog(stage);
           if (file == null) {
+            System.out.println("Load cancelled.");
             return;
           }
           if (currentController == null) {
@@ -167,7 +172,7 @@ public class MainView {
     snakesAndLaddersButton.setOnAction(e -> loadSnakesAndLadders());
 
     Button cluedoButton = new Button("Cluedo");
-    cluedoButton.setOnAction(e -> System.out.println("Cluedo not implemented yet."));
+    cluedoButton.setOnAction(e -> loadCluedo());
 
     games.getChildren().addAll(snakesAndLaddersButton, cluedoButton);
   }
@@ -191,6 +196,34 @@ public class MainView {
 
     saveGameButton.setDisable(false);
     loadGameButton.setDisable(false);
+  }
+
+  private void loadCluedo() {
+    int numberOfPlayers = 6;
+    try {
+      CluedoController cluedoController = new CluedoController(numberOfPlayers);
+      this.currentController = cluedoController;
+
+      CluedoView view = new CluedoView(cluedoController);
+      contentWrapper.getChildren().setAll(view.getRoot());
+
+      saveGameButton.setDisable(true);
+      loadGameButton.setDisable(true);
+
+    } catch (IllegalArgumentException ex) {
+      System.err.println("Failed to load Cluedo: " + ex.getMessage());
+      contentWrapper.getChildren().setAll(new Label("Error loading Cluedo: " + ex.getMessage()));
+      saveGameButton.setDisable(true);
+      loadGameButton.setDisable(true);
+      this.currentController = null;
+    } catch (Exception ex) {
+      System.err.println("An unexpected error occurred while loading Cluedo: " + ex.getMessage());
+      ex.printStackTrace();
+      contentWrapper.getChildren().setAll(new Label("Unexpected error loading Cluedo."));
+      saveGameButton.setDisable(true);
+      loadGameButton.setDisable(true);
+      this.currentController = null;
+    }
   }
 
   private Stage getStage() {
