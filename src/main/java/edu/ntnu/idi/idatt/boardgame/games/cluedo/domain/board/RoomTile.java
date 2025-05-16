@@ -18,7 +18,7 @@ public final class RoomTile extends AbstractCluedoTile {
   /** Ordered perimeter; first == last. */
   private final List<Point> outline;
 
-  /** Set of edges that are open doorways. */
+  /** Set of edges that are open doorways. Each Edge connects a room point and an adjacent corridor point. */
   private final Set<Edge> doorEdges = new HashSet<>();
 
   private final int minRow, maxRow, minCol, maxCol;
@@ -29,7 +29,7 @@ public final class RoomTile extends AbstractCluedoTile {
    * @param outlinePerimeter ordered points, first = last (minimum 4)
    */
   public RoomTile(String roomName, List<Point> outlinePerimeter) {
-    // we store row/col of an arbitrary interior square
+    // we store row/col of an arbitrary interior square from the outline
     super(outlinePerimeter.get(0).row(), outlinePerimeter.get(0).col());
     if (outlinePerimeter.size() < 4)
       throw new IllegalArgumentException("Outline requires ≥ 4 points");
@@ -42,6 +42,7 @@ public final class RoomTile extends AbstractCluedoTile {
     this.maxRow = outlinePerimeter.stream().mapToInt(Point::row).max().orElseThrow();
     this.minCol = outlinePerimeter.stream().mapToInt(Point::col).min().orElseThrow();
     this.maxCol = outlinePerimeter.stream().mapToInt(Point::col).max().orElseThrow();
+    this.walkable = false; // Room interiors are not "walkable" in the same way corridors are.
   }
 
   /**
@@ -74,7 +75,6 @@ public final class RoomTile extends AbstractCluedoTile {
               ", maxC:" + this.maxCol + ")");
     }
 
-    // Edge constructor checks for adjacency between roomBoundaryPoint and adjacentCorridorPoint
     Edge doorEdge = new Edge(roomBoundaryPoint, adjacentCorridorPoint);
     doorEdges.add(doorEdge);
   }
@@ -84,28 +84,29 @@ public final class RoomTile extends AbstractCluedoTile {
   public boolean canEnterFrom(int corridorRow, int corridorCol) {
     Point corridorPoint = new Point(corridorRow, corridorCol);
     for (Edge door : doorEdges) {
-      // A door edge connects a room point and a corridor point.
-      // If the given corridorPoint is one of the points in a door edge.
-      if (door.a().equals(corridorPoint) || door.b().equals(corridorPoint)) {
+      // A door edge connects a room point (door.a) and a corridor point (door.b) or vice versa.
+      // We need to check if the given corridorPoint matches the corridor-side point of any door.
+      if (door.a().equals(corridorPoint) && isPointInsideRoom(door.b())) { // corridorPoint is a, roomPoint is b
+        return true;
+      }
+      if (door.b().equals(corridorPoint) && isPointInsideRoom(door.a())) { // corridorPoint is b, roomPoint is a
         return true;
       }
     }
     return false;
   }
 
-  private List<Edge> perimeterEdges() {
-    return IntStream.range(0, outline.size() - 1)
-            .mapToObj(i -> new Edge(outline.get(i), outline.get(i + 1)))
-            .collect(Collectors.toList());
+  /** Checks if a player can exit this room to the given corridor coordinates. */
+  public boolean canExitTo(int corridorRow, int corridorCol) {
+    // This is symmetric to canEnterFrom for the current door model
+    return canEnterFrom(corridorRow, corridorCol);
   }
 
-  /**
-   * Checks if the given edge 'e' is one of the main structural perimeter edges
-   * (connecting corners) of the room. Not generally used for door validation.
-   */
-  private boolean isPerimeterEdge(Edge e) {
-    return perimeterEdges().contains(e);
+  private boolean isPointInsideRoom(Point p) {
+    return p.row() >= this.minRow && p.row() <= this.maxRow &&
+            p.col() >= this.minCol && p.col() <= this.maxCol;
   }
+
 
   public String getRoomName() {
     return roomName;
@@ -121,7 +122,6 @@ public final class RoomTile extends AbstractCluedoTile {
 
   public record Point(int row, int col) {}
 
-  /** Undirected edge between two adjacent squares. */
   public record Edge(Point a, Point b) {
     public Edge {
       if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1)

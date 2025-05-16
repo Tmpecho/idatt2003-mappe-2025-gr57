@@ -6,6 +6,7 @@ import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.BorderTile;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerColorMapper;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -24,6 +25,7 @@ public class CluedoTileView implements TileObserver<GridPos> {
     private final FlowPane playerPane;
     private final AbstractCluedoTile tileModel;
     private final int tileSize;
+    private boolean isDoorCorridor = false;
 
     public CluedoTileView(AbstractCluedoTile tileModel, int tileSize) {
         this.tileModel = tileModel;
@@ -58,6 +60,11 @@ public class CluedoTileView implements TileObserver<GridPos> {
         return tilePane;
     }
 
+    public void setAsDoorCorridor(boolean isDoor) {
+        this.isDoorCorridor = isDoor;
+        updateDisplay();
+    }
+
     @Override
     public void onTileChanged(Tile<GridPos> tile) {
         if (tile == this.tileModel) {
@@ -72,13 +79,22 @@ public class CluedoTileView implements TileObserver<GridPos> {
             tileBackground.setFill(Color.LIGHTSLATEGRAY); // Room color
             infoLabel.setText(roomTile.getRoomName());
             infoLabel.setVisible(true);
-        } else if (tileModel instanceof CorridorTile) {
-            tileBackground.setFill(Color.BEIGE); // Corridor color
-            infoLabel.setVisible(false);
-        } else {
-            tileBackground.setFill(Color.WHITE); // Default / Unknown
             infoLabel.setText("");
+        } else if (tileModel instanceof CorridorTile) {
+            if (this.isDoorCorridor) {
+                tileBackground.setFill(Color.KHAKI);
+            } else {
+                tileBackground.setFill(Color.BEIGE);
+            }
             infoLabel.setVisible(false);
+        } else if (tileModel instanceof BorderTile) {
+            tileBackground.setFill(Color.DARKSLATEGRAY); // Border color
+            infoLabel.setVisible(false);
+        }
+        else {
+            tileBackground.setFill(Color.LIGHTGRAY);
+            infoLabel.setText("?");
+            infoLabel.setVisible(true);
         }
 
         // Add player circles if any players are on this tile
