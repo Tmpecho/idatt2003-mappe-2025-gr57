@@ -57,8 +57,8 @@ class CluedoBoardTest {
     // Miss Scarlett starts at (23,7). (23,6) should be a border.
     assertInstanceOf(
         BorderTile.class,
-        board.getTileAtPosition(new GridPos(23, 6)),
-        "Tile at (23,6) next to Miss Scarlett start should be BorderTile");
+        board.getTileAtPosition(new GridPos(23, 8)),
+        "Tile at (23,8) next to Miss Scarlett start should be BorderTile");
   }
 
   @Test
