@@ -51,6 +51,10 @@ public final class CluedoView implements GameObserver<GridPos> {
         Button accuseButton = new Button("Make Accusation");
         accuseButton.setOnAction(e -> controller.makeAccusation());
 
+    controlPanel.getChildren().addAll(statusLabel, rollDiceButton, suggestButton, accuseButton);
+
+    root.setRight(controlPanel);
+
         controller.addObserver(this);
         update("Game started. It's " + controller.getCurrentPlayer().getName() + "'s turn.");
     }
@@ -62,6 +66,7 @@ public final class CluedoView implements GameObserver<GridPos> {
     @Override
     public void update(String message) {
         statusLabel.setText(message);
+    boardView.highlightTile(controller.getCurrentPlayer().getPosition());
     }
 
     @Override

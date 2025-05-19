@@ -9,6 +9,8 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.BorderTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -30,6 +32,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
   private static final int MIN_FONT_SIZE = 10;
   private static final int LABEL_PADDING = 5;
   private final GridPane grid;
+  private final Map<GridPos, Node> tileMap = new HashMap<>();
+  private Node highlightedNode = null;
   private final CluedoBoard boardModel;
 
   public CluedoBoardView(CluedoBoard boardModel) {
@@ -41,6 +45,17 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
 
     initializeBoard();
     getChildren().add(grid);
+  }
+
+  public void highlightTile(GridPos pos) {
+    if (highlightedNode != null) {
+      highlightedNode.setStyle("");
+    }
+    Node node = tileMap.get(pos);
+    if (node != null) {
+      node.setStyle("-fx-border-color: blue; -fx-border-width: 2; border-style: solid;");
+      highlightedNode = node;
+    }
   }
 
   private static FlowPane getFlowPane(StackPane roomPane) {
@@ -145,6 +160,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
     CluedoTileView tileView = new CluedoTileView(tileModel, TILE_SIZE);
     Node node = tileView.getNode();
     grid.add(node, col, row);
+    tileMap.put(new GridPos(row, col), node);
+
     bindClick(node, row, col);
   }
 
@@ -155,6 +172,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
       tileView.setAsDoorCorridor(true);
     }
     grid.add(node, col, row);
+    tileMap.put(new GridPos(row, col), node);
     bindClick(node, row, col);
   }
 
@@ -174,6 +192,12 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
         dimensions.colSpan(),
         dimensions.rowSpan());
 
+    // map every cell in that room to the same pane
+    for (int r = dimensions.minRow(); r <= dimensions.maxRow(); r++) {
+      for (int c = dimensions.minCol(); c <= dimensions.maxCol(); c++) {
+        tileMap.put(new GridPos(r, c), roomPane);
+      }
+    }
     bindClick(roomPane, dimensions.minCol(), dimensions.minRow());
 
     markVisitedCells(dimensions, roomTile, boardGrid, visitedRoomCells);
