@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public class SnLView implements GameObserver<LinearPos> {
+public final class SnLView implements GameObserver<LinearPos> {
   private final Button rollDiceButton;
   private final Label logLabel;
   private final BorderPane root;

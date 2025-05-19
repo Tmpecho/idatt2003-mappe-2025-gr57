@@ -1,18 +1,17 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
-public class CluedoController extends GameController<GridPos> {
+public final class CluedoController extends GameController<GridPos> {
 
     private final int numberOfPlayers;
     private final List<PlayerColor> playerColors = List.of(

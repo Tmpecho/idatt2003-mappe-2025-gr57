@@ -1,12 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.IntStream;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
@@ -19,8 +12,14 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAct
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnLMapper;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
-public class SnLController extends GameController<LinearPos> {
+public final class SnLController extends GameController<LinearPos> {
   private final GameStateRepository<SnLGameStateDTO> repo;
 
   private final int numberOfPlayers;

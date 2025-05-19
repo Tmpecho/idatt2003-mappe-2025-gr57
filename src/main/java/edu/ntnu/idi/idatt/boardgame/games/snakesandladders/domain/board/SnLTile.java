@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SnLTile implements Tile<LinearPos> {
+public final class SnLTile implements Tile<LinearPos> {
   private final List<Player<LinearPos>> players;
   private final int position;
   private final List<TileObserver> observers = new ArrayList<>();
