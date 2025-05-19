@@ -123,7 +123,7 @@ public final class CluedoController extends GameController<GridPos> {
     int dr = Math.abs(here.row() - target.row());
     int dc = Math.abs(here.col() - target.col());
     if (dr + dc != 1) {
-      return; // only orthogonal steps
+      return; // only orthogonal moves
     }
 
     var fromTile = boardModel.getTileAtPosition(here);
@@ -136,29 +136,35 @@ public final class CluedoController extends GameController<GridPos> {
             && toTile instanceof RoomTile
             && ((RoomTile) toTile).canEnterFrom(here.row(), here.col());
 
-    if (!corridorToCorridor && !doorEntry) {
+    boolean doorExit =
+        fromTile instanceof RoomTile
+            && toTile instanceof CorridorTile
+            && ((RoomTile) fromTile).canEnterFrom(target.row(), target.col());
+
+    // reject anything but corridor→corridor, corridor→room, room→corridor
+    if (!(corridorToCorridor || doorEntry || doorExit)) {
       return;
     }
 
-    // 1) update the model:
+    // 1) move the model
     fromTile.removePlayer(currentPlayer);
     toTile.addPlayer(currentPlayer);
     currentPlayer.setPosition(target);
 
-    // 2) decrement steps and notify:
-    stepsLeft--;
+    // 2) decrement stepsLeft (but only zero out if *entering* a room)
+    if (doorEntry) {
+      stepsLeft = 0;
+    } else {
+      stepsLeft--;
+    }
+
+    // 3) notify
     notifyObservers(
         currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.");
 
-    // 3) if we just entered a room, consume any remaining steps:
-    if (doorEntry) {
-      stepsLeft = 0;
-    }
-
-    // 4) when you’ve used up all steps, advance the turn:
+    // 4) end the turn if out of steps
     if (stepsLeft == 0) {
-      currentPlayer = getNextPlayer();
-      notifyObservers("Turn over. It is now " + currentPlayer.getName() + "'s turn.");
+      endTurn();
     }
   }
 
