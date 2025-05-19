@@ -14,8 +14,6 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +26,7 @@ public final class CluedoController extends GameController<GridPos> {
   private final CluedoBoard boardModel;
   private final int numberOfPlayers;
   private int stepsLeft = 0;
-  private final List<Card> deck = new ArrayList<>();
+  private List<Card> deck = new ArrayList<>();
   private final Card[] solution = new Card[3];
   private final Random rng = new SecureRandom();
 
@@ -213,11 +211,7 @@ public final class CluedoController extends GameController<GridPos> {
 
   /** Build a complete shuffled deck and pick the three solution cards. */
   private void createCards() {
-    deck.clear();
-    Arrays.stream(Cards.getPeople()).map(s -> new Card(s, CardType.SUSPECT)).forEach(deck::add);
-    Arrays.stream(Cards.getWeapons()).map(s -> new Card(s, CardType.WEAPON)).forEach(deck::add);
-    Arrays.stream(Cards.getRooms()).map(s -> new Card(s, CardType.ROOM)).forEach(deck::add);
-    Collections.shuffle(deck, rng);
+    deck = Cards.shuffledDeck(rng);
 
     solution[0] = drawCard(CardType.SUSPECT);
     solution[1] = drawCard(CardType.WEAPON);
