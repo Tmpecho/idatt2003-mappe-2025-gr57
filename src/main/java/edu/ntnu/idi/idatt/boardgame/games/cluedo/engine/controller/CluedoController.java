@@ -11,6 +11,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.CardType;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +29,7 @@ public final class CluedoController extends GameController<GridPos> {
   private final int numberOfPlayers;
   private int stepsLeft = 0;
   private final List<Card> deck = new ArrayList<>();
-  private final Card[] solution = new Card[3]; // [SUSPECT, WEAPON, ROOM]
-  private final Map<Integer, List<Card>> playerHands = new HashMap<>();
+  private final Card[] solution = new Card[3];
   private final Random rng = new SecureRandom();
 
   private final List<PlayerColor> playerColors =
@@ -54,27 +54,32 @@ public final class CluedoController extends GameController<GridPos> {
   public CluedoController(int numberOfPlayers) {
     super(new CluedoBoard(), new Dice(2));
     this.boardModel = (CluedoBoard) this.gameBoard;
+
     if (numberOfPlayers < 2 || numberOfPlayers > 6) {
       throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
     }
+
     this.numberOfPlayers = numberOfPlayers;
+
     createCards();
+
+    super.initialize(numberOfPlayers);
+
     distributeCards();
-    initialize(numberOfPlayers);
+
+    notifyObservers("Game initialised. " + currentPlayer.getName() + " starts.");
   }
 
   @Override
-  protected Map<Integer, Player<GridPos>> createPlayers(int numPlayers) {
+  protected Map<Integer, Player<GridPos>> createPlayers(int n) {
     Map<Integer, Player<GridPos>> map = new HashMap<>();
-    IntStream.range(0, numPlayers)
+    IntStream.rangeClosed(1, n)
         .forEach(
             i -> {
-              int id = i + 1;
-              PlayerColor color = playerColors.get(i % playerColors.size());
-              String name = playerNames.getOrDefault(color, "Player " + id);
-              // you should pick valid start cells; using (0,0) as placeholder
-              GridPos start = new GridPos(0, 0);
-              map.put(id, new Player<>(id, name, color, start));
+              PlayerColor colour = playerColors.get(i - 1);
+              String name = playerNames.get(colour);
+              CluedoPlayer player = new CluedoPlayer(i, name, colour, new GridPos(0, 0));
+              map.put(i, player);
             });
     return map;
   }
@@ -209,15 +214,9 @@ public final class CluedoController extends GameController<GridPos> {
   /** Build a complete shuffled deck and pick the three solution cards. */
   private void createCards() {
     deck.clear();
-
-    Arrays.stream(Cards.getPeople())
-        .map(name -> new Card(name, CardType.SUSPECT))
-        .forEach(deck::add);
-    Arrays.stream(Cards.getWeapons())
-        .map(name -> new Card(name, CardType.WEAPON))
-        .forEach(deck::add);
-    Arrays.stream(Cards.getRooms()).map(name -> new Card(name, CardType.ROOM)).forEach(deck::add);
-
+    Arrays.stream(Cards.getPeople()).map(s -> new Card(s, CardType.SUSPECT)).forEach(deck::add);
+    Arrays.stream(Cards.getWeapons()).map(s -> new Card(s, CardType.WEAPON)).forEach(deck::add);
+    Arrays.stream(Cards.getRooms()).map(s -> new Card(s, CardType.ROOM)).forEach(deck::add);
     Collections.shuffle(deck, rng);
 
     solution[0] = drawCard(CardType.SUSPECT);
@@ -239,18 +238,16 @@ public final class CluedoController extends GameController<GridPos> {
 
   /** Deal the remaining deck clockwise, one at a time, until empty. */
   private void distributeCards() {
-    // prepare player-hand lists in seat order (id 1 … n)
-    List<Player<GridPos>> seating =
-        players.values().stream().sorted(Comparator.comparingInt(Player::getId)).toList();
+    List<CluedoPlayer> seats =
+        players.values().stream()
+            .map(p -> (CluedoPlayer) p)
+            .sorted(Comparator.comparingInt(Player::getId))
+            .toList();
 
-    seating.forEach(p -> playerHands.put(p.getId(), new ArrayList<>()));
-
-    int playerIndex = 0;
+    int idx = 0;
     while (!deck.isEmpty()) {
-      Card dealt = deck.remove(0); // top of the pile
-      Player<GridPos> target = seating.get(playerIndex);
-      playerHands.get(target.getId()).add(dealt);
-      playerIndex = (playerIndex + 1) % seating.size();
+      seats.get(idx).addCard(deck.remove(0));
+      idx = (idx + 1) % seats.size();
     }
   }
 }
