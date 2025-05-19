@@ -12,6 +12,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -37,10 +38,13 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
   private Node highlightedNode = null;
   private final Consumer<GridPos> onTileClick;
   private final CluedoBoard boardModel;
+  private final Supplier<GridPos> currentPlayerPos;
 
-  public CluedoBoardView(CluedoBoard boardModel, Consumer<GridPos> onTileClick) {
+  public CluedoBoardView(
+      CluedoBoard boardModel, Supplier<GridPos> currentPlayerPos, Consumer<GridPos> onTileClick) {
     this.boardModel = boardModel;
     this.onTileClick = onTileClick;
+    this.currentPlayerPos = currentPlayerPos;
     this.grid = new GridPane();
 
     grid.setHgap(GAP_SIZE);
@@ -201,7 +205,21 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
         tileMap.put(new GridPos(r, c), roomPane);
       }
     }
-    bindClick(roomPane, dimensions.minCol(), dimensions.minRow());
+
+    roomPane.setOnMouseClicked(
+        e -> {
+          GridPos here = currentPlayerPos.get();
+          int[] dr = {-1, 1, 0, 0}, dc = {0, 0, -1, 1};
+          for (int k = 0; k < 4; k++) {
+            GridPos candidate = new GridPos(here.row() + dr[k], here.col() + dc[k]);
+            if (boardModel.getTileAtPosition(candidate) == roomTile) {
+              onTileClick.accept(candidate);
+              return;
+            }
+          }
+          // silent ignore, or:
+          // LoggingNotification.warn("Invalid move","You can only enter through a door.");
+        });
 
     markVisitedCells(dimensions, roomTile, boardGrid, visitedRoomCells);
     addPlayerTokensToRoomPane(roomPane, roomTile);

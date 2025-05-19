@@ -16,7 +16,7 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final BorderPane root;
   private final CluedoBoardView boardView;
   private final Label statusLabel;
-  private final Button rollDiceButton; // Example action button
+  private final Button rollDiceButton;
   private final CluedoController controller;
 
   public CluedoView(CluedoController controller) {
@@ -25,7 +25,9 @@ public final class CluedoView implements GameObserver<GridPos> {
     root.setPadding(new Insets(10));
 
     CluedoBoard board = (CluedoBoard) controller.getGameBoard();
-    this.boardView = new CluedoBoardView(board, controller::movePlayerTo);
+    this.boardView =
+        new CluedoBoardView(
+            board, () -> controller.getCurrentPlayer().getPosition(), controller::movePlayerTo);
 
     ScrollPane scrollPane = new ScrollPane(boardView);
     scrollPane.setFitToWidth(true);
@@ -42,7 +44,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setWrapText(true);
 
     this.rollDiceButton = new Button("Roll Dice & Move");
-    rollDiceButton.setOnAction(e -> controller.rollDiceAndMove());
+    rollDiceButton.setOnAction(
+        e -> {
+          controller.rollDiceAndMove();
+          rollDiceButton.setDisable(true);
+        });
 
     // TODO: Add more controls
     Button suggestButton = new Button("Make Suggestion");
@@ -68,6 +74,9 @@ public final class CluedoView implements GameObserver<GridPos> {
   public void update(String message) {
     statusLabel.setText(message);
     boardView.highlightTile(controller.getCurrentPlayer().getPosition());
+
+    boolean waitingForRoll = controller.getStepsLeft() == 0;
+    rollDiceButton.setDisable(!waitingForRoll);
   }
 
   @Override
