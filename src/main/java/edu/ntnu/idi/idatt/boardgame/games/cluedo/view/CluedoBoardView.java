@@ -20,12 +20,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -232,11 +227,16 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       AbstractCluedoTile[][] boardGrid,
       boolean[][] visitedRoomCells) {
     RoomDimensions dimensions = calculateRoomDimensions(roomTile, numRows, numCols, boardGrid);
-    StackPane roomPane = createRoomPane(roomTile, dimensions);
+
+    Rectangle background = createRoomBackground(dimensions);
+    Label nameLabel = createRoomLabel(roomTile.getRoomName());
 
     FlowPane tokenPane = makePlayerPane();
-    StackPane.setAlignment(tokenPane, Pos.CENTER);
-    roomPane.getChildren().add(tokenPane);
+
+    VBox content = new VBox(2, nameLabel, tokenPane);
+    content.setAlignment(Pos.CENTER);
+
+    StackPane roomPane = new StackPane(background, content);
 
     roomTokenPanes.put(roomTile, tokenPane);
     refreshRoomTokens(roomTile);
@@ -354,12 +354,6 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       roomPane.getChildren().add(playerTokenPane);
       StackPane.setAlignment(playerTokenPane, Pos.BOTTOM_CENTER);
     }
-  }
-
-  public void updateView() {
-    // This full refresh can be slow for large boards or frequent updates.
-    // For player movement, only updating affected tiles would be more efficient.
-    initializeBoard();
   }
 
   @Override

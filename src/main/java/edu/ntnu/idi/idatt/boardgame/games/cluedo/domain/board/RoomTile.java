@@ -105,30 +105,44 @@ public final class RoomTile extends AbstractCluedoTile {
 
   /** Checks if a player can enter this room from the given corridor coordinates. */
   public boolean canEnterFrom(int corridorRow, int corridorCol) {
-    Point corridorPoint = new Point(corridorRow, corridorCol);
-    for (Edge door : doorEdges) {
-      // A door edge connects a room point (door.a) and a corridor point (door.b) or vice versa.
-      // We need to check if the given corridorPoint matches the corridor-side point of any door.
-      if (door.a().equals(corridorPoint)
-          && isPointInsideRoom(door.b())) { // corridorPoint is a, roomPoint is b
-        return true;
-      }
-      if (door.b().equals(corridorPoint)
-          && isPointInsideRoom(door.a())) { // corridorPoint is b, roomPoint is a
-        return true;
-      }
+    if ("Cluedo".equals(roomName)) {
+      return isAdjacentToPerimeter(corridorRow, corridorCol);
     }
-    return false;
+
+    // normal rooms – use the explicit door list
+    Point corridorPoint = new Point(corridorRow, corridorCol);
+    return doorEdges.stream().anyMatch(door -> corridorMatchesDoor(corridorPoint, door));
   }
 
   /** Checks if a player can exit this room to the given corridor coordinates. */
-  public boolean canExitTo(int row, int col) {
-    Point p = new Point(row, col);
-    for (Edge e : doorEdges) {
-      // whichever end of the edge lies outside the room is the
-      // permitted corridor square
-      if (!isPointInsideRoom(e.a()) && e.a().equals(p)) return true;
-      if (!isPointInsideRoom(e.b()) && e.b().equals(p)) return true;
+  public boolean canExitTo(int corridorRow, int corridorCol) {
+    if ("Cluedo".equals(roomName)) {
+      return isAdjacentToPerimeter(corridorRow, corridorCol);
+    }
+
+    Point corridorPoint = new Point(corridorRow, corridorCol);
+    return doorEdges.stream().anyMatch(door -> corridorMatchesDoor(corridorPoint, door));
+  }
+
+  /** true if {@code (row,col)} is next to the room’s perimeter but outside it */
+  private boolean isAdjacentToPerimeter(int row, int col) {
+    boolean left = col == minCol - 1 && row >= minRow && row <= maxRow;
+    boolean right = col == maxCol + 1 && row >= minRow && row <= maxRow;
+    boolean above = row == minRow - 1 && col >= minCol && col <= maxCol;
+    boolean below = row == maxRow + 1 && col >= minCol && col <= maxCol;
+    return left || right || above || below;
+  }
+
+  /**
+   * true when {@code corridorPoint} equals the corridor side of {@code door}. (The *other* endpoint
+   * must be inside the room.)
+   */
+  private boolean corridorMatchesDoor(Point corridorPoint, Edge door) {
+    if (door.a().equals(corridorPoint)) {
+      return isPointInsideRoom(door.b());
+    }
+    if (door.b().equals(corridorPoint)) {
+      return isPointInsideRoom(door.a());
     }
     return false;
   }
