@@ -8,15 +8,29 @@ import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.CardType;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 public final class CluedoController extends GameController<GridPos> {
   private final CluedoBoard boardModel;
   private final int numberOfPlayers;
   private int stepsLeft = 0;
+  private final List<Card> deck = new ArrayList<>();
+  private final Card[] solution = new Card[3]; // [SUSPECT, WEAPON, ROOM]
+  private final Map<Integer, List<Card>> playerHands = new HashMap<>();
+  private final Random rng = new SecureRandom();
 
   private final List<PlayerColor> playerColors =
       List.of(
@@ -44,6 +58,8 @@ public final class CluedoController extends GameController<GridPos> {
       throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
     }
     this.numberOfPlayers = numberOfPlayers;
+    createCards();
+    distributeCards();
     initialize(numberOfPlayers);
   }
 
@@ -188,5 +204,53 @@ public final class CluedoController extends GameController<GridPos> {
     Player<GridPos> next = getNextPlayer();
     currentPlayer = next;
     notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
+  }
+
+  /** Build a complete shuffled deck and pick the three solution cards. */
+  private void createCards() {
+    deck.clear();
+
+    Arrays.stream(Cards.getPeople())
+        .map(name -> new Card(name, CardType.SUSPECT))
+        .forEach(deck::add);
+    Arrays.stream(Cards.getWeapons())
+        .map(name -> new Card(name, CardType.WEAPON))
+        .forEach(deck::add);
+    Arrays.stream(Cards.getRooms()).map(name -> new Card(name, CardType.ROOM)).forEach(deck::add);
+
+    Collections.shuffle(deck, rng);
+
+    solution[0] = drawCard(CardType.SUSPECT);
+    solution[1] = drawCard(CardType.WEAPON);
+    solution[2] = drawCard(CardType.ROOM);
+  }
+
+  // Draws and removes the first card of the requested type from the deck.
+  private Card drawCard(CardType wanted) {
+    for (Iterator<Card> iterator = deck.iterator(); iterator.hasNext(); ) {
+      Card card = iterator.next();
+      if (card.type() == wanted) {
+        iterator.remove();
+        return card;
+      }
+    }
+    throw new IllegalStateException("No card of type " + wanted + " left in deck.");
+  }
+
+  /** Deal the remaining deck clockwise, one at a time, until empty. */
+  private void distributeCards() {
+    // prepare player-hand lists in seat order (id 1 … n)
+    List<Player<GridPos>> seating =
+        players.values().stream().sorted(Comparator.comparingInt(Player::getId)).toList();
+
+    seating.forEach(p -> playerHands.put(p.getId(), new ArrayList<>()));
+
+    int playerIndex = 0;
+    while (!deck.isEmpty()) {
+      Card dealt = deck.remove(0); // top of the pile
+      Player<GridPos> target = seating.get(playerIndex);
+      playerHands.get(target.getId()).add(dealt);
+      playerIndex = (playerIndex + 1) % seating.size();
+    }
   }
 }
