@@ -2,7 +2,7 @@ package edu.ntnu.idi.idatt.boardgame.core.domain.dice;
 
 import java.util.Random;
 
-public class Die {
+public final class Die {
   private int lastRolledValue;
   private final Random random = new Random();
 

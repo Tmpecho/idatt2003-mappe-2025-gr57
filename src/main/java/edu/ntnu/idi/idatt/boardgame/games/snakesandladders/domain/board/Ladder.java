@@ -2,7 +2,7 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
 import javafx.scene.paint.Color;
 
-public class Ladder extends Connector {
+public final class Ladder extends Connector {
   private final int end;
   private final Color color = Color.GREEN;
 

@@ -16,7 +16,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-public class CluedoBoardView extends Pane {
+public final class CluedoBoardView extends Pane {
     private static final int TILE_SIZE = 30;
     private static final int GAP_SIZE = 1;
     private final GridPane grid;
