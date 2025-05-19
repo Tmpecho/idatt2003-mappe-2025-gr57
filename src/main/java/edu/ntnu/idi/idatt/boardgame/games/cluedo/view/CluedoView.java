@@ -31,6 +31,7 @@ public final class CluedoView implements GameObserver<GridPos> {
         scrollPane.setFitToHeight(true);
         root.setCenter(scrollPane);
 
+
         // Control Panel (Right Side)
         VBox controlPanel = new VBox(10);
         controlPanel.setPadding(new Insets(10));
