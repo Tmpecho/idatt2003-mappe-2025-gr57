@@ -15,8 +15,8 @@ public final class CluedoPlayer extends Player<GridPos> {
     super(id, name, color, startPos);
   }
 
-  public void addCard(Card c) {
-    hand.add(c);
+  public void addCard(Card card) {
+    hand.add(card);
   }
 
   public List<Card> getHand() {

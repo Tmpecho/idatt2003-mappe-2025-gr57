@@ -238,16 +238,16 @@ public final class CluedoController extends GameController<GridPos> {
 
   /** Deal the remaining deck clockwise, one at a time, until empty. */
   private void distributeCards() {
-    List<CluedoPlayer> seats =
+    List<CluedoPlayer> cluedoPlayers =
         players.values().stream()
-            .map(p -> (CluedoPlayer) p)
+            .map(player -> (CluedoPlayer) player)
             .sorted(Comparator.comparingInt(Player::getId))
             .toList();
 
     int idx = 0;
     while (!deck.isEmpty()) {
-      seats.get(idx).addCard(deck.remove(0));
-      idx = (idx + 1) % seats.size();
+      cluedoPlayers.get(idx).addCard(deck.remove(0));
+      idx = (idx + 1) % cluedoPlayers.size();
     }
   }
 }
