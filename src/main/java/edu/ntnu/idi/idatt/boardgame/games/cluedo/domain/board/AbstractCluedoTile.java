@@ -32,8 +32,9 @@ public abstract class AbstractCluedoTile implements Tile<GridPos> {
 
   @Override
   public void removePlayer(Player<GridPos> player) {
-    players.remove(player);
-    notifyChange();
+    if (players.remove(player)) {
+      notifyChange();
+    };
   }
 
   @Override
