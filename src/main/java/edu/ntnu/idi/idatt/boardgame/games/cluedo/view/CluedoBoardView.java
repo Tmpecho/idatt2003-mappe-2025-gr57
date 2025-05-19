@@ -11,6 +11,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -34,10 +35,12 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
   private final GridPane grid;
   private final Map<GridPos, Node> tileMap = new HashMap<>();
   private Node highlightedNode = null;
+  private final Consumer<GridPos> onTileClick;
   private final CluedoBoard boardModel;
 
-  public CluedoBoardView(CluedoBoard boardModel) {
+  public CluedoBoardView(CluedoBoard boardModel, Consumer<GridPos> onTileClick) {
     this.boardModel = boardModel;
+    this.onTileClick = onTileClick;
     this.grid = new GridPane();
 
     grid.setHgap(GAP_SIZE);
@@ -53,7 +56,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
     }
     Node node = tileMap.get(pos);
     if (node != null) {
-      node.setStyle("-fx-border-color: blue; -fx-border-width: 2; border-style: solid;");
+      node.setStyle("-fx-border-color: blue;");
       highlightedNode = node;
     }
   }
@@ -135,7 +138,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
         } else {
           addUnknownTile(col, row, tileModel);
         }
-        }
+      }
     }
   }
 
@@ -300,9 +303,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<LinearPo
   }
 
   private void bindClick(Node node, int row, int col) {
-    node.setOnMouseClicked(e ->
-        System.out.println("Pressed tile at [" + row + "," + col + "]")
-    );
+    GridPos pos = new GridPos(row, col);
+    tileMap.put(pos, node);
+    node.setOnMouseClicked(e -> onTileClick.accept(pos));
   }
 
   private record RoomDimensions(int minRow, int maxRow, int minCol, int maxCol) {
