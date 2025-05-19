@@ -12,7 +12,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public class CluedoView implements GameObserver<GridPos> {
+public final class CluedoView implements GameObserver<GridPos> {
     private final BorderPane root;
     private final CluedoBoardView boardView;
     private final Label statusLabel;

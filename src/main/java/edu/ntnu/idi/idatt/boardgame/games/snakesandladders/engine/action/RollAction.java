@@ -6,7 +6,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Position;
 import edu.ntnu.idi.idatt.boardgame.core.engine.action.Action;
 
-public class RollAction<P extends Position> implements Action {
+public final class RollAction<P extends Position> implements Action {
   private final GameBoard<P> gameBoard;
   private final Player<P> player;
   private final Dice dice;

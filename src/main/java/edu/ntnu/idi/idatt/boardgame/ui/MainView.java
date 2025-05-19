@@ -1,6 +1,8 @@
 package edu.ntnu.idi.idatt.boardgame.ui;
 
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnLView;
@@ -9,10 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
-import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
-
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -26,11 +24,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
- * The {@code MainView} class serves as the primary container for the
- * application, featuring a
+ * The {@code MainView} class serves as the primary container for the application, featuring a
  * sidebar with game selection and placeholders for save/load functionality.
  */
-public class MainView {
+public final class MainView {
   private final BorderPane root;
   private final StackPane contentWrapper;
   private GameController<?> currentController;

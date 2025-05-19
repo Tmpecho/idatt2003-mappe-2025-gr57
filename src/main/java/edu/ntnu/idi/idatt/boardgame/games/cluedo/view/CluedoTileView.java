@@ -4,9 +4,9 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.BorderTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
-import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.BorderTile;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerColorMapper;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -18,7 +18,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-public class CluedoTileView implements TileObserver<GridPos> {
+public final class CluedoTileView implements TileObserver<GridPos> {
     private final StackPane tilePane;
     private final Rectangle tileBackground;
     private final Label infoLabel;
