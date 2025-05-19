@@ -120,28 +120,28 @@ public final class CluedoController extends GameController<GridPos> {
     }
 
     GridPos here = currentPlayer.getPosition();
-    int dr = Math.abs(here.row() - target.row());
-    int dc = Math.abs(here.col() - target.col());
-    if (dr + dc != 1) {
-      return; // only orthogonal moves
-    }
 
     var fromTile = boardModel.getTileAtPosition(here);
     var toTile = boardModel.getTileAtPosition(target);
 
-    boolean corridorToCorridor = fromTile instanceof CorridorTile && toTile instanceof CorridorTile;
+    boolean adjacent =
+        Math.abs(here.row() - target.row()) + Math.abs(here.col() - target.col()) == 1;
+
+    boolean corridorToCorridor =
+        fromTile instanceof CorridorTile && toTile instanceof CorridorTile && adjacent;
 
     boolean doorEntry =
         fromTile instanceof CorridorTile
             && toTile instanceof RoomTile
+            && adjacent // must stand right outside the door
             && ((RoomTile) toTile).canEnterFrom(here.row(), here.col());
 
-    boolean doorExit = false;
-    if (fromTile instanceof RoomTile room && toTile instanceof CorridorTile) {
-      doorExit = room.canExitTo(target.row(), target.col());
-    }
+    boolean doorExit =
+        fromTile instanceof RoomTile room
+            && toTile instanceof CorridorTile
+            && room.canExitTo(target.row(), target.col());
 
-    // reject anything but corridor→corridor, corridor→room, room→corridor
+    // reject anything but corridor->corridor, corridor->room, room->corridor
     if (!(corridorToCorridor || doorEntry || doorExit)) {
       return;
     }
