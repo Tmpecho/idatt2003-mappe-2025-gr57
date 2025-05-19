@@ -136,10 +136,10 @@ public final class CluedoController extends GameController<GridPos> {
             && toTile instanceof RoomTile
             && ((RoomTile) toTile).canEnterFrom(here.row(), here.col());
 
-    boolean doorExit =
-        fromTile instanceof RoomTile
-            && toTile instanceof CorridorTile
-            && ((RoomTile) fromTile).canEnterFrom(target.row(), target.col());
+    boolean doorExit = false;
+    if (fromTile instanceof RoomTile room && toTile instanceof CorridorTile) {
+      doorExit = room.canExitTo(target.row(), target.col());
+    }
 
     // reject anything but corridor→corridor, corridor→room, room→corridor
     if (!(corridorToCorridor || doorEntry || doorExit)) {
@@ -168,13 +168,6 @@ public final class CluedoController extends GameController<GridPos> {
     }
   }
 
-  /** Called when this player’s movement finishes. Advances turn. */
-  private void endTurn() {
-    Player<GridPos> next = getNextPlayer();
-    currentPlayer = next;
-    notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
-  }
-
   public Player<GridPos> getCurrentPlayer() {
     return currentPlayer;
   }
@@ -188,5 +181,12 @@ public final class CluedoController extends GameController<GridPos> {
     // TODO: Implement accusation logic (check against solution, handle win/loss)
     notifyObservers(currentPlayer.getName() + " accusation logic TBD.");
     // if (isGameOver()) onGameFinish();
+  }
+
+  /** Called when this player’s movement finishes. Advances turn. */
+  private void endTurn() {
+    Player<GridPos> next = getNextPlayer();
+    currentPlayer = next;
+    notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
   }
 }
