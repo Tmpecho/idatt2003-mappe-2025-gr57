@@ -8,11 +8,13 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.BorderTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerTokenFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -22,7 +24,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
@@ -110,18 +111,20 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       int neighborCol = corridorCol + dc[i];
 
       // Check bounds for neighbor
-      if (neighborRow >= 0
-          && neighborRow < boardModel.getRows()
-          && neighborCol >= 0
-          && neighborCol < boardModel.getCols()) {
+      if (neighborRow < 0
+          || neighborRow >= boardModel.getRows()
+          || neighborCol < 0
+          || neighborCol >= boardModel.getCols()) {
+        continue;
+      }
 
-        AbstractCluedoTile neighborTile =
-            boardModel.getTileAtPosition(new GridPos(neighborRow, neighborCol));
-        if (neighborTile instanceof RoomTile adjacentRoomTile) {
-          if (adjacentRoomTile.canEnterFrom(corridorRow, corridorCol)) {
-            return true;
-          }
-        }
+      AbstractCluedoTile neighborTile =
+          boardModel.getTileAtPosition(new GridPos(neighborRow, neighborCol));
+      if (!(neighborTile instanceof RoomTile adjacentRoomTile)) {
+        continue;
+      }
+      if (adjacentRoomTile.canEnterFrom(corridorRow, corridorCol)) {
+        return true;
       }
     }
     return false;
@@ -171,8 +174,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     StackPane.setAlignment(unknownLabel, Pos.CENTER);
     StackPane wrapper = new StackPane(unknownTilePane, unknownLabel);
     grid.add(wrapper, col, row);
-    System.err.println(
-        "CluedoBoardView: Unhandled tile type at ("
+    LoggingNotification.error(
+        "CluedoBoardView: Unhandled tile type",
+        "Unhandled tile type at ("
             + row
             + ","
             + col
@@ -190,22 +194,26 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   }
 
   private void createFixedGridConstraints() {
-    for (int column = 0; column < boardModel.getCols(); column++) {
-      ColumnConstraints columnConstraints = new ColumnConstraints(TILE_SIZE);
-      columnConstraints.setMinWidth(TILE_SIZE);
-      columnConstraints.setPrefWidth(TILE_SIZE);
-      columnConstraints.setMaxWidth(TILE_SIZE);
-      columnConstraints.setHalignment(HPos.CENTER);
-      grid.getColumnConstraints().add(columnConstraints);
-    }
-    for (int row = 0; row < boardModel.getRows(); row++) {
-      RowConstraints rowConstraints = new RowConstraints(TILE_SIZE);
-      rowConstraints.setMinHeight(TILE_SIZE);
-      rowConstraints.setPrefHeight(TILE_SIZE);
-      rowConstraints.setMaxHeight(TILE_SIZE);
-      rowConstraints.setValignment(VPos.CENTER);
-      grid.getRowConstraints().add(rowConstraints);
-    }
+    IntStream.range(0, boardModel.getCols())
+        .mapToObj(column -> new ColumnConstraints(TILE_SIZE))
+        .forEach(
+            columnConstraints -> {
+              columnConstraints.setMinWidth(TILE_SIZE);
+              columnConstraints.setPrefWidth(TILE_SIZE);
+              columnConstraints.setMaxWidth(TILE_SIZE);
+              columnConstraints.setHalignment(HPos.CENTER);
+              grid.getColumnConstraints().add(columnConstraints);
+            });
+    IntStream.range(0, boardModel.getRows())
+        .mapToObj(row -> new RowConstraints(TILE_SIZE))
+        .forEach(
+            rowConstraints -> {
+              rowConstraints.setMinHeight(TILE_SIZE);
+              rowConstraints.setPrefHeight(TILE_SIZE);
+              rowConstraints.setMaxHeight(TILE_SIZE);
+              rowConstraints.setValignment(VPos.CENTER);
+              grid.getRowConstraints().add(rowConstraints);
+            });
   }
 
   private void addCorridorTile(AbstractCluedoTile tileModel, int row, int col) {
@@ -267,8 +275,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
               return;
             }
           }
-          // silent ignore, or:
-          // LoggingNotification.warn("Invalid move","You can only enter through a door.");
+          // silent ignore - this happens often
         });
 
     markVisitedCells(dimensions, roomTile, boardGrid, visitedRoomCells);
@@ -293,15 +300,6 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       }
     }
     return new RoomDimensions(minRow, maxRow, minCol, maxCol);
-  }
-
-  private StackPane createRoomPane(RoomTile roomTile, RoomDimensions dimensions) {
-    Rectangle background = createRoomBackground(dimensions);
-    Label label = createRoomLabel(roomTile.getRoomName());
-
-    StackPane roomPane = new StackPane(background, label);
-    roomPane.setAlignment(Pos.CENTER);
-    return roomPane;
   }
 
   private Rectangle createRoomBackground(RoomDimensions dimensions) {
@@ -339,23 +337,6 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     }
   }
 
-  private void addPlayerTokensToRoomPane(StackPane roomPane, RoomTile roomTile) {
-    if (!roomTile.getPlayers().isEmpty()) {
-      FlowPane playerTokenPane = getFlowPane(roomPane);
-
-      roomTile
-          .getPlayers()
-          .forEach(
-              player -> {
-                Circle token = PlayerTokenFactory.createPlayerToken(player, TILE_SIZE, 0.1);
-                playerTokenPane.getChildren().add(token);
-              });
-
-      roomPane.getChildren().add(playerTokenPane);
-      StackPane.setAlignment(playerTokenPane, Pos.BOTTOM_CENTER);
-    }
-  }
-
   @Override
   public void onTileChanged(Tile<GridPos> tile) {
     if (tile instanceof RoomTile room) {
@@ -366,7 +347,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private void refreshRoomTokens(RoomTile room) {
     FlowPane pane = roomTokenPanes.get(room);
     if (pane == null) {
-	    return;
+      return;
     }
 
     pane.getChildren().clear();

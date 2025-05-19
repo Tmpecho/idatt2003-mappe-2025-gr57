@@ -1,20 +1,14 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-/**
- * A room described by an ordered list of corner points that form the perimeter.
- *
- * <p><point>Edges (point[i] → point[i+1]) are walls except those registered via {@link #addDoor}.
- * Coordinates are board squares (row, col), 0-based.
- */
+/** A room described by an ordered list of corner points that form the perimeter. */
 public final class RoomTile extends AbstractCluedoTile {
 
-  /** Name shown on cards / UI */
   private final String roomName;
-
-  /** Ordered perimeter; first == last. */
-  private final List<Point> outline;
 
   /**
    * Set of edges that are open doorways. Each Edge connects a room point and an adjacent corridor
@@ -22,21 +16,27 @@ public final class RoomTile extends AbstractCluedoTile {
    */
   private final Set<Edge> doorEdges = new HashSet<>();
 
-  private final int minRow, maxRow, minCol, maxCol;
+  private final int minRow;
+  private final int maxRow;
+  private final int minCol;
+  private final int maxCol;
 
   /**
+   * Creates a room tile with the given name and outline perimeter.
+   *
    * @param roomName logical name (“Kitchen”)
    * @param outlinePerimeter ordered points, first = last (minimum 4)
    */
   public RoomTile(String roomName, List<Point> outlinePerimeter) {
     // we store row/col of an arbitrary interior square from the outline
     super(outlinePerimeter.get(0).row(), outlinePerimeter.get(0).col());
-    if (outlinePerimeter.size() < 4)
+    if (outlinePerimeter.size() < 4) {
       throw new IllegalArgumentException("Outline requires ≥ 4 points");
-    if (!outlinePerimeter.get(0).equals(outlinePerimeter.get(outlinePerimeter.size() - 1)))
+    }
+    if (!outlinePerimeter.get(0).equals(outlinePerimeter.get(outlinePerimeter.size() - 1))) {
       throw new IllegalArgumentException("First and last outline point must match");
+    }
     this.roomName = Objects.requireNonNull(roomName);
-    this.outline = List.copyOf(outlinePerimeter);
 
     this.minRow = outlinePerimeter.stream().mapToInt(Point::row).min().orElseThrow();
     this.maxRow = outlinePerimeter.stream().mapToInt(Point::row).max().orElseThrow();
@@ -105,6 +105,7 @@ public final class RoomTile extends AbstractCluedoTile {
 
   /** Checks if a player can enter this room from the given corridor coordinates. */
   public boolean canEnterFrom(int corridorRow, int corridorCol) {
+    // Cluedo has a special rule that you can enter from any adjacent corridor square
     if ("Cluedo".equals(roomName)) {
       return isAdjacentToPerimeter(corridorRow, corridorCol);
     }
@@ -116,6 +117,7 @@ public final class RoomTile extends AbstractCluedoTile {
 
   /** Checks if a player can exit this room to the given corridor coordinates. */
   public boolean canExitTo(int corridorRow, int corridorCol) {
+    // Cluedo has a special rule that you can exit to any adjacent corridor square
     if ("Cluedo".equals(roomName)) {
       return isAdjacentToPerimeter(corridorRow, corridorCol);
     }
@@ -124,7 +126,7 @@ public final class RoomTile extends AbstractCluedoTile {
     return doorEdges.stream().anyMatch(door -> corridorMatchesDoor(corridorPoint, door));
   }
 
-  /** true if {@code (row,col)} is next to the room’s perimeter but outside it */
+  /** true if {@code (row,col)} is next to the room’s perimeter but outside it. */
   private boolean isAdjacentToPerimeter(int row, int col) {
     boolean left = col == minCol - 1 && row >= minRow && row <= maxRow;
     boolean right = col == maxCol + 1 && row >= minRow && row <= maxRow;
@@ -158,20 +160,13 @@ public final class RoomTile extends AbstractCluedoTile {
     return roomName;
   }
 
-  public List<Point> getOutline() {
-    return outline;
-  }
-
-  public Set<Edge> getDoors() {
-    return Set.copyOf(doorEdges);
-  }
-
   public record Point(int row, int col) {}
 
   public record Edge(Point a, Point b) {
     public Edge {
-      if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1)
+      if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1) {
         throw new IllegalArgumentException("Edge must connect adjacent squares: " + a + ", " + b);
+      }
     }
 
     boolean adjacentTo(Point p) {
