@@ -7,8 +7,4 @@ public final class CorridorTile extends AbstractCluedoTile {
     super(row, col);
   }
 
-  /** Corridor squares are always enterable. */
-  public boolean isWalkable() {
-    return true;
-  }
 }
