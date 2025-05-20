@@ -3,7 +3,6 @@ package edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller;
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
-import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
@@ -11,6 +10,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.CardType;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -29,25 +29,7 @@ public final class CluedoController extends GameController<GridPos> {
   private List<Card> deck = new ArrayList<>();
   private final Card[] solution = new Card[3];
   private final Random rng = new SecureRandom();
-
-  private final List<PlayerColor> playerColors =
-      List.of(
-          PlayerColor.WHITE, // Miss Scarlett
-          PlayerColor.RED, // Col. Mustard
-          PlayerColor.BLUE, // Mrs. Peacock
-          PlayerColor.GREEN, // Rev. Green
-          PlayerColor.YELLOW, // Mrs. White
-          PlayerColor.PURPLE // Prof. Plum
-          );
-
-  private final Map<PlayerColor, String> playerNames =
-      Map.of(
-          PlayerColor.WHITE, "Miss Scarlett",
-          PlayerColor.RED, "Col. Mustard",
-          PlayerColor.BLUE, "Mrs. Peacock",
-          PlayerColor.GREEN, "Rev. Green",
-          PlayerColor.YELLOW, "Mrs. White",
-          PlayerColor.PURPLE, "Prof. Plum");
+  private final List<Suspect> suspects = List.of(Suspect.values());
 
   public CluedoController(int numberOfPlayers) {
     super(new CluedoBoard(), new Dice(2));
@@ -74,9 +56,9 @@ public final class CluedoController extends GameController<GridPos> {
     IntStream.rangeClosed(1, n)
         .forEach(
             i -> {
-              PlayerColor colour = playerColors.get(i - 1);
-              String name = playerNames.get(colour);
-              CluedoPlayer player = new CluedoPlayer(i, name, colour, new GridPos(0, 0));
+              Suspect suspect = suspects.get(i - 1);
+              CluedoPlayer player =
+                  new CluedoPlayer(i, suspect.displayName(), suspect.colour(), new GridPos(0, 0));
               map.put(i, player);
             });
     return map;
