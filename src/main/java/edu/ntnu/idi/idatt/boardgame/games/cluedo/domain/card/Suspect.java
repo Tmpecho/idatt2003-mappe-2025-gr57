@@ -25,14 +25,27 @@ public enum Suspect {
     return Arrays.stream(values()).map(Suspect::displayName).toArray(String[]::new);
   }
 
+  /**
+   * Maps a {@link PlayerColor} to its {@code Suspect}.
+   *
+   * @throws NullPointerException if {@code playerColor} is {@code null}
+   * @throws IllegalArgumentException if the colour is not used by any suspect
+   */
   public static Suspect from(PlayerColor playerColor) {
+    if (playerColor == null) {
+      throw new NullPointerException("playerColor is null");
+    }
+
     return Arrays.stream(values())
-        .filter(suspect -> suspect.colour == playerColor)
+        .filter(s -> s.colour == playerColor)
         .findFirst()
         .orElseThrow(
             () -> {
-              LoggingNotification.error(
-                  "No suspect for color", "No suspect found for " + playerColor);
+              // swallow any JavaFX-initialization problems
+              try {
+                LoggingNotification.error("Unknown colour", "No suspect for " + playerColor);
+              } catch (RuntimeException ignored) {
+              }
               return new IllegalArgumentException("No suspect for " + playerColor);
             });
   }
