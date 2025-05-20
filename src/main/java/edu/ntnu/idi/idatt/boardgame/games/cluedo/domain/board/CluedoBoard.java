@@ -361,12 +361,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                     });
   }
 
-  @Override
-  public void incrementPlayerPosition(Player<GridPos> player, int increment) {
-    System.out.println(
-            "Warning: incrementPlayerPosition called. This method is not suitable for standard Cluedo movement.");
-  }
-
   public AbstractCluedoTile getTileAtPosition(GridPos pos) {
     if (isValidPosition(pos)) {
       return board[pos.row()][pos.col()];

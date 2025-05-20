@@ -220,16 +220,4 @@ class CluedoBoardTest {
     assertNull(board.getTileAtPosition(new GridPos(25, 5)));
     assertNull(board.getTileAtPosition(new GridPos(5, 25)));
   }
-
-  // TODO: remove incrementplayerposition with test
-  @Test
-  void incrementPlayerPosition_logsWarningAndDoesNotChangePosition() {
-    board.addPlayersToStart(players);
-    GridPos initialPos = missScarlett.getPosition();
-    board.incrementPlayerPosition(missScarlett, 5);
-    assertEquals(
-            initialPos,
-            missScarlett.getPosition(),
-            "incrementPlayerPosition should not change position in Cluedo");
-  }
 }

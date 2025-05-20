@@ -59,7 +59,7 @@ class SnLBoardTest {
   }
 
   @Test
-  void incrementPlayerPosition_normalMove() {
+  void incrementPlayerPosition_normalMovePlayer() {
     board.addPlayersToStart(playersMap);
     board.incrementPlayerPosition(player1, 5);
     assertEquals(new LinearPos(6), player1.getPosition());

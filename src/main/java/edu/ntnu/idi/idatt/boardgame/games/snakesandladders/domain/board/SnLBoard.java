@@ -54,17 +54,16 @@ public final class SnLBoard implements GameBoard<LinearPos> {
             });
   }
 
-  @Override
   public void incrementPlayerPosition(Player<LinearPos> player, int inc) {
     int from = player.getPosition().index();
     int to = computeDestination(from + inc);
-    move(player, from, to);
+    movePlayer(player, from, to);
     applyConnector(player);
   }
 
   @Override
   public void setPlayerPosition(Player<LinearPos> player, LinearPos pos) {
-    move(player, player.getPosition().index(), pos.index());
+    movePlayer(player, player.getPosition().index(), pos.index());
   }
 
   @Override
@@ -79,7 +78,7 @@ public final class SnLBoard implements GameBoard<LinearPos> {
     return Math.max(raw, 1);
   }
 
-  private void move(Player<LinearPos> p, int from, int to) {
+  private void movePlayer(Player<LinearPos> p, int from, int to) {
     tiles.get(from).removePlayer(p);
     p.setPosition(new LinearPos(to));
     tiles.get(to).addPlayer(p);
@@ -91,7 +90,7 @@ public final class SnLBoard implements GameBoard<LinearPos> {
     if (c == null) {
       return;
     }
-    move(p, pos, computeDestination(c.getEnd()));
+    movePlayer(p, pos, computeDestination(c.getEnd()));
   }
 
   private SnLTile getTileAtPosition(int pos) {
