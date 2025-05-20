@@ -3,10 +3,7 @@ package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card;
 import java.util.*;
 
 public final class Cards {
-  private static final String[] SUSPECTS = {
-    "Miss Scarlet", "Colonel Mustard", "Mrs. White",
-    "Reverend Green", "Mrs. Peacock", "Professor Plum"
-  };
+  private static final String[] SUSPECTS = Suspect.names();
   private static final String[] WEAPONS = {
     "Candlestick", "Knife", "Lead Pipe",
     "Revolver", "Rope", "Wrench"
