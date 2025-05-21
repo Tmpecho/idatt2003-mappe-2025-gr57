@@ -31,6 +31,7 @@ import javafx.util.Duration;
  * and accusing.
  */
 public final class CluedoController extends GameController<GridPos> {
+
   private final CluedoBoard boardModel;
   private int stepsLeft = 0;
   private Suspect solutionSuspect;

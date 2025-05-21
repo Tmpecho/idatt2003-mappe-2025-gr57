@@ -19,6 +19,7 @@ import java.util.Set;
  * players have a hand of {@link Card}s.
  */
 public final class CluedoPlayer extends Player<GridPos> {
+
   private final Set<Suspect> suspectHand = new HashSet<>();
   private final Set<Weapon> weaponHand = new HashSet<>();
   private final Set<Room> roomHand = new HashSet<>();
@@ -59,7 +60,9 @@ public final class CluedoPlayer extends Player<GridPos> {
     return roomHand.contains(room);
   }
 
-  /** pick one at random if there are multiple options */
+  /**
+   * pick one at random if there are multiple options
+   */
   public Card showOneOf(Collection<Card> options, Random rng) {
     List<Card> matches =
         options.stream()

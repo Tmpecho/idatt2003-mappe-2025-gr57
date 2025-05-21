@@ -10,6 +10,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoControl
  * Represents the action of making an accusation in the Cluedo game.
  */
 public final class AccusationAction implements Action {
+
   private final CluedoController cluedoController;
   private final Suspect suspect;
   private final Weapon weapon;
