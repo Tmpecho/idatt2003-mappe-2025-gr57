@@ -4,9 +4,14 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
@@ -20,10 +25,16 @@ public final class CluedoView implements GameObserver<GridPos> {
 
   private final BorderPane root;
   private final CluedoBoardView boardView;
+  private final VBox controlPanel;
+  private final Button submitAccusationButton;
   private final Label statusLabel;
   private final Button rollDiceButton;
   private final Button suggestButton;
   private final Button accuseButton;
+  private final ChoiceBox<Suspect> suspectChoice;
+  private final ChoiceBox<Weapon> weaponChoice;
+  private final ChoiceBox<Room> roomChoice;
+  private VBox accusationForm;
   private final CluedoController controller;
 
   /**
@@ -46,13 +57,31 @@ public final class CluedoView implements GameObserver<GridPos> {
     root.setCenter(scrollPane);
 
     // Control Panel (Right Side)
-    VBox controlPanel = new VBox(10);
+    this.controlPanel = new VBox(10);
     controlPanel.setPrefWidth(200);
     controlPanel.setPadding(new Insets(10));
     controlPanel.setStyle("-fx-background-color: #f0f0f0;");
 
     this.statusLabel = new Label("Welcome to Cluedo!");
     statusLabel.setWrapText(true);
+
+    suspectChoice = new ChoiceBox<>(FXCollections.observableArrayList(Suspect.values()));
+    weaponChoice = new ChoiceBox<>(FXCollections.observableArrayList(Weapon.values()));
+    roomChoice = new ChoiceBox<>(FXCollections.observableArrayList(Room.values()));
+
+    submitAccusationButton = new Button("Submit Accusation");
+    submitAccusationButton.setOnAction(
+        e -> {
+          Suspect suspect = suspectChoice.getValue();
+          Weapon weapon = weaponChoice.getValue();
+          Room room = roomChoice.getValue();
+          if (suspect != null && weapon != null && room != null) {
+            controller.onAccuseButton(suspect, weapon, room);
+            hideAccusationForm();
+          } else {
+            statusLabel.setText("Please select a suspect, weapon and room.");
+          }
+        });
 
     this.rollDiceButton = new Button("Roll Dice");
     rollDiceButton.setOnAction(
@@ -66,7 +95,7 @@ public final class CluedoView implements GameObserver<GridPos> {
     suggestButton.setDisable(true); // Enable only when in a room excluding the "Cluedo" room
 
     this.accuseButton = new Button("Make Accusation");
-    accuseButton.setOnAction(e -> controller.makeAccusation());
+    accuseButton.setOnAction(e -> showAccusationForm());
     accuseButton.setDisable(true); // Enable only when in "Cluedo room"
 
     controlPanel.getChildren().addAll(statusLabel, rollDiceButton, suggestButton, accuseButton);
@@ -91,6 +120,10 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setText(message);
     boardView.highlightTile(controller.getCurrentPlayer().getPosition());
 
+    if (!controller.canAccuse() && controlPanel.getChildren().contains(submitAccusationButton)) {
+      hideAccusationForm();
+    }
+
     boolean waitingForRoll = controller.isWaitingForRoll();
     rollDiceButton.setDisable(!waitingForRoll);
 
@@ -105,5 +138,28 @@ public final class CluedoView implements GameObserver<GridPos> {
     rollDiceButton.setDisable(true);
     suggestButton.setDisable(true);
     accuseButton.setDisable(true);
+  }
+
+  private void showAccusationForm() {
+    controlPanel.getChildren().remove(accuseButton);
+
+    accusationForm =
+        new VBox(
+            5,
+            new Label("Suspect:"),
+            suspectChoice,
+            new Label("Weapon:"),
+            weaponChoice,
+            new Label("Room:"),
+            roomChoice,
+            submitAccusationButton);
+    accusationForm.setPadding(new Insets(10));
+
+    controlPanel.getChildren().add(accusationForm);
+  }
+
+  private void hideAccusationForm() {
+    controlPanel.getChildren().remove(accusationForm);
+    controlPanel.getChildren().add(accuseButton);
   }
 }

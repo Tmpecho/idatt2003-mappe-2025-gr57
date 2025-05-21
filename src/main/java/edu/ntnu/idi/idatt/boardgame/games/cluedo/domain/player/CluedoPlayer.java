@@ -4,20 +4,24 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
-import java.util.ArrayList;
-import java.util.Collections;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Represents a player in the Cluedo game, extending the generic {@link Player} class. Cluedo
  * players have a hand of {@link Card}s.
  */
 public final class CluedoPlayer extends Player<GridPos> {
-
-  /**
-   * The list of cards held by the player.
-   */
-  private final List<Card> hand = new ArrayList<>();
+  private final Set<Suspect> suspectHand = new HashSet<>();
+  private final Set<Weapon> weaponHand = new HashSet<>();
+  private final Set<Room> roomHand = new HashSet<>();
 
   /**
    * Constructs a new CluedoPlayer.
@@ -31,21 +35,54 @@ public final class CluedoPlayer extends Player<GridPos> {
     super(id, name, color, startPos);
   }
 
-  /**
-   * Adds a card to the player's hand.
-   *
-   * @param card The {@link Card} to add.
-   */
-  public void addCard(Card card) {
-    hand.add(card);
+  public void addCard(Suspect suspect) {
+    suspectHand.add(suspect);
   }
 
-  /**
-   * Gets an unmodifiable view of the player's hand of cards.
-   *
-   * @return An unmodifiable list of {@link Card}s in the player's hand.
-   */
-  public List<Card> getHand() {
-    return Collections.unmodifiableList(hand);
+  public void addCard(Weapon weapon) {
+    weaponHand.add(weapon);
+  }
+
+  public void addCard(Room room) {
+    roomHand.add(room);
+  }
+
+  public boolean hasCard(Suspect suspect) {
+    return suspectHand.contains(suspect);
+  }
+
+  public boolean hasCard(Weapon weapon) {
+    return weaponHand.contains(weapon);
+  }
+
+  public boolean hasCard(Room room) {
+    return roomHand.contains(room);
+  }
+
+  /** pick one at random if there are multiple options */
+  public Card showOneOf(Collection<Card> options, Random rng) {
+    List<Card> matches =
+        options.stream()
+            .filter(
+                card -> {
+                  if (card instanceof Suspect) {
+                    return suspectHand.contains(card);
+                  }
+                  if (card instanceof Weapon) {
+                    return weaponHand.contains(card);
+                  }
+                  if (card instanceof Room) {
+                    return roomHand.contains(card);
+                  }
+                  LoggingNotification.error(
+                      this.getClass().getName(), "Unknown card type: " + card);
+                  throw new IllegalArgumentException("Unknown card type: " + card.getClass());
+                })
+            .toList();
+    if (matches.isEmpty()) {
+      LoggingNotification.error(this.getClass().getName(), "No cards to show");
+      throw new IllegalArgumentException("No cards to show");
+    }
+    return matches.get(rng.nextInt(matches.size()));
   }
 }

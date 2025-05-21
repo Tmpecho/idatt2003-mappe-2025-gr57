@@ -27,7 +27,7 @@ class SuspectTest {
           .forEach(
               i ->
                   assertEquals(
-                      values[i].displayName(),
+                      values[i].getName(),
                       names[i],
                       "names()["
                           + i

@@ -8,7 +8,7 @@ import java.util.Arrays;
  * Enum representing the suspects in the Cluedo game. Each suspect has an associated
  * {@link PlayerColor} and a display name.
  */
-public enum Suspect {
+public enum Suspect implements Card {
   /**
    * Miss Scarlett, associated with {@link PlayerColor#WHITE}.
    */
@@ -48,7 +48,7 @@ public enum Suspect {
    * @return An array of display names for all suspects.
    */
   public static String[] names() {
-    return Arrays.stream(values()).map(Suspect::displayName).toArray(String[]::new);
+    return Arrays.stream(values()).map(Suspect::getName).toArray(String[]::new);
   }
 
   /**
@@ -64,15 +64,18 @@ public enum Suspect {
       throw new NullPointerException("playerColor is null");
     }
 
-    return Arrays.stream(values()).filter(s -> s.colour == playerColor).findFirst()
-        .orElseThrow(() -> {
-          // swallow any JavaFX-initialization problems
-          try {
-            LoggingNotification.error("Unknown colour", "No suspect for " + playerColor);
-          } catch (RuntimeException ignored) {
-          }
-          return new IllegalArgumentException("No suspect for " + playerColor);
-        });
+    return Arrays.stream(values())
+        .filter(s -> s.colour == playerColor)
+        .findFirst()
+        .orElseThrow(
+            () -> {
+              // swallow any JavaFX-initialization problems
+              try {
+                LoggingNotification.error("Unknown colour", "No suspect for " + playerColor);
+              } catch (RuntimeException ignored) {
+              }
+              return new IllegalArgumentException("No suspect for " + playerColor);
+            });
   }
 
   /**
@@ -89,7 +92,7 @@ public enum Suspect {
    *
    * @return The display name.
    */
-  public String displayName() {
+  public String getName() {
     return displayName;
   }
 }

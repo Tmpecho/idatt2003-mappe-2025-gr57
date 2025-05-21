@@ -8,42 +8,38 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
-import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.CardType;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.AccusationAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.IntStream;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 /**
  * Controller for the Cluedo game. Manages game flow, player turns, actions like moving, suggesting,
  * and accusing.
  */
 public final class CluedoController extends GameController<GridPos> {
-
   private final CluedoBoard boardModel;
-  private final int numberOfPlayers;
   private int stepsLeft = 0;
-  private List<Card> deck = new ArrayList<>();
-  /**
-   * The three cards (suspect, weapon, room) that form the solution to the mystery.
-   */
-  private final Card[] solution = new Card[3];
+  private Suspect solutionSuspect;
+  private Weapon solutionWeapon;
+  private Room solutionRoom;
   private final Random rng = new SecureRandom();
-  /**
-   * List of available suspects, used for player creation.
-   */
   private final List<Suspect> suspects = List.of(Suspect.values());
-
+  private final List<Player<GridPos>> turnOrder = new ArrayList<>();
+  private int currentIndex;
   private Phase phase = Phase.WAIT_ROLL;
 
   public boolean isWaitingForRoll() {
@@ -64,28 +60,27 @@ public final class CluedoController extends GameController<GridPos> {
       throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
     }
 
-    this.numberOfPlayers = numberOfPlayers;
-
-    createCards();
+    pickSolution();
 
     super.initialize(numberOfPlayers);
 
-    distributeCards();
+    currentIndex = 0;
+    currentPlayer = turnOrder.get(currentIndex);
+
+    dealRemainingCards();
 
     notifyObservers("Game initialised. " + currentPlayer.getName() + " starts.");
   }
 
   @Override
   protected Map<Integer, Player<GridPos>> createPlayers(int n) {
-    Map<Integer, Player<GridPos>> map = new HashMap<>();
-    IntStream.rangeClosed(1, n)
-        .forEach(
-            i -> {
-              Suspect suspect = suspects.get(i - 1);
-              CluedoPlayer player =
-                  new CluedoPlayer(i, suspect.displayName(), suspect.colour(), new GridPos(0, 0));
-              map.put(i, player);
-            });
+    LinkedHashMap<Integer, Player<GridPos>> map = new LinkedHashMap<>();
+    for (int i = 1; i <= n; i++) {
+      Suspect s = suspects.get((i - 1) % suspects.size());
+      CluedoPlayer p = new CluedoPlayer(i, s.getName(), s.colour(), new GridPos(0, 0));
+      map.put(i, p);
+      turnOrder.add(p);
+    }
     return map;
   }
 
@@ -98,15 +93,13 @@ public final class CluedoController extends GameController<GridPos> {
 
   @Override
   protected void onGameFinish() {
-    // TODO: Determine winner and notify
-    notifyGameFinished(currentPlayer); // Placeholder
+    notifyGameFinished(currentPlayer);
   }
 
   @Override
   protected Player<GridPos> getNextPlayer() {
-    int currentId = currentPlayer.getId();
-    int nextId = (currentId % numberOfPlayers) + 1;
-    return players.get(nextId);
+    currentIndex = (currentIndex + 1) % turnOrder.size();
+    return turnOrder.get(currentIndex);
   }
 
   @Override
@@ -157,6 +150,10 @@ public final class CluedoController extends GameController<GridPos> {
 
   public void onBoardClick(GridPos target) {
     new MoveAction(this, target).execute();
+  }
+
+  public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
+    new AccusationAction(this, suspect, weapon, room).execute();
   }
 
   /**
@@ -234,10 +231,49 @@ public final class CluedoController extends GameController<GridPos> {
    * player's turn. If the accusation is correct, the player wins. If incorrect, the player may be
    * out of the game or unable to make further accusations, depending on house rules.
    */
-  public void makeAccusation() {
-    // TODO: Implement accusation logic (check against solution, handle win/loss)
-    notifyObservers(currentPlayer.getName() + " accusation logic TBD.");
-    // if (isGameOver()) onGameFinish();
+  public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
+    if (suspect == null || weapon == null || room == null) {
+      throw new IllegalArgumentException("Accusation cannot be null.");
+    }
+
+    if (suspect == solutionSuspect && weapon == solutionWeapon && room == solutionRoom) {
+      notifyObservers(currentPlayer.getName() + " wins!");
+      onGameFinish();
+    } else {
+      notifyObservers(
+          currentPlayer.getName()
+              + " accused "
+              + suspect.getName()
+              + " with "
+              + weapon.getName()
+              + " in "
+              + room.getName()
+              + ". Wrong!");
+      eliminateCurrentPlayer(currentPlayer);
+
+      PauseTransition pause = new PauseTransition(Duration.seconds(2));
+      pause.setOnFinished(
+          e -> {
+            phase = Phase.WAIT_ROLL;
+            nextTurn();
+          });
+      pause.play();
+    }
+  }
+
+  private void eliminateCurrentPlayer(Player<GridPos> p) {
+    AbstractCluedoTile tile = boardModel.getTileAtPosition(p.getPosition());
+    if (tile != null) {
+      tile.removePlayer(p);
+    }
+
+    int removed = turnOrder.indexOf(p);
+    turnOrder.remove(removed);
+    if (removed <= currentIndex && currentIndex > 0) {
+      currentIndex--;
+    }
+
+    notifyObservers(p.getName() + " has been eliminated and removed from the board.");
   }
 
   private enum Phase {
@@ -257,42 +293,44 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Build a complete shuffled deck and pick the three solution cards.
+   * Selects the solution for the game by randomly picking one {@link Suspect}, one {@link Weapon},
+   * and one {@link Room} from the available cards. The selected cards are then assigned to the
+   * fields representing the solution of the game.
    */
-  private void createCards() {
-    deck = Cards.shuffledDeck(rng);
+  private void pickSolution() {
+    var suspectList = Cards.shuffledSuspects(rng);
+    solutionSuspect = suspectList.remove(0);
 
-    solution[0] = drawCard(CardType.SUSPECT);
-    solution[1] = drawCard(CardType.WEAPON);
-    solution[2] = drawCard(CardType.ROOM);
-  }
+    var weaponList = Cards.shuffledWeapons(rng);
+    solutionWeapon = weaponList.remove(0);
 
-  // Helper to draw and remove the first card of a specific type from the main deck.
-  private Card drawCard(CardType wanted) {
-    for (Iterator<Card> iterator = deck.iterator(); iterator.hasNext(); ) {
-      Card card = iterator.next();
-      if (card.type() == wanted) {
-        iterator.remove();
-        return card;
-      }
-    }
-    throw new IllegalStateException("No card of type " + wanted + " left in deck.");
+    var roomList = Cards.shuffledRooms(rng);
+    solutionRoom = roomList.remove(0);
   }
 
   /**
    * Deal the remaining deck clockwise, one at a time, until empty.
    */
-  private void distributeCards() {
-    List<CluedoPlayer> cluedoPlayers =
-        players.values().stream()
-            .map(player -> (CluedoPlayer) player)
-            .sorted(Comparator.comparingInt(Player::getId))
-            .toList();
+  private void dealRemainingCards() {
+    List<Card> deck = new ArrayList<>();
+    deck.addAll(Cards.shuffledSuspects(rng));
+    deck.addAll(Cards.shuffledWeapons(rng));
+    deck.addAll(Cards.shuffledRooms(rng));
+    Collections.shuffle(deck, rng);
+
+    var playersInOrder = players.values().stream().map(p -> (CluedoPlayer) p).toList();
 
     int idx = 0;
-    while (!deck.isEmpty()) {
-      cluedoPlayers.get(idx).addCard(deck.remove(0));
-      idx = (idx + 1) % cluedoPlayers.size();
+    for (Card card : deck) {
+      CluedoPlayer player = playersInOrder.get(idx);
+      if (card instanceof Suspect suspect) {
+        player.addCard(suspect);
+      } else if (card instanceof Weapon weapon) {
+        player.addCard(weapon);
+      } else if (card instanceof Room room) {
+        player.addCard(room);
+      }
+      idx = (idx + 1) % playersInOrder.size();
     }
   }
 }
