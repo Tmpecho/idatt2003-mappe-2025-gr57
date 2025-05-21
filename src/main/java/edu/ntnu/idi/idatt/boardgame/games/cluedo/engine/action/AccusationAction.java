@@ -6,7 +6,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
 
-public class AccusationAction implements Action {
+public final class AccusationAction implements Action {
   private final CluedoController cluedoController;
   private final Suspect suspect;
   private final Weapon weapon;

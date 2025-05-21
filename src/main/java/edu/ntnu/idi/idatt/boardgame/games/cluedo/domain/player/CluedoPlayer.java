@@ -3,9 +3,11 @@ package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -46,18 +48,22 @@ public final class CluedoPlayer extends Player<GridPos> {
   }
 
   /** pick one at random if there are multiple options */
-  public <T> T showOneOf(Collection<T> options, Random rng) {
-    List<T> matches =
+  public Card showOneOf(Collection<Card> options, Random rng) {
+    List<Card> matches =
         options.stream()
             .filter(
-                o -> {
-                  if (o instanceof Suspect) {
-                    return suspectHand.contains(o);
+                card -> {
+                  if (card instanceof Suspect) {
+                    return suspectHand.contains(card);
                   }
-                  if (o instanceof Weapon) {
-                    return weaponHand.contains(o);
+                  if (card instanceof Weapon) {
+                    return weaponHand.contains(card);
                   }
-                  return roomHand.contains(o);
+                  if (card instanceof Room) {
+                    return roomHand.contains(card);
+                  }
+                  LoggingNotification.error(this.getName(), "Unknown card type: " + card);
+                  throw new IllegalArgumentException("Unknown card type: " + card.getClass());
                 })
             .toList();
     return matches.get(rng.nextInt(matches.size()));
