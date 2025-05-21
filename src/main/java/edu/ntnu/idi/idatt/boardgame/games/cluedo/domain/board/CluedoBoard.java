@@ -20,55 +20,103 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 23); // BLUE
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 23); // PURPLE
 
-
   // Inner record for defining doors
   private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
 
   private static final List<RoomSpec> ROOM_SPECS =
-          List.of(
-                  new RoomSpec("Kitchen", new RoomDimensions(1, 1, 6, 5), true, List.of(
-                          new DoorDefinition(new RoomTile.Point(6, 4), new RoomTile.Point(7, 4))
-                  )),
-                  new RoomSpec("Ball Room", new RoomDimensions(1, 8, 7, 15), false, List.of(
-                          new DoorDefinition(new RoomTile.Point(5, 8), new RoomTile.Point(5, 7)),
-                          new DoorDefinition(new RoomTile.Point(7, 9), new RoomTile.Point(8, 9)),
-                          new DoorDefinition(new RoomTile.Point(7, 14), new RoomTile.Point(8, 14)),
-                          new DoorDefinition(new RoomTile.Point(5, 15), new RoomTile.Point(5, 16))
-                  )),
-                  new RoomSpec("Conservatory", new RoomDimensions(1, 18, 4, 23), true, List.of(
-                          new DoorDefinition(new RoomTile.Point(4, 18), new RoomTile.Point(4, 17))
-                  )),
-                  new RoomSpec("Dining Room", new RoomDimensions(10, 1, 15, 7), false, List.of(
-                          new DoorDefinition(new RoomTile.Point(12, 7), new RoomTile.Point(12, 8)),
-                          new DoorDefinition(new RoomTile.Point(15, 6), new RoomTile.Point(16, 6))
-                  )),
-                  new RoomSpec("Billiard Room", new RoomDimensions(7, 18, 12, 23), false, List.of(
-                          new DoorDefinition(new RoomTile.Point(8, 18), new RoomTile.Point(8, 17)),
-                          new DoorDefinition(new RoomTile.Point(12, 22), new RoomTile.Point(13, 22))
-                  )),
-                  new RoomSpec("Library", new RoomDimensions(14, 17, 18, 23), false, List.of(
-                          new DoorDefinition(new RoomTile.Point(14, 20), new RoomTile.Point(13, 20)),
-                          new DoorDefinition(new RoomTile.Point(16, 17), new RoomTile.Point(16, 16))
-                  )),
-                  new RoomSpec("Study", new RoomDimensions(21, 17, 23, 23), true, List.of(
-                          new DoorDefinition(new RoomTile.Point(21, 18), new RoomTile.Point(20, 18))
-                  )),
-                  new RoomSpec("Hall", new RoomDimensions(18, 9, 23, 14), false, List.of(
-                          new DoorDefinition(new RoomTile.Point(18, 11), new RoomTile.Point(17, 11)),
-                          new DoorDefinition(new RoomTile.Point(18, 12), new RoomTile.Point(17, 12)),
-                          new DoorDefinition(new RoomTile.Point(20, 9), new RoomTile.Point(20, 8)),
-                          new DoorDefinition(new RoomTile.Point(21, 14), new RoomTile.Point(21, 15))
-                  )),
-                  new RoomSpec("Lounge", new RoomDimensions(19, 1, 23, 6), true, List.of(
-                          new DoorDefinition(new RoomTile.Point(19, 6), new RoomTile.Point(18, 6))
-                  )),
-                  new RoomSpec("Cluedo", new RoomDimensions(10, 10, 14, 14), true, List.of())
-          );
+      List.of(
+          new RoomSpec(
+              "Kitchen",
+              new RoomDimensions(1, 1, 6, 5),
+              true,
+              List.of(new DoorDefinition(new RoomTile.Point(6, 4), new RoomTile.Point(7, 4)))),
+          new RoomSpec(
+              "Ball Room",
+              new RoomDimensions(1, 8, 7, 15),
+              false,
+              List.of(
+                  new DoorDefinition(new RoomTile.Point(5, 8), new RoomTile.Point(5, 7)),
+                  new DoorDefinition(new RoomTile.Point(7, 9), new RoomTile.Point(8, 9)),
+                  new DoorDefinition(new RoomTile.Point(7, 14), new RoomTile.Point(8, 14)),
+                  new DoorDefinition(new RoomTile.Point(5, 15), new RoomTile.Point(5, 16)))),
+          new RoomSpec(
+              "Conservatory",
+              new RoomDimensions(1, 18, 4, 23),
+              true,
+              List.of(new DoorDefinition(new RoomTile.Point(4, 18), new RoomTile.Point(4, 17)))),
+          new RoomSpec(
+              "Dining Room",
+              new RoomDimensions(10, 1, 15, 7),
+              false,
+              List.of(
+                  new DoorDefinition(new RoomTile.Point(12, 7), new RoomTile.Point(12, 8)),
+                  new DoorDefinition(new RoomTile.Point(15, 6), new RoomTile.Point(16, 6)))),
+          new RoomSpec(
+              "Billiard Room",
+              new RoomDimensions(7, 18, 12, 23),
+              false,
+              List.of(
+                  new DoorDefinition(new RoomTile.Point(8, 18), new RoomTile.Point(8, 17)),
+                  new DoorDefinition(new RoomTile.Point(12, 22), new RoomTile.Point(13, 22)))),
+          new RoomSpec(
+              "Library",
+              new RoomDimensions(14, 17, 18, 23),
+              false,
+              List.of(
+                  new DoorDefinition(new RoomTile.Point(14, 20), new RoomTile.Point(13, 20)),
+                  new DoorDefinition(new RoomTile.Point(16, 17), new RoomTile.Point(16, 16)))),
+          new RoomSpec(
+              "Study",
+              new RoomDimensions(21, 17, 23, 23),
+              true,
+              List.of(new DoorDefinition(new RoomTile.Point(21, 18), new RoomTile.Point(20, 18)))),
+          new RoomSpec(
+              "Hall",
+              new RoomDimensions(18, 9, 23, 14),
+              false,
+              List.of(
+                  new DoorDefinition(new RoomTile.Point(18, 11), new RoomTile.Point(17, 11)),
+                  new DoorDefinition(new RoomTile.Point(18, 12), new RoomTile.Point(17, 12)),
+                  new DoorDefinition(new RoomTile.Point(20, 9), new RoomTile.Point(20, 8)),
+                  new DoorDefinition(new RoomTile.Point(21, 14), new RoomTile.Point(21, 15)))),
+          new RoomSpec(
+              "Lounge",
+              new RoomDimensions(19, 1, 23, 6),
+              true,
+              List.of(new DoorDefinition(new RoomTile.Point(19, 6), new RoomTile.Point(18, 6)))),
+          new RoomSpec("Cluedo", new RoomDimensions(10, 10, 14, 14), true, List.of()));
 
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
   public CluedoBoard() {
     initializeTiles();
+  }
+
+  public boolean isLegalDestination(GridPos fromPosition, GridPos targetPosition) {
+    AbstractCluedoTile fromTile = getTileAtPosition(fromPosition);
+    AbstractCluedoTile toTile = getTileAtPosition(targetPosition);
+
+    boolean adjacent =
+        Math.abs(fromPosition.row() - targetPosition.row())
+                + Math.abs(fromPosition.col() - targetPosition.col())
+            == 1;
+
+    boolean corridorToCorridor =
+        fromTile instanceof CorridorTile && toTile instanceof CorridorTile && adjacent;
+
+    boolean doorEntry =
+        fromTile instanceof CorridorTile
+            && toTile instanceof RoomTile
+            && adjacent // must stand right outside the door
+            && ((RoomTile) toTile).canEnterFrom(fromPosition.row(), fromPosition.col());
+
+    boolean doorExit =
+        fromTile instanceof RoomTile room
+            && toTile instanceof CorridorTile
+            && room.canExitTo(targetPosition.row(), targetPosition.col());
+
+    // reject anything but corridor->corridor, corridor->room, room->corridor
+    return corridorToCorridor || doorEntry || doorExit;
   }
 
   private void initializeTiles() {
@@ -163,7 +211,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
             try {
               room.addDoor(doorDef.roomSide(), doorDef.corridorSide());
             } catch (IllegalArgumentException e) {
-              System.err.println("Error adding door for room "
+              System.err.println(
+                  "Error adding door for room "
                       + spec.name
                       + " between "
                       + doorDef.roomSide()
@@ -185,24 +234,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         }
       }
     }
-    // Making the central "Cluedo" area (which is a RoomTile) non-walkable internally.
-    // And the corridor tiles directly around it also non-walkable.
-    for (int r = 10; r <= 16; r++) {
-      for (int c = 9; c <= 14; c++) {
-        if (isValidPosition(new GridPos(r,c))) {
-          AbstractCluedoTile tile = board[r][c];
-          if (r >= 10 && r <= 14 && c >= 10 && c <= 14) { // Inside "Cluedo" room dimensions
-            if (tile instanceof RoomTile roomTile && roomTile.getRoomName().equals("Cluedo")){
-              roomTile.setWalkable(false);
-            }
-          } else {
-            if (tile instanceof CorridorTile) {
-              tile.setWalkable(false);
-            }
-          }
-        }
-      }
-    }
   }
 
   private void placeStartPosAdjacentBorders() {
@@ -218,11 +249,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     replaceWithBorderIfCorridor(1, 6);
     replaceWithBorderIfCorridor(1, 8);
 
-
     // PlayerColor.GREEN (Rev. Green) -> START_POS_REV_GREEN = new GridPos(1, 16);
     replaceWithBorderIfCorridor(1, 15); // Adjusted from 1,13 to 1,15
     replaceWithBorderIfCorridor(1, 17); // Adjusted from 1,15 to 1,17
-
 
     // PlayerColor.BLUE (Mrs. Peacock) -> START_POS_MRS_PEACOCK = new GridPos(6, 23);
     replaceWithBorderIfCorridor(5, 23);
@@ -263,7 +292,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       return;
     }
     AbstractCluedoTile targetTile = getTileAtPosition(position);
-    if (targetTile == null) { // Should not happen if isValidPosition is true and board is fully initialized
+    if (targetTile
+        == null) { // Should not happen if isValidPosition is true and board is fully initialized
       System.err.println("CRITICAL Error: Target tile is null at valid position " + position);
       return;
     }
@@ -337,7 +367,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                   return;
                 }
 
-                        player.setPosition(startPos);
+                player.setPosition(startPos);
 
                 if (!startTile.isWalkable()
                     && !(startTile instanceof RoomTile)) { // Rooms are fine to start in.
@@ -351,14 +381,14 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                 }
                 startTile.addPlayer(player); // Add player to the tile model
 
-                      } else {
-                        System.err.println(
-                                "Error: Invalid start position "
-                                        + startPos
-                                        + " calculated for player "
-                                        + player.getName());
-                      }
-                    });
+              } else {
+                System.err.println(
+                    "Error: Invalid start position "
+                        + startPos
+                        + " calculated for player "
+                        + player.getName());
+              }
+            });
   }
 
   public AbstractCluedoTile getTileAtPosition(GridPos pos) {
@@ -368,67 +398,12 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     return null;
   }
 
-  public void movePlayer(Player<GridPos> player, GridPos toPos) {
-    if (!isValidPosition(toPos)) {
-      System.err.println("Invalid move target: " + toPos);
-      return;
-    }
-    AbstractCluedoTile targetTile = getTileAtPosition(toPos);
-    if (targetTile == null) {
-      System.err.println("Cannot move to null tile: " + toPos);
-      return;
-    }
-    if (targetTile instanceof BorderTile) {
-      System.err.println("Cannot move to a BorderTile: " + toPos);
-      return;
-    }
-    AbstractCluedoTile currentTile = getTileAtPosition(player.getPosition());
-    if (targetTile instanceof RoomTile roomTarget) {
-      if (currentTile instanceof CorridorTile) {
-        if (!roomTarget.canEnterFrom(player.getPosition().row(), player.getPosition().col())) {
-          System.err.println(
-                  "Cannot enter room "
-                          + roomTarget.getRoomName()
-                          + " from "
-                          + player.getPosition()
-                          + ". No door or invalid entry point.");
-          return;
-        }
-      }
-      // Moving from Room to Room (secret passage - not implemented, so disallow for now)
-      else if (currentTile instanceof RoomTile && currentTile != targetTile) {
-        System.err.println("Secret passages not implemented. Cannot move directly between rooms "
-                + ((RoomTile) currentTile).getRoomName() + " and " + roomTarget.getRoomName());
-        return;
-      }
-      // Moving within the same room is allowed.
-    }
-    // Moving from Room to Corridor
-    else if (targetTile instanceof CorridorTile && currentTile instanceof RoomTile roomOrigin) {
-      if (!roomOrigin.canExitTo(toPos.row(), toPos.col())) {
-        System.err.println("Cannot exit room " + roomOrigin.getRoomName() + " to " + toPos + ". No door or invalid exit point.");
-        return;
-      }
-    }
-    // Moving to a non-walkable tile (that isn't a room)
-    else if (!targetTile.isWalkable()) {
-      System.err.println(
-              "Cannot move to non-walkable tile: "
-                      + toPos
-                      + " of type "
-                      + targetTile.getClass().getSimpleName());
-      return;
-    }
-    setPlayerPosition(player, toPos);
-  }
-
-
   private boolean isValidPosition(GridPos pos) {
     return pos != null
-            && pos.row() >= 0
-            && pos.row() < BOARD_SIZE
-            && pos.col() >= 0
-            && pos.col() < BOARD_SIZE;
+        && pos.row() >= 0
+        && pos.row() < BOARD_SIZE
+        && pos.col() >= 0
+        && pos.col() < BOARD_SIZE;
   }
 
   private GridPos getPlayerStartPosition(Player<GridPos> player) {
@@ -441,11 +416,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       case BLUE -> START_POS_MRS_PEACOCK;
       case PURPLE -> START_POS_PROF_PLUM;
       default -> {
-        System.err.println(
-                "Warning: Unmapped player color for start position: "
-                        + color);
+        System.err.println("Warning: Unmapped player color for start position: " + color);
         throw new IllegalArgumentException(
-                "Invalid or unmapped player color for start position: " + color);
+            "Invalid or unmapped player color for start position: " + color);
       }
     };
   }
@@ -456,5 +429,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   private record RoomDimensions(int top, int left, int bottom, int right) {}
 
-  private record RoomSpec(String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {}
+  private record RoomSpec(
+      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {}
 }

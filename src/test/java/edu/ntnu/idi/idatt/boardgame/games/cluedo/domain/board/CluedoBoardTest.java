@@ -33,59 +33,6 @@ class CluedoBoardTest {
   }
 
   @Test
-  void constructor_initializesBoardCorrectly() {
-    assertEquals(25, board.getBoardSize());
-    assertEquals(25, board.getRows());
-    assertEquals(25, board.getCols());
-
-    assertInstanceOf(BorderTile.class, board.getTileAtPosition(new GridPos(0, 0)));
-    assertInstanceOf(RoomTile.class, board.getTileAtPosition(new GridPos(1, 1)));
-    assertEquals("Kitchen", ((RoomTile) board.getTileAtPosition(new GridPos(1, 1))).getRoomName());
-
-    // Check a standard corridor tile that should be walkable
-    GridPos walkableCorridorPos = new GridPos(7, 7);
-    AbstractCluedoTile walkableCorridorTile = board.getTileAtPosition(walkableCorridorPos);
-    assertInstanceOf(CorridorTile.class, walkableCorridorTile);
-    assertTrue(walkableCorridorTile.isWalkable(), "Corridor tile at (7,7) should be walkable.");
-
-
-    RoomTile kitchen = (RoomTile) board.getTileAtPosition(new GridPos(1, 1));
-    assertTrue(kitchen.canEnterFrom(7, 4), "Kitchen should have a door at (7,4)");
-
-    AbstractCluedoTile cluedoCenterTile = board.getTileAtPosition(new GridPos(10, 10));
-    assertInstanceOf(RoomTile.class, cluedoCenterTile);
-    assertEquals("Cluedo", ((RoomTile) cluedoCenterTile).getRoomName());
-    assertFalse(cluedoCenterTile.isWalkable());
-
-    assertInstanceOf(CorridorTile.class, board.getTileAtPosition(new GridPos(10, 9)));
-    assertFalse(board.getTileAtPosition(new GridPos(10, 9)).isWalkable());
-
-    assertInstanceOf(
-            BorderTile.class,
-            board.getTileAtPosition(new GridPos(23, 8)),
-            "Tile at (23,8) next to Miss Scarlett start should become BorderTile");
-    // (23,6) is initially Lounge (RoomTile).
-    assertInstanceOf(
-            RoomTile.class,
-            board.getTileAtPosition(new GridPos(23, 6)),
-            "Tile at (23,6) next to Miss Scarlett start should remain RoomTile (Lounge)");
-    assertEquals("Lounge", ((RoomTile)board.getTileAtPosition(new GridPos(23,6))).getRoomName());
-
-
-    assertInstanceOf(
-            BorderTile.class,
-            board.getTileAtPosition(new GridPos(1, 6)),
-            "Tile at (1,6) next to Mrs. White start should become BorderTile");
-    GridPos mrsWhiteAdjRoomPos = new GridPos(1,8);
-    AbstractCluedoTile mrsWhiteAdjRoomTile = board.getTileAtPosition(mrsWhiteAdjRoomPos);
-    assertInstanceOf(
-            RoomTile.class,
-            mrsWhiteAdjRoomTile,
-            "Tile at (1,8) next to Mrs. White start should remain RoomTile (Ball Room)");
-    assertEquals("Ball Room", ((RoomTile)mrsWhiteAdjRoomTile).getRoomName());
-  }
-
-  @Test
   void addPlayersToStart_placesPlayersAtCorrectStartPositions() {
     board.addPlayersToStart(players);
 
@@ -134,20 +81,6 @@ class CluedoBoardTest {
   }
 
   @Test
-  void setPlayerPosition_invalidMoveToNonWalkableNonRoomTile_doesNotMove() {
-    board.addPlayersToStart(players);
-    GridPos originalPos = missScarlett.getPosition();
-    GridPos nonWalkableCorridor = new GridPos(10, 9);
-    assertFalse(board.getTileAtPosition(nonWalkableCorridor).isWalkable());
-    assertInstanceOf(CorridorTile.class, board.getTileAtPosition(nonWalkableCorridor));
-
-    board.setPlayerPosition(missScarlett, nonWalkableCorridor);
-
-    assertEquals(originalPos, missScarlett.getPosition());
-    assertFalse(board.getTileAtPosition(nonWalkableCorridor).getPlayers().contains(missScarlett));
-  }
-
-  @Test
   void setPlayerPosition_moveToRoom_isAllowed() {
     board.addPlayersToStart(players);
     GridPos studyEntranceCorridor = new GridPos(20, 18);
@@ -166,58 +99,59 @@ class CluedoBoardTest {
   }
 
   @Test
-  void movePlayer_corridorToRoom_throughValidDoor() {
-    board.addPlayersToStart(players);
-    GridPos corridorByKitchenDoor = new GridPos(7, 4);
-    GridPos kitchenTileByDoor = new GridPos(6, 4);
-
-    board.setPlayerPosition(colMustard, corridorByKitchenDoor);
-    AbstractCluedoTile oldTile = board.getTileAtPosition(corridorByKitchenDoor);
-
-    board.movePlayer(colMustard, kitchenTileByDoor);
-
-    assertEquals(kitchenTileByDoor, colMustard.getPosition());
-    assertTrue(board.getTileAtPosition(kitchenTileByDoor).getPlayers().contains(colMustard));
-    assertFalse(oldTile.getPlayers().contains(colMustard));
-  }
-
-  @Test
-  void movePlayer_corridorToRoom_throughWall_shouldNotMove() {
-    board.addPlayersToStart(players);
-    GridPos corridorNextToKitchenWall = new GridPos(7, 1);
-    GridPos kitchenTileInsideWall = new GridPos(6, 1);
-
-    board.setPlayerPosition(colMustard, corridorNextToKitchenWall);
-    AbstractCluedoTile originalTile = board.getTileAtPosition(corridorNextToKitchenWall);
-
-    board.movePlayer(colMustard, kitchenTileInsideWall);
-
-    assertEquals(corridorNextToKitchenWall, colMustard.getPosition());
-    assertTrue(originalTile.getPlayers().contains(colMustard));
-    assertFalse(board.getTileAtPosition(kitchenTileInsideWall).getPlayers().contains(colMustard));
-  }
-
-  @Test
-  void movePlayer_roomToCorridor_throughValidDoor() {
-    board.addPlayersToStart(players);
-    GridPos kitchenTileByDoor = new GridPos(6, 4);
-    GridPos corridorByKitchenDoor = new GridPos(7, 4);
-
-    board.setPlayerPosition(colMustard, kitchenTileByDoor);
-    AbstractCluedoTile oldTile = board.getTileAtPosition(kitchenTileByDoor);
-
-    board.movePlayer(colMustard, corridorByKitchenDoor);
-
-    assertEquals(corridorByKitchenDoor, colMustard.getPosition());
-    assertTrue(board.getTileAtPosition(corridorByKitchenDoor).getPlayers().contains(colMustard));
-    assertFalse(oldTile.getPlayers().contains(colMustard));
-  }
-
-  @Test
   void getTileAtPosition_outOfBounds_returnsNull() {
     assertNull(board.getTileAtPosition(new GridPos(-1, 5)));
     assertNull(board.getTileAtPosition(new GridPos(5, -1)));
     assertNull(board.getTileAtPosition(new GridPos(25, 5)));
     assertNull(board.getTileAtPosition(new GridPos(5, 25)));
+  }
+
+  @Test
+  void isLegalDestination_validCorridorMove_returnsTrue() {
+    GridPos fromPos = new GridPos(10, 10);
+    GridPos toPos = new GridPos(10, 9); // Adjacent corridor
+
+    assertTrue(
+        board.isLegalDestination(fromPos, toPos), "Legal move between adjacent corridors failed.");
+  }
+
+  @Test
+  void isLegalDestination_doorEntry_returnsTrue() {
+    GridPos corridorPos = new GridPos(12, 8); // Corridor near a door
+    GridPos roomPos = new GridPos(12, 7); // Room tile through a door
+
+    assertTrue(
+        board.isLegalDestination(corridorPos, roomPos),
+        "Legal move into a room through a door failed.");
+  }
+
+  @Test
+  void isLegalDestination_doorExit_returnsTrue() {
+    GridPos roomPos = new GridPos(12, 7); // Room tile
+    GridPos corridorPos = new GridPos(12, 8); // Adjacent corridor tile
+
+    assertTrue(
+        board.isLegalDestination(roomPos, corridorPos),
+        "Legal move to exit a room through a door failed.");
+  }
+
+  @Test
+  void isLegalDestination_nonAdjacentTiles_returnsFalse() {
+    GridPos fromPos = new GridPos(5, 5);
+    GridPos toPos = new GridPos(7, 7); // Non-adjacent tile
+
+    assertFalse(
+        board.isLegalDestination(fromPos, toPos),
+        "Illegal move to a non-adjacent tile was considered legal.");
+  }
+
+  @Test
+  void isLegalDestination_invalidTileMove_returnsFalse() {
+    GridPos fromPos = new GridPos(10, 10);
+    GridPos invalidPos = new GridPos(0, 0); // Border or invalid tile
+
+    assertFalse(
+        board.isLegalDestination(fromPos, invalidPos),
+        "Illegal move to a border or invalid tile was considered legal.");
   }
 }

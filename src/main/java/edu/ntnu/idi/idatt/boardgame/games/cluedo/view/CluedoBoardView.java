@@ -70,29 +70,6 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     }
   }
 
-  private static FlowPane getFlowPane(StackPane roomPane) {
-    FlowPane playerTokenPane = new FlowPane();
-    playerTokenPane.setAlignment(Pos.BOTTOM_CENTER);
-    playerTokenPane.setHgap(3);
-    playerTokenPane.setVgap(3);
-    playerTokenPane.setPadding(new javafx.geometry.Insets(5));
-    // Make token pane pick up mouse events if needed later, but not block room label
-    playerTokenPane.setPickOnBounds(false);
-
-    double roomPaneWidth = roomPane.getWidth();
-    if (roomPaneWidth <= 0) {
-      roomPaneWidth = TILE_SIZE * 2;
-    }
-    double roomPaneHeight = roomPane.getHeight();
-    if (roomPaneHeight <= 0) {
-      roomPaneHeight = TILE_SIZE * 2;
-    }
-
-    playerTokenPane.setMaxWidth(Math.max(TILE_SIZE, roomPaneWidth - 20));
-    playerTokenPane.setMaxHeight(Math.max(TILE_SIZE / 2.0, roomPaneHeight / 3.0));
-    return playerTokenPane;
-  }
-
   private static FlowPane makePlayerPane() {
     FlowPane pane = new FlowPane();
     pane.setAlignment(Pos.CENTER);
