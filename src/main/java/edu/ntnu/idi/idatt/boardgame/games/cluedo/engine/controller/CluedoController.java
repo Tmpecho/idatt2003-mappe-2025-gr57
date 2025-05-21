@@ -39,10 +39,6 @@ public final class CluedoController extends GameController<GridPos> {
   private int currentIndex;
   private Phase phase = Phase.WAIT_ROLL;
 
-  public boolean isWaitingForRoll() {
-    return phase == Phase.WAIT_ROLL;
-  }
-
   public CluedoController(int numberOfPlayers) {
     super(new CluedoBoard(), new Dice(4)); // todo switch to 2
     this.boardModel = (CluedoBoard) this.gameBoard;
@@ -61,6 +57,10 @@ public final class CluedoController extends GameController<GridPos> {
     dealRemainingCards();
 
     notifyObservers("Game initialised. " + currentPlayer.getName() + " starts.");
+  }
+
+  public boolean isWaitingForRoll() {
+    return phase == Phase.WAIT_ROLL;
   }
 
   @Override
@@ -162,24 +162,18 @@ public final class CluedoController extends GameController<GridPos> {
       return;
     }
 
-    // did we step *into* a room?
     boolean enteringRoom = boardModel.getTileAtPosition(target) instanceof RoomTile;
 
-    // 1) actually move
     boardModel.setPlayerPosition(currentPlayer, target);
-
-    // 2) consume a step (or zero out on entry)
     if (enteringRoom) {
       stepsLeft = 0;
     } else {
       stepsLeft--;
     }
 
-    // 3) log it
     notifyObservers(
         currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.");
 
-    // 4) adjust phase / turn
     if (stepsLeft == 0) {
       if (enteringRoom) {
         phase = Phase.IN_ROOM;
@@ -237,17 +231,23 @@ public final class CluedoController extends GameController<GridPos> {
               + " disproved by showing \""
               + shownCardName
               + ".\"");
+
+      phase = Phase.WAIT_ROLL;
       return;
     }
 
     // Nobody could disprove
     notifyObservers(
-        String.format(
-            "%s suggested %s in the %s with the %s.  No one could disprove the suggestion.",
-            currentPlayer.getName(),
-            suggestedSuspect.getName(),
-            suggestedRoom.getName(),
-            suggestedWeapon.getName()));
+        currentPlayer.getName()
+            + " suggested "
+            + suggestedSuspect.getName()
+            + " in the "
+            + suggestedRoom.getName()
+            + " with the "
+            + suggestedWeapon.getName()
+            + ".  No one could disprove the suggestion.");
+
+    phase = Phase.WAIT_ROLL;
   }
 
   public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
@@ -304,18 +304,10 @@ public final class CluedoController extends GameController<GridPos> {
     return null;
   }
 
-  private enum Phase {
-    WAIT_ROLL,
-    MOVING,
-    IN_ROOM,
-    TURN_OVER
-  }
-
   /** Called when this player’s movement finishes. Advances turn. */
-  private void endTurn() {
-    Player<GridPos> next = getNextPlayer();
-    currentPlayer = next;
-    notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
+  public void endTurn() {
+    this.phase = Phase.WAIT_ROLL;
+    nextTurn();
   }
 
   /**
@@ -355,5 +347,12 @@ public final class CluedoController extends GameController<GridPos> {
       }
       idx = (idx + 1) % playersInOrder.size();
     }
+  }
+
+  private enum Phase {
+    WAIT_ROLL,
+    MOVING,
+    IN_ROOM,
+    TURN_OVER
   }
 }

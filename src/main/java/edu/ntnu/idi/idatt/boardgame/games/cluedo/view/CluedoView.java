@@ -27,6 +27,7 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final Button rollDiceButton;
   private final Button suggestButton;
   private final Button accuseButton;
+  private final Button endTurnButton;
   private final ChoiceBox<Suspect> suspectChoice;
   private final ChoiceBox<Weapon> weaponChoice;
   private final ChoiceBox<Room> roomChoice;
@@ -61,6 +62,21 @@ public final class CluedoView implements GameObserver<GridPos> {
     weaponChoice = new ChoiceBox<>(FXCollections.observableArrayList(Weapon.values()));
     roomChoice = new ChoiceBox<>(FXCollections.observableArrayList(Room.values()));
 
+    this.suggestButton = new Button("Make Suggestion");
+    suggestButton.setOnAction(e -> showSuggestionForm());
+    suggestButton.setDisable(true); // Enable only when in a room excluding the "Cluedo" room
+
+    this.accuseButton = new Button("Make Accusation");
+    accuseButton.setOnAction(e -> showAccusationForm());
+    accuseButton.setDisable(true); // Enable only when in "Cluedo room"
+
+    endTurnButton = new Button("End Turn");
+    endTurnButton.setOnAction(
+        e -> {
+          controller.endTurn();
+          controlPanel.getChildren().remove(endTurnButton);
+        });
+
     submitAccusationButton = new Button("Submit Accusation");
     submitAccusationButton.setOnAction(
         e -> {
@@ -81,9 +97,15 @@ public final class CluedoView implements GameObserver<GridPos> {
           Suspect suspect = suspectChoice.getValue();
           Weapon weapon = weaponChoice.getValue();
           Room room = roomChoice.getValue();
+
           if (suspect != null && weapon != null && room != null) {
             controller.onSuggestButton(suspect, weapon, room);
+
             hideSuggestionForm();
+            controlPanel.getChildren().add(endTurnButton);
+
+            suggestButton.setDisable(true);
+            accuseButton.setDisable(true);
           } else {
             statusLabel.setText("Please select a suspect, weapon and room.");
           }
@@ -95,14 +117,6 @@ public final class CluedoView implements GameObserver<GridPos> {
           controller.onRollButton();
           rollDiceButton.setDisable(true);
         });
-
-    this.suggestButton = new Button("Make Suggestion");
-    suggestButton.setOnAction(e -> showSuggestionForm());
-    suggestButton.setDisable(true); // Enable only when in a room excluding the "Cluedo" room
-
-    this.accuseButton = new Button("Make Accusation");
-    accuseButton.setOnAction(e -> showAccusationForm());
-    accuseButton.setDisable(true); // Enable only when in "Cluedo room"
 
     controlPanel.getChildren().addAll(statusLabel, rollDiceButton, suggestButton, accuseButton);
 
@@ -125,11 +139,16 @@ public final class CluedoView implements GameObserver<GridPos> {
       hideAccusationForm();
     }
 
-    boolean waitingForRoll = controller.isWaitingForRoll();
-    rollDiceButton.setDisable(!waitingForRoll);
+    rollDiceButton.setDisable(!controller.isWaitingForRoll());
 
-    suggestButton.setDisable(!controller.canSuggest());
-    accuseButton.setDisable(!controller.canAccuse());
+    // if we’re mid-suggestion (i.e. EndTurn is visible), keep suggest/accuse off
+    if (controlPanel.getChildren().contains(endTurnButton)) {
+      suggestButton.setDisable(true);
+      accuseButton.setDisable(true);
+    } else {
+      suggestButton.setDisable(!controller.canSuggest());
+      accuseButton.setDisable(!controller.canAccuse());
+    }
   }
 
   @Override
@@ -187,6 +206,6 @@ public final class CluedoView implements GameObserver<GridPos> {
   private void hideSuggestionForm() {
     controlPanel.getChildren().remove(suggesionForm);
     roomChoice.setDisable(false);
-    suggestButton.setDisable(false);
+    //    suggestButton.setDisable(false);
   }
 }
