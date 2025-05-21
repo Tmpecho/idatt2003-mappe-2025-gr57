@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum Room implements Card {
   KITCHEN("Kitchen"),
-  BALLROOM("Ballroom"),
+  BALLROOM("Ball Room"),
   CONSERVATORY("Conservatory"),
   DINING_ROOM("Dining Room"),
   BILLIARD_ROOM("Billiard Room"),
@@ -23,6 +23,14 @@ public enum Room implements Card {
     return Arrays.stream(Room.values()).map(Room::getName).toArray(String[]::new);
   }
 
+  public static Room fromDisplayName(String name) {
+    return Arrays.stream(values())
+        .filter(r -> r.getName().equals(name))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown room: " + name));
+  }
+
+  @Override
   public String getName() {
     return name;
   }

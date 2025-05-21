@@ -16,6 +16,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.AccusationAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.SuggestionAction;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +44,7 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   public CluedoController(int numberOfPlayers) {
-    super(new CluedoBoard(), new Dice(2));
+    super(new CluedoBoard(), new Dice(4)); // todo switch to 2
     this.boardModel = (CluedoBoard) this.gameBoard;
 
     if (numberOfPlayers < 2 || numberOfPlayers > 6) {
@@ -143,6 +144,10 @@ public final class CluedoController extends GameController<GridPos> {
     new AccusationAction(this, suspect, weapon, room).execute();
   }
 
+  public void onSuggestButton(Suspect suspect, Weapon weapon, Room room) {
+    new SuggestionAction(this, suspect, weapon, room).execute();
+  }
+
   /**
    * Try to move the current player to the clicked tile. Only corridor→corridor or valid door→room
    * is allowed. Decrements stepsLeft and ends turn on room-entry or when stepsLeft hits zero.
@@ -194,9 +199,55 @@ public final class CluedoController extends GameController<GridPos> {
     return currentPlayer;
   }
 
-  public void makeSuggestion() {
-    // TODO: Implement suggestion logic (only in rooms, move suspect/weapon)
-    notifyObservers(currentPlayer.getName() + " suggestion logic TBD.");
+  public void makeSuggestion(Suspect suggestedSuspect, Weapon suggestedWeapon, Room suggestedRoom) {
+    if (suggestedSuspect == null || suggestedWeapon == null || suggestedRoom == null) {
+      throw new IllegalArgumentException("Suggestion cannot be null.");
+    }
+
+    int totalPlayers = turnOrder.size();
+
+    // Try each other player in turn order, starting with the next player
+    for (int stepsFromCurrent = 1; stepsFromCurrent < totalPlayers; stepsFromCurrent++) {
+      int respondentIndex = (currentIndex + stepsFromCurrent) % totalPlayers;
+      CluedoPlayer respondent = (CluedoPlayer) turnOrder.get(respondentIndex);
+
+      // Does this player hold any of the three cards?
+      if (!respondent.hasCard(suggestedSuspect)
+          && !respondent.hasCard(suggestedWeapon)
+          && !respondent.hasCard(suggestedRoom)) {
+        continue;
+      }
+
+      // If they hold more than one, pick one at random to show
+      Card shownCard =
+          respondent.showOneOf(List.of(suggestedSuspect, suggestedWeapon, suggestedRoom), rng);
+
+      String shownCardName = shownCard.getName();
+
+      notifyObservers(
+          currentPlayer.getName()
+              + " suggested "
+              + suggestedSuspect.getName()
+              + " in the "
+              + suggestedRoom.getName()
+              + " with the "
+              + suggestedWeapon.getName()
+              + ".  "
+              + respondent.getName()
+              + " disproved by showing \""
+              + shownCardName
+              + ".\"");
+      return;
+    }
+
+    // Nobody could disprove
+    notifyObservers(
+        String.format(
+            "%s suggested %s in the %s with the %s.  No one could disprove the suggestion.",
+            currentPlayer.getName(),
+            suggestedSuspect.getName(),
+            suggestedRoom.getName(),
+            suggestedWeapon.getName()));
   }
 
   public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
@@ -242,6 +293,15 @@ public final class CluedoController extends GameController<GridPos> {
     }
 
     notifyObservers(p.getName() + " has been eliminated and removed from the board.");
+  }
+
+  public Room getRoomOfCurrentPlayer() {
+    GridPos pos = currentPlayer.getPosition();
+    AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
+    if (tile instanceof RoomTile room) {
+      return Room.fromDisplayName(room.getRoomName());
+    }
+    return null;
   }
 
   private enum Phase {

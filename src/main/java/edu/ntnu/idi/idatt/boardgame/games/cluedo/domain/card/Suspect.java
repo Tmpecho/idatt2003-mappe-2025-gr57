@@ -54,6 +54,7 @@ public enum Suspect implements Card {
     return colour;
   }
 
+  @Override
   public String getName() {
     return displayName;
   }
