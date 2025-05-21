@@ -22,7 +22,7 @@ public enum Suspect {
 
   /** Convenience: every suspect’s display name in game-order (needed by {@code Cards}). */
   public static String[] names() {
-    return Arrays.stream(values()).map(Suspect::displayName).toArray(String[]::new);
+    return Arrays.stream(values()).map(Suspect::getName).toArray(String[]::new);
   }
 
   /**
@@ -54,7 +54,7 @@ public enum Suspect {
     return colour;
   }
 
-  public String displayName() {
+  public String getName() {
     return displayName;
   }
 }
