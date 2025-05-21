@@ -19,19 +19,18 @@ public interface GameBoard<P extends Position> {
   void addPlayersToStart(Map<Integer, Player<P>> players);
 
   /**
-   * Gets the size of the board (e.g., number of tiles).
-   * The exact meaning of "size" can vary depending on the game.
+   * Gets the size of the board (e.g., number of tiles). The exact meaning of "size" can vary
+   * depending on the game.
    *
    * @return The size of the board.
    */
   int getBoardSize();
 
   /**
-   * Sets the position of a given player on the board.
-   * This method should handle removing the player from their old tile
-   * and adding them to the new tile.
+   * Sets the position of a given player on the board. This method should handle removing the player
+   * from their old tile and adding them to the new tile.
    *
-   * @param player The player whose position is to be set.
+   * @param player   The player whose position is to be set.
    * @param position The new position for the player.
    */
   void setPlayerPosition(Player<P> player, P position);

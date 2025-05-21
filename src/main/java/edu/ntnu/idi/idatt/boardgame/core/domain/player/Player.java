@@ -6,6 +6,7 @@ package edu.ntnu.idi.idatt.boardgame.core.domain.player;
  * @param <P> The type of {@link Position} used by this player.
  */
 public class Player<P extends Position> {
+
   /**
    * The unique identifier for the player.
    */
@@ -26,9 +27,9 @@ public class Player<P extends Position> {
   /**
    * Constructs a new Player.
    *
-   * @param id The unique identifier for the player.
-   * @param name The name of the player.
-   * @param color The color of the player.
+   * @param id       The unique identifier for the player.
+   * @param name     The name of the player.
+   * @param color    The color of the player.
    * @param startPos The starting position of the player.
    */
   public Player(int id, String name, PlayerColor color, P startPos) {

@@ -10,39 +10,46 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
- * Represents the game board for Snakes and Ladders.
- * It defines the grid of tiles, and the placement of snakes and ladders.
+ * Represents the game board for Snakes and Ladders. It defines the grid of tiles, and the placement
+ * of snakes and ladders.
  */
 public final class SnLBoard implements GameBoard<LinearPos> {
+
   private static final int ROWS = 10;
   private static final int COLS = 9; // E.g., 9 columns for a 90-tile board (10x9)
-  /** Total number of tiles on the board. */
+  /**
+   * Total number of tiles on the board.
+   */
   private static final int BOARD_SIZE = ROWS * COLS;
 
-  /** Map of tile position number to {@link SnLTile} object. */
+  /**
+   * Map of tile position number to {@link SnLTile} object.
+   */
   private final Map<Integer, SnLTile> tiles = new HashMap<>();
-  /** Map of tile position number (start of connector) to {@link Connector} object. */
+  /**
+   * Map of tile position number (start of connector) to {@link Connector} object.
+   */
   private final Map<Integer, Connector> connectors = new HashMap<>();
 
   // Standard snake positions: key = start (head), value = length (downwards)
   private static final Map<Integer, Integer> SNAKES = Map.of(
-          30, 14, // 30 -> 16
-          34, 7,  // 34 -> 27
-          47, 7,  // 47 -> 40
-          54, 35, // 54 -> 19
-          65, 5,  // 65 -> 60
-          87, 31  // 87 -> 56
+      30, 14, // 30 -> 16
+      34, 7,  // 34 -> 27
+      47, 7,  // 47 -> 40
+      54, 35, // 54 -> 19
+      65, 5,  // 65 -> 60
+      87, 31  // 87 -> 56
   );
 
   // Standard ladder positions: key = start (bottom), value = length (upwards)
   private static final Map<Integer, Integer> LADDERS = Map.of(
-          8, 6,   // 8  -> 14
-          21, 10, // 21 -> 31
-          33, 5,  // 33 -> 38
-          48, 7,  // 48 -> 55
-          61, 8,  // 61 -> 69
-          70, 9,  // 70 -> 79
-          81, 2   // 81 -> 83. Note: Original problem might have larger values for BOARD_SIZE
+      8, 6,   // 8  -> 14
+      21, 10, // 21 -> 31
+      33, 5,  // 33 -> 38
+      48, 7,  // 48 -> 55
+      61, 8,  // 61 -> 69
+      70, 9,  // 70 -> 79
+      81, 2   // 81 -> 83. Note: Original problem might have larger values for BOARD_SIZE
   );        // For a 90-tile board, 81+2 = 83 is valid.
 
   /**
@@ -69,12 +76,12 @@ public final class SnLBoard implements GameBoard<LinearPos> {
   }
 
   /**
-   * Increments the player's position by a given amount (e.g., dice roll).
-   * Handles bouncing back if the player overshoots the last tile.
-   * After moving, it applies any connector (snake or ladder) at the new position.
+   * Increments the player's position by a given amount (e.g., dice roll). Handles bouncing back if
+   * the player overshoots the last tile. After moving, it applies any connector (snake or ladder)
+   * at the new position.
    *
    * @param player The player to move.
-   * @param inc The number of steps to increment the position by.
+   * @param inc    The number of steps to increment the position by.
    */
   public void incrementPlayerPosition(Player<LinearPos> player, int inc) {
     int from = player.getPosition().index();
@@ -140,8 +147,8 @@ public final class SnLBoard implements GameBoard<LinearPos> {
   }
 
   /**
-   * Gets an unmodifiable map of all tiles on the board.
-   * The key is the 1-based tile position, and the value is the {@link SnLTile}.
+   * Gets an unmodifiable map of all tiles on the board. The key is the 1-based tile position, and
+   * the value is the {@link SnLTile}.
    *
    * @return An unmodifiable map of tiles.
    */
@@ -160,6 +167,7 @@ public final class SnLBoard implements GameBoard<LinearPos> {
 
   /**
    * Gets the number of rows on the board.
+   *
    * @return The number of rows.
    */
   public int getRows() {
@@ -168,6 +176,7 @@ public final class SnLBoard implements GameBoard<LinearPos> {
 
   /**
    * Gets the number of columns on the board.
+   *
    * @return The number of columns.
    */
   public int getCols() {

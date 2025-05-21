@@ -10,6 +10,7 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard
  * Represents the action of a player rolling dice and moving on the Snakes and Ladders board.
  */
 public final class RollAction implements Action {
+
   private final SnLBoard gameBoard;
   private final Player<LinearPos> player;
   private final Dice dice;
@@ -18,8 +19,8 @@ public final class RollAction implements Action {
    * Constructs a RollAction.
    *
    * @param gameBoard The {@link SnLBoard} on which the action takes place.
-   * @param player The {@link Player} performing the roll and move.
-   * @param dice The {@link Dice} to be rolled.
+   * @param player    The {@link Player} performing the roll and move.
+   * @param dice      The {@link Dice} to be rolled.
    */
   public RollAction(SnLBoard gameBoard, Player<LinearPos> player, Dice dice) {
     this.gameBoard = gameBoard;
@@ -28,9 +29,8 @@ public final class RollAction implements Action {
   }
 
   /**
-   * Executes the roll and move action.
-   * The dice are rolled, and the player's position on the game board is updated accordingly.
-   * This includes handling snakes and ladders.
+   * Executes the roll and move action. The dice are rolled, and the player's position on the game
+   * board is updated accordingly. This includes handling snakes and ladders.
    */
   @Override
   public void execute() {

@@ -6,6 +6,7 @@ import java.util.Random;
  * Represents a single six-sided die.
  */
 public final class Die {
+
   /**
    * The value of the last roll.
    */
@@ -13,9 +14,8 @@ public final class Die {
   private final Random random = new Random();
 
   /**
-   * Rolls the die and returns the result.
-   * The result is a random integer between 1 and 6 (inclusive).
-   * This value is also stored as the last rolled value.
+   * Rolls the die and returns the result. The result is a random integer between 1 and 6
+   * (inclusive). This value is also stored as the last rolled value.
    *
    * @return The value rolled on the die.
    */
@@ -25,8 +25,8 @@ public final class Die {
   }
 
   /**
-   * Gets the value of the last roll of this die.
-   * If the die has not been rolled yet, this value may be 0 or uninitialized.
+   * Gets the value of the last roll of this die. If the die has not been rolled yet, this value may
+   * be 0 or uninitialized.
    *
    * @return The last rolled value.
    */

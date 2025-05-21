@@ -3,10 +3,11 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 import javafx.scene.paint.Color;
 
 /**
- * Represents a snake on the Snakes and Ladders board.
- * A snake moves a player from its start (head) to a lower-numbered end (tail).
+ * Represents a snake on the Snakes and Ladders board. A snake moves a player from its start (head)
+ * to a lower-numbered end (tail).
  */
 public final class Snake extends Connector {
+
   /**
    * The tile number where the snake's tail is located.
    */
@@ -19,9 +20,9 @@ public final class Snake extends Connector {
   /**
    * Constructs a Snake.
    *
-   * @param start The tile number where the snake's head is located (start of the slide).
-   * @param length The number of tiles the snake makes a player slide down.
-   *               The end position will be {@code start - length}.
+   * @param start  The tile number where the snake's head is located (start of the slide).
+   * @param length The number of tiles the snake makes a player slide down. The end position will be
+   *               {@code start - length}.
    */
   public Snake(int start, int length) {
     super(start);

@@ -13,11 +13,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 /**
- * The main view for the Snakes and Ladders game.
- * It displays the game board, a roll dice button, and a log label.
- * Implements {@link GameObserver} to react to game state changes.
+ * The main view for the Snakes and Ladders game. It displays the game board, a roll dice button,
+ * and a log label. Implements {@link GameObserver} to react to game state changes.
  */
 public final class SnLView implements GameObserver<LinearPos> {
+
   private final Button rollDiceButton;
   private final Label logLabel;
   private final BorderPane root;
@@ -48,11 +48,11 @@ public final class SnLView implements GameObserver<LinearPos> {
 
   private void setupRollDiceButton(GameController<LinearPos> controller) {
     rollDiceButton.setOnAction(
-            e -> {
-              if (controller instanceof SnLController) {
-                ((SnLController) controller).rollDice();
-              }
-            });
+        e -> {
+          if (controller instanceof SnLController) {
+            ((SnLController) controller).rollDice();
+          }
+        });
   }
 
   @Override

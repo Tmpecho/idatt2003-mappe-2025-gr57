@@ -10,9 +10,8 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
- * Represents the game board for Cluedo.
- * It defines the layout of rooms, corridors, and borders,
- * as well as player starting positions.
+ * Represents the game board for Cluedo. It defines the layout of rooms, corridors, and borders, as
+ * well as player starting positions.
  */
 public final class CluedoBoard implements GameBoard<GridPos> {
 
@@ -29,14 +28,16 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   /**
    * Inner record for defining doors between a room and a corridor.
-   * @param roomSide The {@link RoomTile.Point} on the room's side of the door.
+   *
+   * @param roomSide     The {@link RoomTile.Point} on the room's side of the door.
    * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
    */
-  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
+  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {
+
+  }
 
   /**
-   * Specifications for each room on the Cluedo board, including dimensions,
-   * and door definitions.
+   * Specifications for each room on the Cluedo board, including dimensions, and door definitions.
    */
   private static final List<RoomSpec> ROOM_SPECS =
       List.of(
@@ -119,7 +120,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
     boolean adjacent =
         Math.abs(fromPosition.row() - targetPosition.row())
-                + Math.abs(fromPosition.col() - targetPosition.col())
+            + Math.abs(fromPosition.col() - targetPosition.col())
             == 1;
 
     boolean corridorToCorridor =
@@ -260,13 +261,17 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private void placeStartPosAdjacentBorders() {
     // PlayerColor.WHITE (Miss Scarlett) -> START_POS_MISS_SCARLETT = new GridPos(23, 7);
     // Tiles adjacent to Miss Scarlett's start
-    replaceWithBorderIfCorridor(START_POS_MISS_SCARLETT.row(), START_POS_MISS_SCARLETT.col() - 1); // 23, 6
-    replaceWithBorderIfCorridor(START_POS_MISS_SCARLETT.row(), START_POS_MISS_SCARLETT.col() + 1); // 23, 8
+    replaceWithBorderIfCorridor(START_POS_MISS_SCARLETT.row(),
+        START_POS_MISS_SCARLETT.col() - 1); // 23, 6
+    replaceWithBorderIfCorridor(START_POS_MISS_SCARLETT.row(),
+        START_POS_MISS_SCARLETT.col() + 1); // 23, 8
 
     // PlayerColor.RED (Col. Mustard) -> START_POS_COL_MUSTARD = new GridPos(17, 1);
     // Tiles adjacent to Col. Mustard's start
-    replaceWithBorderIfCorridor(START_POS_COL_MUSTARD.row() - 1, START_POS_COL_MUSTARD.col()); // 16, 1
-    replaceWithBorderIfCorridor(START_POS_COL_MUSTARD.row() + 1, START_POS_COL_MUSTARD.col()); // 18, 1
+    replaceWithBorderIfCorridor(START_POS_COL_MUSTARD.row() - 1,
+        START_POS_COL_MUSTARD.col()); // 16, 1
+    replaceWithBorderIfCorridor(START_POS_COL_MUSTARD.row() + 1,
+        START_POS_COL_MUSTARD.col()); // 18, 1
 
     // PlayerColor.YELLOW (Mrs. White) -> START_POS_MRS_WHITE = new GridPos(1, 7);
     // Tiles adjacent to Mrs. White's start
@@ -280,8 +285,10 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
     // PlayerColor.BLUE (Mrs. Peacock) -> START_POS_MRS_PEACOCK = new GridPos(6, 23);
     // Tiles adjacent to Mrs. Peacock's start
-    replaceWithBorderIfCorridor(START_POS_MRS_PEACOCK.row() - 1, START_POS_MRS_PEACOCK.col()); // 5, 23
-    replaceWithBorderIfCorridor(START_POS_MRS_PEACOCK.row() + 1, START_POS_MRS_PEACOCK.col()); // 7, 23
+    replaceWithBorderIfCorridor(START_POS_MRS_PEACOCK.row() - 1,
+        START_POS_MRS_PEACOCK.col()); // 5, 23
+    replaceWithBorderIfCorridor(START_POS_MRS_PEACOCK.row() + 1,
+        START_POS_MRS_PEACOCK.col()); // 7, 23
 
     // PlayerColor.PURPLE (Prof. Plum) -> START_POS_PROF_PLUM = new GridPos(19, 23);
     // Tiles adjacent to Prof. Plum's start
@@ -306,6 +313,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   /**
    * Gets the number of rows on the board.
+   *
    * @return The number of rows.
    */
   public int getRows() {
@@ -314,6 +322,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
   /**
    * Gets the number of columns on the board.
+   *
    * @return The number of columns.
    */
   public int getCols() {
@@ -339,7 +348,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     }
     if (!targetTile.isWalkable()
         && !(targetTile
-            instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
+        instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
       System.err.println(
           "Error: Cannot set player position to a non-walkable tile at "
               + position
@@ -398,7 +407,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                           + startPos
                           + " for player "
                           + player.getName()
-                          + ". This might be due to board initialization order or incorrect coordinates.");
+                          + ". This might be due to board initialization "
+                          + "order or incorrect coordinates.");
                   return;
                 }
 
@@ -475,22 +485,28 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   /**
-   * Record to define the rectangular dimensions of a room.
-   * Coordinates are inclusive and 0-indexed.
-   * @param top The top-most row index.
-   * @param left The left-most column index.
+   * Record to define the rectangular dimensions of a room. Coordinates are inclusive and
+   * 0-indexed.
+   *
+   * @param top    The top-most row index.
+   * @param left   The left-most column index.
    * @param bottom The bottom-most row index.
-   * @param right The right-most column index.
+   * @param right  The right-most column index.
    */
-  private record RoomDimensions(int top, int left, int bottom, int right) {}
+  private record RoomDimensions(int top, int left, int bottom, int right) {
+
+  }
 
   /**
    * Record to encapsulate the specification for a room on the board.
-   * @param name The name of the room.
-   * @param dims The {@link RoomDimensions} of the room.
+   *
+   * @param name             The name of the room.
+   * @param dims             The {@link RoomDimensions} of the room.
    * @param hasSecretPassage True if the room has a secret passage (feature not fully implemented).
-   * @param doors A list of {@link DoorDefinition}s for the room.
+   * @param doors            A list of {@link DoorDefinition}s for the room.
    */
   private record RoomSpec(
-      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {}
+      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {
+
+  }
 }

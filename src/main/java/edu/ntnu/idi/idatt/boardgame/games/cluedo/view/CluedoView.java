@@ -13,10 +13,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 /**
- * The main view for the Cluedo game. It displays the game board and control panel.
- * Implements {@link GameObserver} to react to game state changes.
+ * The main view for the Cluedo game. It displays the game board and control panel. Implements
+ * {@link GameObserver} to react to game state changes.
  */
 public final class CluedoView implements GameObserver<GridPos> {
+
   private final BorderPane root;
   private final CluedoBoardView boardView;
   private final Label statusLabel;

@@ -9,10 +9,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Represents a player in the Cluedo game, extending the generic {@link Player} class.
- * Cluedo players have a hand of {@link Card}s.
+ * Represents a player in the Cluedo game, extending the generic {@link Player} class. Cluedo
+ * players have a hand of {@link Card}s.
  */
 public final class CluedoPlayer extends Player<GridPos> {
+
   /**
    * The list of cards held by the player.
    */
@@ -21,9 +22,9 @@ public final class CluedoPlayer extends Player<GridPos> {
   /**
    * Constructs a new CluedoPlayer.
    *
-   * @param id The unique identifier for the player.
-   * @param name The name of the player (typically the suspect name).
-   * @param color The {@link PlayerColor} associated with the player/suspect.
+   * @param id       The unique identifier for the player.
+   * @param name     The name of the player (typically the suspect name).
+   * @param color    The {@link PlayerColor} associated with the player/suspect.
    * @param startPos The starting {@link GridPos} of the player on the board.
    */
   public CluedoPlayer(int id, String name, PlayerColor color, GridPos startPos) {

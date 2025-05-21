@@ -16,7 +16,9 @@ public final class BorderTile extends AbstractCluedoTile {
     this.walkable = false; // Border tiles are not walkable
   }
 
-  /** Border tiles are never walkable.
+  /**
+   * Border tiles are never walkable.
+   *
    * @return always false.
    */
   @Override

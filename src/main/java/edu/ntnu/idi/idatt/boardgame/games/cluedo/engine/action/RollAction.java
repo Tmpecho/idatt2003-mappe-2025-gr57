@@ -8,6 +8,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoControl
  * Rolls two dice and starts a MOVE phase. Must be executed while the controller is in WAIT_ROLL.
  */
 public final class RollAction implements Action {
+
   private final CluedoController controller;
   private final Dice dice;
 

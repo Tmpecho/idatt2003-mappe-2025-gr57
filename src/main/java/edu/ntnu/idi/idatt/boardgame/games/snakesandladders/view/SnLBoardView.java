@@ -11,12 +11,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 
 /**
- * Represents the visual view of the Snakes and Ladders game board.
- * It arranges {@link SnLTileView} instances in a grid and draws connectors (snakes and ladders).
- * Implements {@link TileObserver} to react to changes in individual tiles, though typically
- * individual tile views handle their own updates.
+ * Represents the visual view of the Snakes and Ladders game board. It arranges {@link SnLTileView}
+ * instances in a grid and draws connectors (snakes and ladders). Implements {@link TileObserver} to
+ * react to changes in individual tiles, though typically individual tile views handle their own
+ * updates.
  */
 public final class SnLBoardView extends Pane implements TileObserver<LinearPos> {
+
   private static final int TILE_SIZE = 60;
   private static final int GAP_SIZE = 5;
   private final GridPane grid;
@@ -69,7 +70,7 @@ public final class SnLBoardView extends Pane implements TileObserver<LinearPos> 
       col = boardModel.getCols() - 1 - (index % boardModel.getCols());
     }
     int gridRow = boardModel.getRows() - 1 - rowFromBottom;
-    return new int[] {col, gridRow};
+    return new int[]{col, gridRow};
   }
 
   private void drawConnector(Connector connector) {
@@ -87,9 +88,10 @@ public final class SnLBoardView extends Pane implements TileObserver<LinearPos> 
     int[] coords = getGridCoordinates(pos);
     double x = coords[0] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
     double y = coords[1] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
-    return new double[] {x, y};
+    return new double[]{x, y};
   }
 
   @Override
-  public void onTileChanged(Tile<LinearPos> tile) {}
+  public void onTileChanged(Tile<LinearPos> tile) {
+  }
 }

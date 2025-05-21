@@ -9,10 +9,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Represents a single tile on the Snakes and Ladders board.
- * It holds a list of players currently on this tile and its position number.
+ * Represents a single tile on the Snakes and Ladders board. It holds a list of players currently on
+ * this tile and its position number.
  */
 public final class SnLTile implements Tile<LinearPos> {
+
   /**
    * List of players currently occupying this tile.
    */
@@ -67,7 +68,8 @@ public final class SnLTile implements Tile<LinearPos> {
   public void removeObserver(TileObserver observer) {
     observers.remove(observer);
   }
-/**
+
+  /**
    * Notifies all registered observers that this tile has changed.
    */
   private void notifyObservers() {

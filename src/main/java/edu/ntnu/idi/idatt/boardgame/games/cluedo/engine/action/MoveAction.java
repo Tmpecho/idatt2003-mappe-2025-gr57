@@ -9,6 +9,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoControl
  * delegated to the board.
  */
 public final class MoveAction implements Action {
+
   private final CluedoController controller;
   private final GridPos target;
 

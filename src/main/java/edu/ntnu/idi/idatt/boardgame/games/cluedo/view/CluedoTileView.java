@@ -19,10 +19,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 /**
- * Represents the visual view of a single tile on the Cluedo board.
- * Implements {@link TileObserver} to update its display when the underlying tile model changes.
+ * Represents the visual view of a single tile on the Cluedo board. Implements {@link TileObserver}
+ * to update its display when the underlying tile model changes.
  */
 public final class CluedoTileView implements TileObserver<GridPos> {
+
   private final StackPane tilePane;
   private final Rectangle tileBackground;
   private final Label infoLabel;
@@ -35,7 +36,7 @@ public final class CluedoTileView implements TileObserver<GridPos> {
    * Constructs a CluedoTileView.
    *
    * @param tileModel The {@link AbstractCluedoTile} this view represents.
-   * @param tileSize The size (width and height) of the tile in pixels.
+   * @param tileSize  The size (width and height) of the tile in pixels.
    */
   public CluedoTileView(AbstractCluedoTile tileModel, int tileSize) {
     this.tileModel = tileModel;
@@ -76,8 +77,8 @@ public final class CluedoTileView implements TileObserver<GridPos> {
   }
 
   /**
-   * Marks this tile view as representing a corridor tile that acts as a door.
-   * This typically changes its background color.
+   * Marks this tile view as representing a corridor tile that acts as a door. This typically
+   * changes its background color.
    *
    * @param isDoor True if this corridor tile is a door, false otherwise.
    */
@@ -94,8 +95,8 @@ public final class CluedoTileView implements TileObserver<GridPos> {
   }
 
   /**
-   * Updates the visual display of the tile based on the state of its model.
-   * This includes background color, labels, and player tokens.
+   * Updates the visual display of the tile based on the state of its model. This includes
+   * background color, labels, and player tokens.
    */
   void updateDisplay() {
     playerPane.getChildren().clear();
@@ -123,11 +124,11 @@ public final class CluedoTileView implements TileObserver<GridPos> {
 
     // Add player circles if any players are on this tile
     tileModel
-            .getPlayers()
-            .forEach(
-                    player -> {
-                      Circle playerToken = PlayerTokenFactory.createPlayerToken(player, tileSize, 0.1);
-                      playerPane.getChildren().add(playerToken);
-                    });
+        .getPlayers()
+        .forEach(
+            player -> {
+              Circle playerToken = PlayerTokenFactory.createPlayerToken(player, tileSize, 0.1);
+              playerPane.getChildren().add(playerToken);
+            });
   }
 }

@@ -9,6 +9,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.Position;
  * @param <P> The type of {@link Position} used by the tile.
  */
 public interface TileObserver<P extends Position> {
+
   /**
    * Called when the observed tile has changed (e.g., a player entered or left).
    *

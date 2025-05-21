@@ -14,8 +14,6 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
-import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
-
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,18 +25,23 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 /**
- * Controller for the Cluedo game. Manages game flow, player turns,
- * actions like moving, suggesting, and accusing.
+ * Controller for the Cluedo game. Manages game flow, player turns, actions like moving, suggesting,
+ * and accusing.
  */
 public final class CluedoController extends GameController<GridPos> {
+
   private final CluedoBoard boardModel;
   private final int numberOfPlayers;
   private int stepsLeft = 0;
   private List<Card> deck = new ArrayList<>();
-  /** The three cards (suspect, weapon, room) that form the solution to the mystery. */
+  /**
+   * The three cards (suspect, weapon, room) that form the solution to the mystery.
+   */
   private final Card[] solution = new Card[3];
   private final Random rng = new SecureRandom();
-  /** List of available suspects, used for player creation. */
+  /**
+   * List of available suspects, used for player creation.
+   */
   private final List<Suspect> suspects = List.of(Suspect.values());
 
   private Phase phase = Phase.WAIT_ROLL;
@@ -139,7 +142,9 @@ public final class CluedoController extends GameController<GridPos> {
     return false;
   }
 
-  /** True if the current player is in the “Cluedo” room and so may make an accusation. */
+  /**
+   * True if the current player is in the “Cluedo” room and so may make an accusation.
+   */
   public boolean canAccuse() {
     GridPos pos = currentPlayer.getPosition();
     AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
@@ -155,10 +160,10 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Try to move the current player to the clicked target {@link GridPos}.
-   * Movement is allowed between adjacent corridor tiles, or between a corridor and an adjacent room
-   * if a valid door exists. Entering a room typically ends the movement phase for the turn.
-   * Each step decrements {@link #stepsLeft}.
+   * Try to move the current player to the clicked target {@link GridPos}. Movement is allowed
+   * between adjacent corridor tiles, or between a corridor and an adjacent room if a valid door
+   * exists. Entering a room typically ends the movement phase for the turn. Each step decrements
+   * {@link #stepsLeft}.
    *
    * @param target The target {@link GridPos} to move to.
    */
@@ -207,6 +212,7 @@ public final class CluedoController extends GameController<GridPos> {
 
   /**
    * Gets the current player.
+   *
    * @return The {@link Player} whose turn it is.
    */
   public Player<GridPos> getCurrentPlayer() {
@@ -214,10 +220,9 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Allows the current player to make a suggestion.
-   * This is typically done when the player is in a room.
-   * The player suggests a suspect, a weapon, and the current room.
-   * Other players then attempt to disprove the suggestion.
+   * Allows the current player to make a suggestion. This is typically done when the player is in a
+   * room. The player suggests a suspect, a weapon, and the current room. Other players then attempt
+   * to disprove the suggestion.
    */
   public void makeSuggestion() {
     // TODO: Implement suggestion logic (only in rooms, move suspect/weapon)
@@ -225,10 +230,9 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Allows the current player to make an accusation.
-   * This can usually be done at any time on the player's turn.
-   * If the accusation is correct, the player wins. If incorrect, the player may be out of the game
-   * or unable to make further accusations, depending on house rules.
+   * Allows the current player to make an accusation. This can usually be done at any time on the
+   * player's turn. If the accusation is correct, the player wins. If incorrect, the player may be
+   * out of the game or unable to make further accusations, depending on house rules.
    */
   public void makeAccusation() {
     // TODO: Implement accusation logic (check against solution, handle win/loss)
@@ -243,14 +247,18 @@ public final class CluedoController extends GameController<GridPos> {
     TURN_OVER
   }
 
-  /** Called when this player’s movement finishes. Advances turn. */
+  /**
+   * Called when this player’s movement finishes. Advances turn.
+   */
   private void endTurn() {
     Player<GridPos> next = getNextPlayer();
     currentPlayer = next;
     notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
   }
 
-  /** Build a complete shuffled deck and pick the three solution cards. */
+  /**
+   * Build a complete shuffled deck and pick the three solution cards.
+   */
   private void createCards() {
     deck = Cards.shuffledDeck(rng);
 
@@ -271,7 +279,9 @@ public final class CluedoController extends GameController<GridPos> {
     throw new IllegalStateException("No card of type " + wanted + " left in deck.");
   }
 
-  /** Deal the remaining deck clockwise, one at a time, until empty. */
+  /**
+   * Deal the remaining deck clockwise, one at a time, until empty.
+   */
   private void distributeCards() {
     List<CluedoPlayer> cluedoPlayers =
         players.values().stream()

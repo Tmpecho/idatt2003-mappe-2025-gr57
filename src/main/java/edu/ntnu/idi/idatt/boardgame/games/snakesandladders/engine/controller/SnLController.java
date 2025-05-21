@@ -20,15 +20,20 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
- * Controller for the Snakes and Ladders game.
- * Manages game flow, player turns, dice rolls, and game state persistence.
+ * Controller for the Snakes and Ladders game. Manages game flow, player turns, dice rolls, and game
+ * state persistence.
  */
 public final class SnLController extends GameController<LinearPos> {
-  /** Repository for saving and loading game state. */
+
+  /**
+   * Repository for saving and loading game state.
+   */
   private final GameStateRepository<SnLGameStateDTO> repo;
 
   private final int numberOfPlayers;
-  /** List of player colors to assign to players. */
+  /**
+   * List of player colors to assign to players.
+   */
   private final List<PlayerColor> playerColors = List.of(
       PlayerColor.RED,
       PlayerColor.BLUE,
@@ -41,7 +46,8 @@ public final class SnLController extends GameController<LinearPos> {
    * Constructs an SnLController.
    *
    * @param numberOfPlayers The number of players in the game.
-   * @param repo The {@link GameStateRepository} for handling persistence of {@link SnLGameStateDTO}.
+   * @param repo            The {@link GameStateRepository} for handling persistence of
+   *                        {@link SnLGameStateDTO}.
    */
   public SnLController(
       int numberOfPlayers, GameStateRepository<SnLGameStateDTO> repo) {
@@ -85,15 +91,16 @@ public final class SnLController extends GameController<LinearPos> {
         .forEach(
             playerId -> {
               PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-              Player<LinearPos> player = new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
+              Player<LinearPos> player = new Player<>(playerId, "Player " + playerId, color,
+                  new LinearPos(1));
               players.put(playerId, player);
             });
     return players;
   }
 
   /**
-   * Executes a dice roll for the current player, updates their position,
-   * checks for game over, and advances to the next player if the game is not over.
+   * Executes a dice roll for the current player, updates their position, checks for game over, and
+   * advances to the next player if the game is not over.
    */
   public void rollDice() {
     Action roll = new RollAction((SnLBoard) gameBoard, currentPlayer, dice);

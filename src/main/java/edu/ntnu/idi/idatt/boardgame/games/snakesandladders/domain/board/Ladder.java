@@ -3,10 +3,11 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 import javafx.scene.paint.Color;
 
 /**
- * Represents a ladder on the Snakes and Ladders board.
- * A ladder moves a player from its start (bottom) to a higher-numbered end (top).
+ * Represents a ladder on the Snakes and Ladders board. A ladder moves a player from its start
+ * (bottom) to a higher-numbered end (top).
  */
 public final class Ladder extends Connector {
+
   /**
    * The tile number where the ladder's top is located.
    */
@@ -19,9 +20,9 @@ public final class Ladder extends Connector {
   /**
    * Constructs a Ladder.
    *
-   * @param start The tile number where the ladder's bottom is located (start of the climb).
-   * @param length The number of tiles the ladder makes a player climb up.
-   *               The end position will be {@code start + length}.
+   * @param start  The tile number where the ladder's bottom is located (start of the climb).
+   * @param length The number of tiles the ladder makes a player climb up. The end position will be
+   *               {@code start + length}.
    */
   public Ladder(int start, int length) {
     super(start);

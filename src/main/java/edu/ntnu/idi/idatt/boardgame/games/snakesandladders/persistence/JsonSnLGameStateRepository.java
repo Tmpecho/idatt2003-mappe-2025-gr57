@@ -9,14 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A {@link GameStateRepository} implementation for Snakes and Ladders that
- * saves and loads game state to/from JSON files using Gson.
+ * A {@link GameStateRepository} implementation for Snakes and Ladders that saves and loads game
+ * state to/from JSON files using Gson.
  */
 public final class JsonSnLGameStateRepository implements GameStateRepository<SnLGameStateDTO> {
 
   /**
-   * Gson instance for JSON serialization and deserialization.
-   * Configured for pretty printing.
+   * Gson instance for JSON serialization and deserialization. Configured for pretty printing.
    */
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 

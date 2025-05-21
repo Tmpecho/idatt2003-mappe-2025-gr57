@@ -5,4 +5,6 @@ package edu.ntnu.idi.idatt.boardgame.core.domain.player;
  * not define any methods. Classes implementing this interface can be used to represent different
  * types of positions in various games.
  */
-public interface Position {}
+public interface Position {
+
+}

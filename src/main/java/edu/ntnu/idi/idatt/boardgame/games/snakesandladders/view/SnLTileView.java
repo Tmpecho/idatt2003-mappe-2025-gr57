@@ -16,10 +16,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 /**
- * Represents the visual view of a single tile on the Snakes and Ladders board.
- * Implements {@link TileObserver} to update its display when the underlying tile model changes.
+ * Represents the visual view of a single tile on the Snakes and Ladders board. Implements
+ * {@link TileObserver} to update its display when the underlying tile model changes.
  */
 public final class SnLTileView implements TileObserver<LinearPos> {
+
   private final StackPane tilePane;
   private final Label posLabel;
   private final HBox playerBox;
@@ -31,7 +32,7 @@ public final class SnLTileView implements TileObserver<LinearPos> {
    * Constructs an SnLTileView.
    *
    * @param tileModel The {@link SnLTile} this view represents.
-   * @param tileSize The size (width and height) of the tile in pixels.
+   * @param tileSize  The size (width and height) of the tile in pixels.
    */
   public SnLTileView(SnLTile tileModel, int tileSize) {
     this.tileModel = tileModel;
@@ -79,14 +80,13 @@ public final class SnLTileView implements TileObserver<LinearPos> {
   }
 
   /**
-   * Updates the visual display of the tile based on the state of its model.
-   * This includes displaying the tile number and any player tokens on it.
+   * Updates the visual display of the tile based on the state of its model. This includes
+   * displaying the tile number and any player tokens on it.
    */
   void updateDisplay() {
     tileContainer.getChildren().clear();
     tileContainer.getChildren().add(posLabel);
     playerBox.getChildren().clear();
-
 
     tileModel
         .getPlayers()

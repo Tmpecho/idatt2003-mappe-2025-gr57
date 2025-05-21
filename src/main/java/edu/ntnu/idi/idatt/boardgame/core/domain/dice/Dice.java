@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 /**
- * Represents a collection of dice.
- * Implements the {@link DiceInterface} for rolling all dice and summing their results.
+ * Represents a collection of dice. Implements the {@link DiceInterface} for rolling all dice and
+ * summing their results.
  */
 public final class Dice implements DiceInterface {
+
   /**
    * The list of individual {@link Die} objects.
    */
@@ -24,12 +25,12 @@ public final class Dice implements DiceInterface {
     if (numberOfDice < 1) {
       throw new IllegalArgumentException("Number of dice must be at least 1");
     }
-	  IntStream.range(0, numberOfDice).mapToObj(i -> new Die()).forEach(dice::add);
+    IntStream.range(0, numberOfDice).mapToObj(i -> new Die()).forEach(dice::add);
   }
 
   @Override
   public int roll() {
-	  return dice.stream().mapToInt(Die::roll).sum();
+    return dice.stream().mapToInt(Die::roll).sum();
   }
 
   /**

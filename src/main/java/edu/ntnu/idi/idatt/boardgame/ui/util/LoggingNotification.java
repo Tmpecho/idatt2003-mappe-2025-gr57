@@ -13,13 +13,14 @@ import org.controlsfx.control.Notifications;
  */
 public final class LoggingNotification {
 
-  private LoggingNotification() {}
+  private LoggingNotification() {
+  }
 
   /**
    * Shows a notification with sensible defaults for the given log type.
    *
-   * @param type severity/category (see {@link LoggingType})
-   * @param title short summary
+   * @param type    severity/category (see {@link LoggingType})
+   * @param title   short summary
    * @param message detailed message (optional)
    */
   public static void show(LoggingType type, String title, String message) {
@@ -27,40 +28,50 @@ public final class LoggingNotification {
     runOnFxThread(task);
   }
 
-  /** Convenience overload for errors.
-   * @param title The title of the error notification.
+  /**
+   * Convenience overload for errors.
+   *
+   * @param title   The title of the error notification.
    * @param message The detailed message of the error.
    */
   public static void error(String title, String message) {
     show(LoggingType.ERROR, title, message);
   }
 
-  /** Convenience overload for fatal errors.
-   * @param title The title of the fatal error notification.
+  /**
+   * Convenience overload for fatal errors.
+   *
+   * @param title   The title of the fatal error notification.
    * @param message The detailed message of the fatal error.
    */
   public static void fatal(String title, String message) {
     show(LoggingType.FATAL, title, message);
   }
 
-  /** Convenience overload for warnings.
-   * @param title The title of the warning notification.
+  /**
+   * Convenience overload for warnings.
+   *
+   * @param title   The title of the warning notification.
    * @param message The detailed message of the warning.
    */
   public static void warn(String title, String message) {
     show(LoggingType.WARN, title, message);
   }
 
-  /** Convenience overload for info messages.
-   * @param title The title of the info notification.
+  /**
+   * Convenience overload for info messages.
+   *
+   * @param title   The title of the info notification.
    * @param message The detailed message of the info.
    */
   public static void info(String title, String message) {
     show(LoggingType.INFO, title, message);
   }
 
-  /** Convenience overload for debug messages.
-   * @param title The title of the debug notification.
+  /**
+   * Convenience overload for debug messages.
+   *
+   * @param title   The title of the debug notification.
    * @param message The detailed message of the debug information.
    */
   public static void debug(String title, String message) {
@@ -69,11 +80,11 @@ public final class LoggingNotification {
 
   private static Notifications build(LoggingType type, String title, String message) {
     Notifications notifications =
-            Notifications.create()
-                    .title(title)
-                    .text(message == null ? "" : message)
-                    .hideAfter(Duration.seconds(4))
-                    .position(Pos.BOTTOM_RIGHT);
+        Notifications.create()
+            .title(title)
+            .text(message == null ? "" : message)
+            .hideAfter(Duration.seconds(4))
+            .position(Pos.BOTTOM_RIGHT);
 
     switch (type) {
       case INFO -> notifications.graphic(Icon.INFO.view());
@@ -99,7 +110,9 @@ public final class LoggingNotification {
     }
   }
 
-  /** Icon helper. */
+  /**
+   * Icon helper.
+   */
   private enum Icon {
     INFO("/icons/info64.png"),
     DEBUG("/icons/debug64.png"),

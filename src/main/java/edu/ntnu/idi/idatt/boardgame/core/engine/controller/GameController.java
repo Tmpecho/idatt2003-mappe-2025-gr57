@@ -15,6 +15,7 @@ import java.util.Map;
  * @param <P> concrete {@link Position} implementation used by the game
  */
 public abstract class GameController<P extends Position> {
+
   /**
    * The game board instance.
    */
@@ -42,21 +43,25 @@ public abstract class GameController<P extends Position> {
    * Constructs a GameController.
    *
    * @param gameBoard The game board.
-   * @param dice The dice used in the game.
+   * @param dice      The dice used in the game.
    */
   protected GameController(GameBoard<P> gameBoard, Dice dice) {
     this.gameBoard = gameBoard;
     this.dice = dice;
   }
 
-  /** Implementations must create the players that participate in the game.
+  /**
+   * Implementations must create the players that participate in the game.
+   *
    * @param numberOfPlayers The number of players to create.
    * @return A map of player IDs to Player objects.
    */
   protected abstract Map<Integer, Player<P>> createPlayers(int numberOfPlayers);
 
-  /** Must be called by subclass constructor after fields are set up.
-   *  Initializes players and places them on the board.
+  /**
+   * Must be called by subclass constructor after fields are set up. Initializes players and places
+   * them on the board.
+   *
    * @param numberOfPlayers The number of players in the game.
    */
   protected void initialize(int numberOfPlayers) {
@@ -67,6 +72,7 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Adds a game observer.
+   *
    * @param observer The observer to add.
    */
   public void addObserver(GameObserver<P> observer) {
@@ -75,6 +81,7 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Removes a game observer.
+   *
    * @param observer The observer to remove.
    */
   public void removeObserver(GameObserver<P> observer) {
@@ -83,6 +90,7 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Notifies all registered observers with an update message.
+   *
    * @param message The message to send to observers.
    */
   protected void notifyObservers(String message) {
@@ -91,6 +99,7 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Notifies all registered observers that the game has finished.
+   *
    * @param currentPlayer The player who was current when the game finished.
    */
   protected void notifyGameFinished(Player<P> currentPlayer) {
@@ -99,6 +108,7 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Checks if the game is over.
+   *
    * @return True if the game is over, false otherwise.
    */
   protected abstract boolean isGameOver();
@@ -110,12 +120,14 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Determines the next player in turn order.
+   *
    * @return The next player.
    */
   protected abstract Player<P> getNextPlayer();
 
   /**
    * Gets the game board.
+   *
    * @return The game board.
    */
   public GameBoard<P> getGameBoard() {
@@ -124,12 +136,14 @@ public abstract class GameController<P extends Position> {
 
   /**
    * Saves the current game state to the specified file path.
+   *
    * @param filePath The path to save the game state to.
    */
   public abstract void saveGameState(String filePath);
 
   /**
    * Loads the game state from the specified file path.
+   *
    * @param filePath The path to load the game state from.
    */
   public abstract void loadGameState(String filePath);
