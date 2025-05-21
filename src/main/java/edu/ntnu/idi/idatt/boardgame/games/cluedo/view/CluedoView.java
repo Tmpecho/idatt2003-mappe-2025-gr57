@@ -32,7 +32,7 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final ChoiceBox<Weapon> weaponChoice;
   private final ChoiceBox<Room> roomChoice;
   private VBox accusationForm;
-  private VBox suggesionForm;
+  private VBox suggestionForm;
   private final CluedoController controller;
 
   public CluedoView(CluedoController controller) {
@@ -185,7 +185,7 @@ public final class CluedoView implements GameObserver<GridPos> {
   private void showSuggestionForm() {
     suggestButton.setDisable(true);
 
-    suggesionForm =
+    suggestionForm =
         new VBox(
             5,
             new Label("Suspect:"),
@@ -200,11 +200,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     roomChoice.setValue(controller.getRoomOfCurrentPlayer());
     roomChoice.setDisable(true);
 
-    controlPanel.getChildren().add(suggesionForm);
+    controlPanel.getChildren().add(suggestionForm);
   }
 
   private void hideSuggestionForm() {
-    controlPanel.getChildren().remove(suggesionForm);
+    controlPanel.getChildren().remove(suggestionForm);
     roomChoice.setDisable(false);
   }
 }
