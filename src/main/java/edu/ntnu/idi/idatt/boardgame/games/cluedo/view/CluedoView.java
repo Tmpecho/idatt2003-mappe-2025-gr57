@@ -128,12 +128,16 @@ public final class CluedoView implements GameObserver<GridPos> {
   private void showAccusationForm() {
     controlPanel.getChildren().remove(accuseButton);
 
-    accusationForm = new VBox(5,
-        new Label("Suspect:"), suspectChoice,
-        new Label("Weapon:"),  weaponChoice,
-        new Label("Room:"),    roomChoice,
-        submitAccusationButton
-    );
+    accusationForm =
+        new VBox(
+            5,
+            new Label("Suspect:"),
+            suspectChoice,
+            new Label("Weapon:"),
+            weaponChoice,
+            new Label("Room:"),
+            roomChoice,
+            submitAccusationButton);
     accusationForm.setPadding(new Insets(10));
 
     controlPanel.getChildren().add(accusationForm);

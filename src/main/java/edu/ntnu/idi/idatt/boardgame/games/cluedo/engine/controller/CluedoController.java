@@ -19,24 +19,23 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.IntStream;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 
 public final class CluedoController extends GameController<GridPos> {
   private final CluedoBoard boardModel;
-  private final int numberOfPlayers;
   private int stepsLeft = 0;
   private Suspect solutionSuspect;
   private Weapon solutionWeapon;
   private Room solutionRoom;
   private final Random rng = new SecureRandom();
   private final List<Suspect> suspects = List.of(Suspect.values());
-
+  private final List<Player<GridPos>> turnOrder = new ArrayList<>();
+  private int currentIndex;
   private Phase phase = Phase.WAIT_ROLL;
 
   public boolean isWaitingForRoll() {
@@ -51,11 +50,12 @@ public final class CluedoController extends GameController<GridPos> {
       throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
     }
 
-    this.numberOfPlayers = numberOfPlayers;
-
     pickSolution();
 
     super.initialize(numberOfPlayers);
+
+    currentIndex = 0;
+    currentPlayer = turnOrder.get(currentIndex);
 
     dealRemainingCards();
 
@@ -64,15 +64,13 @@ public final class CluedoController extends GameController<GridPos> {
 
   @Override
   protected Map<Integer, Player<GridPos>> createPlayers(int n) {
-    Map<Integer, Player<GridPos>> map = new HashMap<>();
-    IntStream.rangeClosed(1, n)
-        .forEach(
-            i -> {
-              Suspect suspect = suspects.get(i - 1);
-              CluedoPlayer player =
-                  new CluedoPlayer(i, suspect.getName(), suspect.colour(), new GridPos(0, 0));
-              map.put(i, player);
-            });
+    LinkedHashMap<Integer, Player<GridPos>> map = new LinkedHashMap<>();
+    for (int i = 1; i <= n; i++) {
+      Suspect s = suspects.get((i - 1) % suspects.size());
+      CluedoPlayer p = new CluedoPlayer(i, s.getName(), s.colour(), new GridPos(0, 0));
+      map.put(i, p);
+      turnOrder.add(p);
+    }
     return map;
   }
 
@@ -88,8 +86,8 @@ public final class CluedoController extends GameController<GridPos> {
 
   @Override
   protected Player<GridPos> getNextPlayer() {
-    int nextId = (currentPlayer.getId() % numberOfPlayers) + 1;
-    return players.get(nextId);
+    currentIndex = (currentIndex + 1) % turnOrder.size();
+    return turnOrder.get(currentIndex);
   }
 
   @Override
@@ -231,8 +229,19 @@ public final class CluedoController extends GameController<GridPos> {
     }
   }
 
-  private void eliminateCurrentPlayer(Player<GridPos> currentPlayer) {
-    // todo
+  private void eliminateCurrentPlayer(Player<GridPos> p) {
+    AbstractCluedoTile tile = boardModel.getTileAtPosition(p.getPosition());
+    if (tile != null) {
+      tile.removePlayer(p);
+    }
+
+    int removed = turnOrder.indexOf(p);
+    turnOrder.remove(removed);
+    if (removed <= currentIndex && currentIndex > 0) {
+      currentIndex--;
+    }
+
+    notifyObservers(p.getName() + " has been eliminated and removed from the board.");
   }
 
   private enum Phase {
@@ -255,18 +264,18 @@ public final class CluedoController extends GameController<GridPos> {
    * fields representing the solution of the game.
    */
   private void pickSolution() {
-    var sList = Cards.shuffledSuspects(rng);
-    solutionSuspect = sList.remove(0);
+    var suspectList = Cards.shuffledSuspects(rng);
+    solutionSuspect = suspectList.remove(0);
 
-    var wList = Cards.shuffledWeapons(rng);
-    solutionWeapon = wList.remove(0);
+    var weaponList = Cards.shuffledWeapons(rng);
+    solutionWeapon = weaponList.remove(0);
 
-    var rList = Cards.shuffledRooms(rng);
-    solutionRoom = rList.remove(0);
+    var roomList = Cards.shuffledRooms(rng);
+    solutionRoom = roomList.remove(0);
   }
 
   private void dealRemainingCards() {
-    List<Card> deck = new ArrayList<>(); // todo: use a proper type
+    List<Card> deck = new ArrayList<>();
     deck.addAll(Cards.shuffledSuspects(rng));
     deck.addAll(Cards.shuffledWeapons(rng));
     deck.addAll(Cards.shuffledRooms(rng));
