@@ -130,27 +130,35 @@ public final class CluedoController extends GameController<GridPos> {
       return;
     }
 
-    if (!boardModel.isLegalDestination(currentPlayer, target)) {
+    GridPos currentPosition = currentPlayer.getPosition();
+    if (!boardModel.isLegalDestination(currentPosition, target)) {
       return;
     }
 
+    // did we step *into* a room?
     boolean enteringRoom = boardModel.getTileAtPosition(target) instanceof RoomTile;
 
+    // 1) actually move
     boardModel.setPlayerPosition(currentPlayer, target);
-    stepsLeft--;
 
-    String msg =
-        currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.";
-    notifyObservers(msg);
-
+    // 2) consume a step (or zero out on entry)
     if (enteringRoom) {
-      stepsLeft = 0; // movement ends in a room
+      stepsLeft = 0;
+    } else {
+      stepsLeft--;
     }
 
+    // 3) log it
+    notifyObservers(
+        currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.");
+
+    // 4) adjust phase / turn
     if (stepsLeft == 0) {
-      phase = enteringRoom ? Phase.IN_ROOM : Phase.WAIT_ROLL;
-      if (phase == Phase.WAIT_ROLL) {
-        nextTurn(); // corridor -> turn ends
+      if (enteringRoom) {
+        phase = Phase.IN_ROOM;
+      } else {
+        phase = Phase.WAIT_ROLL;
+        nextTurn();
       }
     }
   }

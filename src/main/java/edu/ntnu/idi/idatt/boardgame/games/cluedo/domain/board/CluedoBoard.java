@@ -92,39 +92,31 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     initializeTiles();
   }
 
-  /**
-   * True if <code>player</code> may legally step onto <code>target</code>. (Adjacency, doorways and
-   * “secret passage” rules live here.)
-   */
-  public boolean isLegalDestination(Player<GridPos> player, GridPos target) {
-    AbstractCluedoTile from = getTileAtPosition(player.getPosition());
-    AbstractCluedoTile to = getTileAtPosition(target);
-    if (from == null || to == null) {
-      return false;
-    }
-    if (to instanceof BorderTile) {
-      return false;
-    }
+  public boolean isLegalDestination(GridPos fromPosition, GridPos targetPosition) {
+    AbstractCluedoTile fromTile = getTileAtPosition(fromPosition);
+    AbstractCluedoTile toTile = getTileAtPosition(targetPosition);
 
-    // 4-neighbour adjacency in grid
-    boolean adjacent = Math.abs(from.row() - to.row()) + Math.abs(from.col() - to.col()) == 1;
+    boolean adjacent =
+        Math.abs(fromPosition.row() - targetPosition.row())
+                + Math.abs(fromPosition.col() - targetPosition.col())
+            == 1;
 
-    // corridor -> corridor
-    if (from instanceof CorridorTile && to instanceof CorridorTile) {
-      return adjacent;
-    }
+    boolean corridorToCorridor =
+        fromTile instanceof CorridorTile && toTile instanceof CorridorTile && adjacent;
 
-    // corridor -> room through a door
-    if (from instanceof CorridorTile && to instanceof RoomTile room) {
-      return adjacent && room.canEnterFrom(from.row(), from.col());
-    }
+    boolean doorEntry =
+        fromTile instanceof CorridorTile
+            && toTile instanceof RoomTile
+            && adjacent // must stand right outside the door
+            && ((RoomTile) toTile).canEnterFrom(fromPosition.row(), fromPosition.col());
 
-    // room -> corridor through a door
-    if (from instanceof RoomTile room && to instanceof CorridorTile) {
-      return room.canExitTo(to.row(), to.col());
-    }
+    boolean doorExit =
+        fromTile instanceof RoomTile room
+            && toTile instanceof CorridorTile
+            && room.canExitTo(targetPosition.row(), targetPosition.col());
 
-    return false; // every other combination is illegal (for now)
+    // reject anything but corridor->corridor, corridor->room, room->corridor
+    return corridorToCorridor || doorEntry || doorExit;
   }
 
   private void initializeTiles() {
@@ -318,7 +310,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       return;
     }
     AbstractCluedoTile targetTile = getTileAtPosition(position);
-    if (targetTile == null) { // Should not happen if isValidPosition is true and board is fully initialized
+    if (targetTile
+        == null) { // Should not happen if isValidPosition is true and board is fully initialized
       System.err.println("CRITICAL Error: Target tile is null at valid position " + position);
       return;
     }
