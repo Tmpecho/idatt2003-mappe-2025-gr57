@@ -25,10 +25,9 @@ public final class CluedoView implements GameObserver<GridPos> {
     root.setPadding(new Insets(10));
 
     CluedoBoard board = (CluedoBoard) controller.getGameBoard();
-    this.boardView =
+    boardView =
         new CluedoBoardView(
-            board, () -> controller.getCurrentPlayer().getPosition(), controller::movePlayerTo);
-
+            board, () -> controller.getCurrentPlayer().getPosition(), controller::onBoardClick);
     ScrollPane scrollPane = new ScrollPane(boardView);
     scrollPane.setFitToWidth(true);
     scrollPane.setFitToHeight(true);
@@ -43,20 +42,20 @@ public final class CluedoView implements GameObserver<GridPos> {
     this.statusLabel = new Label("Welcome to Cluedo!");
     statusLabel.setWrapText(true);
 
-    this.rollDiceButton = new Button("Roll Dice & Move");
+    this.rollDiceButton = new Button("Roll Dice");
     rollDiceButton.setOnAction(
         e -> {
-          controller.rollDiceAndMove();
+          controller.onRollButton();
           rollDiceButton.setDisable(true);
         });
 
-    // TODO: Add more controls
     Button suggestButton = new Button("Make Suggestion");
     suggestButton.setOnAction(e -> controller.makeSuggestion());
-    suggestButton.setDisable(true); // Enable only when in a room
+    suggestButton.setDisable(true); // Enable only when in a room excluding the "Cluedo" room
 
     Button accuseButton = new Button("Make Accusation");
     accuseButton.setOnAction(e -> controller.makeAccusation());
+    accuseButton.setDisable(true); // Enable only when in "Cluedo room"
 
     controlPanel.getChildren().addAll(statusLabel, rollDiceButton, suggestButton, accuseButton);
 

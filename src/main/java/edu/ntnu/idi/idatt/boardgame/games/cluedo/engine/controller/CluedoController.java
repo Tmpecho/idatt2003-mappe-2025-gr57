@@ -5,13 +5,14 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
-import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.CardType;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,6 +31,12 @@ public final class CluedoController extends GameController<GridPos> {
   private final Card[] solution = new Card[3];
   private final Random rng = new SecureRandom();
   private final List<Suspect> suspects = List.of(Suspect.values());
+
+  private Phase phase = Phase.WAIT_ROLL;
+
+  public boolean isWaitingForRoll() {
+    return phase == Phase.WAIT_ROLL;
+  }
 
   public CluedoController(int numberOfPlayers) {
     super(new CluedoBoard(), new Dice(2));
@@ -93,22 +100,25 @@ public final class CluedoController extends GameController<GridPos> {
     System.out.println("Cluedo load game state not implemented yet from path: " + filePath);
   }
 
+  public void beginMovePhase(int rolled) {
+    this.stepsLeft = rolled;
+    this.phase = Phase.MOVING;
+
+    notifyObservers(
+        currentPlayer.getName() + " rolled " + rolled + ". Click a neighbouring square to move.");
+  }
+
   /** How many steps remain this turn. */
   public int getStepsLeft() {
     return stepsLeft;
   }
 
-  /** Roll two dice and begin a move phase. Disables further rolls until this turn completes. */
-  public void rollDiceAndMove() {
-    int roll = dice.roll();
-    this.stepsLeft = roll;
-    notifyObservers(
-        currentPlayer.getName()
-            + " rolled a "
-            + roll
-            + ". You have "
-            + stepsLeft
-            + " steps remaining.");
+  public void onRollButton() {
+    new RollAction(this, dice).execute();
+  }
+
+  public void onBoardClick(GridPos target) {
+    new MoveAction(this, target).execute();
   }
 
   /**
@@ -116,57 +126,38 @@ public final class CluedoController extends GameController<GridPos> {
    * is allowed. Decrements stepsLeft and ends turn on room-entry or when stepsLeft hits zero.
    */
   public void movePlayerTo(GridPos target) {
-    if (stepsLeft <= 0) {
+    if (phase != Phase.MOVING || stepsLeft <= 0) {
       return;
     }
 
-    GridPos here = currentPlayer.getPosition();
-
-    var fromTile = boardModel.getTileAtPosition(here);
-    var toTile = boardModel.getTileAtPosition(target);
-
-    boolean adjacent =
-        Math.abs(here.row() - target.row()) + Math.abs(here.col() - target.col()) == 1;
-
-    boolean corridorToCorridor =
-        fromTile instanceof CorridorTile && toTile instanceof CorridorTile && adjacent;
-
-    boolean doorEntry =
-        fromTile instanceof CorridorTile
-            && toTile instanceof RoomTile
-            && adjacent // must stand right outside the door
-            && ((RoomTile) toTile).canEnterFrom(here.row(), here.col());
-
-    boolean doorExit =
-        fromTile instanceof RoomTile room
-            && toTile instanceof CorridorTile
-            && room.canExitTo(target.row(), target.col());
-
-    // reject anything but corridor->corridor, corridor->room, room->corridor
-    if (!(corridorToCorridor || doorEntry || doorExit)) {
+    if (!boardModel.isLegalDestination(currentPlayer, target)) {
       return;
     }
 
-    // 1) move the model
-    fromTile.removePlayer(currentPlayer);
-    toTile.addPlayer(currentPlayer);
-    currentPlayer.setPosition(target);
+    boolean enteringRoom = boardModel.getTileAtPosition(target) instanceof RoomTile;
 
-    // 2) decrement stepsLeft (but only zero out if *entering* a room)
-    if (doorEntry) {
-      stepsLeft = 0;
-    } else {
-      stepsLeft--;
+    boardModel.setPlayerPosition(currentPlayer, target);
+    stepsLeft--;
+
+    String msg =
+        currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.";
+    notifyObservers(msg);
+
+    if (enteringRoom) {
+      stepsLeft = 0; // movement ends in a room
     }
 
-    // 3) notify
-    notifyObservers(
-        currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.");
-
-    // 4) end the turn if out of steps
     if (stepsLeft == 0) {
-      endTurn();
+      phase = enteringRoom ? Phase.IN_ROOM : Phase.WAIT_ROLL;
+      if (phase == Phase.WAIT_ROLL) {
+        nextTurn(); // corridor -> turn ends
+      }
     }
+  }
+
+  private void nextTurn() {
+    currentPlayer = getNextPlayer();
+    notifyObservers("Turn over. " + currentPlayer.getName() + " to roll.");
   }
 
   public Player<GridPos> getCurrentPlayer() {
@@ -182,6 +173,13 @@ public final class CluedoController extends GameController<GridPos> {
     // TODO: Implement accusation logic (check against solution, handle win/loss)
     notifyObservers(currentPlayer.getName() + " accusation logic TBD.");
     // if (isGameOver()) onGameFinish();
+  }
+
+  private enum Phase {
+    WAIT_ROLL,
+    MOVING,
+    IN_ROOM,
+    TURN_OVER
   }
 
   /** Called when this player’s movement finishes. Advances turn. */
