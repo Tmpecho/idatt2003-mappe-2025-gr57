@@ -40,7 +40,7 @@ public final class CluedoController extends GameController<GridPos> {
   private Phase phase = Phase.WAIT_ROLL;
 
   public CluedoController(int numberOfPlayers) {
-    super(new CluedoBoard(), new Dice(4)); // todo switch to 2
+    super(new CluedoBoard(), new Dice(2));
     this.boardModel = (CluedoBoard) this.gameBoard;
 
     if (numberOfPlayers < 2 || numberOfPlayers > 6) {

@@ -206,6 +206,5 @@ public final class CluedoView implements GameObserver<GridPos> {
   private void hideSuggestionForm() {
     controlPanel.getChildren().remove(suggesionForm);
     roomChoice.setDisable(false);
-    //    suggestButton.setDisable(false);
   }
 }
