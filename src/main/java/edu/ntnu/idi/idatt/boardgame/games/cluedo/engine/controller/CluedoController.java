@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
@@ -108,9 +109,24 @@ public final class CluedoController extends GameController<GridPos> {
         currentPlayer.getName() + " rolled " + rolled + ". Click a neighbouring square to move.");
   }
 
-  /** How many steps remain this turn. */
-  public int getStepsLeft() {
-    return stepsLeft;
+  /**
+   * True if the current player is in a normal room (not the central “Cluedo” room) and so may make
+   * a suggestion.
+   */
+  public boolean canSuggest() {
+    GridPos pos = currentPlayer.getPosition();
+    AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
+    if (tile instanceof RoomTile room) {
+      return !"Cluedo".equals(room.getRoomName());
+    }
+    return false;
+  }
+
+  /** True if the current player is in the “Cluedo” room and so may make an accusation. */
+  public boolean canAccuse() {
+    GridPos pos = currentPlayer.getPosition();
+    AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
+    return tile instanceof RoomTile room && "Cluedo".equals(room.getRoomName());
   }
 
   public void onRollButton() {

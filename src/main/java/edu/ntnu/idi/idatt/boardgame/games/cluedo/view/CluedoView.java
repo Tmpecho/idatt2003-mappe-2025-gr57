@@ -17,6 +17,8 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final CluedoBoardView boardView;
   private final Label statusLabel;
   private final Button rollDiceButton;
+  private final Button suggestButton;
+  private final Button accuseButton;
   private final CluedoController controller;
 
   public CluedoView(CluedoController controller) {
@@ -49,11 +51,11 @@ public final class CluedoView implements GameObserver<GridPos> {
           rollDiceButton.setDisable(true);
         });
 
-    Button suggestButton = new Button("Make Suggestion");
+    this.suggestButton = new Button("Make Suggestion");
     suggestButton.setOnAction(e -> controller.makeSuggestion());
     suggestButton.setDisable(true); // Enable only when in a room excluding the "Cluedo" room
 
-    Button accuseButton = new Button("Make Accusation");
+    this.accuseButton = new Button("Make Accusation");
     accuseButton.setOnAction(e -> controller.makeAccusation());
     accuseButton.setDisable(true); // Enable only when in "Cluedo room"
 
@@ -74,8 +76,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setText(message);
     boardView.highlightTile(controller.getCurrentPlayer().getPosition());
 
-    boolean waitingForRoll = controller.getStepsLeft() == 0;
+    boolean waitingForRoll = controller.isWaitingForRoll();
     rollDiceButton.setDisable(!waitingForRoll);
+
+    suggestButton.setDisable(!controller.canSuggest());
+    accuseButton.setDisable(!controller.canAccuse());
   }
 
   @Override
@@ -83,7 +88,7 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setText("Game Over! " + winner.getName() + " wins!");
     // Disable game action buttons
     rollDiceButton.setDisable(true);
-    // suggestButton.setDisable(true);
-    // accuseButton.setDisable(true);
+    suggestButton.setDisable(true);
+    accuseButton.setDisable(true);
   }
 }
