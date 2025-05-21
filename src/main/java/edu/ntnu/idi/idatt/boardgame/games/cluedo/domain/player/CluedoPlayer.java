@@ -6,7 +6,11 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public final class CluedoPlayer extends Player<GridPos> {
   private final Set<Suspect> suspectHand = new HashSet<>();

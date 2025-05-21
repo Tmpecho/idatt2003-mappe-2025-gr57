@@ -2,7 +2,7 @@ package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card;
 
 import java.util.Arrays;
 
-public enum Weapon {
+public enum Weapon implements Card {
   CANDLESTICK("Candlestick"),
   KNIFE("Knife"),
   LEAD_PIPE("Lead Pipe"),

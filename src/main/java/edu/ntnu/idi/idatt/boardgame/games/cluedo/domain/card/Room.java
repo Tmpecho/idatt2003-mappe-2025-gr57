@@ -2,7 +2,7 @@ package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card;
 
 import java.util.Arrays;
 
-public enum Room {
+public enum Room implements Card {
   KITCHEN("Kitchen"),
   BALLROOM("Ballroom"),
   CONSERVATORY("Conservatory"),

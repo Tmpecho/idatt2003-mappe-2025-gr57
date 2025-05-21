@@ -7,12 +7,21 @@ import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
-import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.*;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Cards;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 public final class CluedoController extends GameController<GridPos> {
@@ -235,20 +244,8 @@ public final class CluedoController extends GameController<GridPos> {
     // now sList, wList, rList hold the cards you will deal
   }
 
-  // Draws and removes the first card of the requested type from the deck.
-  private Card drawCard(CardType wanted) {
-    for (Iterator<Card> iterator = deck.iterator(); iterator.hasNext(); ) {
-      Card card = iterator.next();
-      if (card.type() == wanted) {
-        iterator.remove();
-        return card;
-      }
-    }
-    throw new IllegalStateException("No card of type " + wanted + " left in deck.");
-  }
-
   private void dealRemainingCards() {
-    List<Object> deck = new ArrayList<>(); // todo: use a proper type
+    List<Card> deck = new ArrayList<>(); // todo: use a proper type
     deck.addAll(Cards.shuffledSuspects(rng));
     deck.addAll(Cards.shuffledWeapons(rng));
     deck.addAll(Cards.shuffledRooms(rng));
@@ -257,12 +254,15 @@ public final class CluedoController extends GameController<GridPos> {
     var playersInOrder = players.values().stream().map(p -> (CluedoPlayer) p).toList();
 
     int idx = 0;
-    for (Object o : deck) {
-      CluedoPlayer p = playersInOrder.get(idx);
-      Object card = o;
-      if (card instanceof Suspect s) p.addCard(s);
-      else if (card instanceof Weapon w) p.addCard(w);
-      else if (card instanceof Room r) p.addCard(r);
+    for (Card card : deck) {
+      CluedoPlayer player = playersInOrder.get(idx);
+      if (card instanceof Suspect suspect) {
+        player.addCard(suspect);
+      } else if (card instanceof Weapon weapon) {
+        player.addCard(weapon);
+      } else if (card instanceof Room room) {
+        player.addCard(room);
+      }
       idx = (idx + 1) % playersInOrder.size();
     }
   }
