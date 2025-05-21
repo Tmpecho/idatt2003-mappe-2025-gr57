@@ -36,32 +36,73 @@ public final class CluedoPlayer extends Player<GridPos> {
     super(id, name, color, startPos);
   }
 
+  /**
+   * Adds a suspect card to the player's hand.
+   *
+   * @param suspect the suspect card to add
+   */
   public void addCard(Suspect suspect) {
     suspectHand.add(suspect);
   }
 
+  /**
+   * Adds a weapon card to the player's hand.
+   *
+   * @param weapon the weapon card to add
+   */
   public void addCard(Weapon weapon) {
     weaponHand.add(weapon);
   }
 
+  /**
+   * Adds a room card to the player's hand.
+   *
+   * @param room the room card to add
+   */
   public void addCard(Room room) {
     roomHand.add(room);
   }
 
+  /**
+   * Checks if the player has the specified suspect card.
+   *
+   * @param suspect the suspect card to check
+   * @return true if the player has the suspect card, false otherwise
+   */
   public boolean hasCard(Suspect suspect) {
     return suspectHand.contains(suspect);
   }
 
+  /**
+   * Checks if the player has the specified weapon card.
+   *
+   * @param weapon the weapon card to check
+   * @return true if the player has the weapon card, false otherwise
+   */
   public boolean hasCard(Weapon weapon) {
     return weaponHand.contains(weapon);
   }
 
+  /**
+   * Checks if the player has the specified room card.
+   *
+   * @param room the room card to check
+   * @return true if the player has the room card, false otherwise
+   */
   public boolean hasCard(Room room) {
     return roomHand.contains(room);
   }
 
   /**
-   * pick one at random if there are multiple options
+   * Selects and returns one card from the given collection of options that this player holds in
+   * their hand. If multiple matching cards are found, one is chosen at random using the provided
+   * {@link Random} instance.
+   *
+   * @param options the collection of cards to check against the player's hand
+   * @param rng     the random number generator used to select a card if multiple matches are found
+   * @return a card from the player's hand that matches one of the options
+   * @throws IllegalArgumentException if none of the options are in the player's hand or if an
+   *                                  unknown card type is encountered
    */
   public Card showOneOf(Collection<Card> options, Random rng) {
     List<Card> matches =

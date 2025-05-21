@@ -13,6 +13,12 @@ public final class MoveAction implements Action {
   private final CluedoController controller;
   private final GridPos target;
 
+  /**
+   * Constructs a new MoveAction to move the current player to the specified target position.
+   *
+   * @param controller the CluedoController managing the game state and player actions
+   * @param target     the target GridPos to which the player should be moved
+   */
   public MoveAction(CluedoController controller, GridPos target) {
     this.controller = controller;
     this.target = target;

@@ -70,49 +70,29 @@ public final class RoomTile extends AbstractCluedoTile {
   public void addDoor(Point roomBoundaryPoint, Point adjacentCorridorPoint) {
     // Check roomBoundaryPoint is actually on the boundary of this room
     boolean onHorizontalEdge =
-        (roomBoundaryPoint.row() == this.minRow || roomBoundaryPoint.row() == this.maxRow)
-            && (roomBoundaryPoint.col() >= this.minCol && roomBoundaryPoint.col() <= this.maxCol);
+        (roomBoundaryPoint.row() == this.minRow || roomBoundaryPoint.row() == this.maxRow) && (
+            roomBoundaryPoint.col() >= this.minCol && roomBoundaryPoint.col() <= this.maxCol);
     boolean onVerticalEdge =
-        (roomBoundaryPoint.col() == this.minCol || roomBoundaryPoint.col() == this.maxCol)
-            && (roomBoundaryPoint.row() >= this.minRow && roomBoundaryPoint.row() <= this.maxRow);
+        (roomBoundaryPoint.col() == this.minCol || roomBoundaryPoint.col() == this.maxCol) && (
+            roomBoundaryPoint.row() >= this.minRow && roomBoundaryPoint.row() <= this.maxRow);
 
     if (!(onHorizontalEdge || onVerticalEdge)) {
       throw new IllegalArgumentException(
-          "Room boundary point "
-              + roomBoundaryPoint
-              + " is not on the calculated perimeter (minR:"
-              + this.minRow
-              + ", maxR:"
-              + this.maxRow
-              + ", minC:"
-              + this.minCol
-              + ", maxC:"
-              + this.maxCol
-              + ") of room "
-              + roomName);
+          "Room boundary point " + roomBoundaryPoint + " is not on the calculated perimeter (minR:"
+              + this.minRow + ", maxR:" + this.maxRow + ", minC:" + this.minCol + ", maxC:"
+              + this.maxCol + ") of room " + roomName);
     }
 
     // Check adjacentCorridorPoint is outside the room's bounds
     boolean corridorIsOutside =
-        adjacentCorridorPoint.row() < this.minRow
-            || adjacentCorridorPoint.row() > this.maxRow
+        adjacentCorridorPoint.row() < this.minRow || adjacentCorridorPoint.row() > this.maxRow
             || adjacentCorridorPoint.col() < this.minCol
             || adjacentCorridorPoint.col() > this.maxCol;
     if (!corridorIsOutside) {
       throw new IllegalArgumentException(
-          "Corridor point "
-              + adjacentCorridorPoint
-              + " is not outside room "
-              + roomName
-              + " (bounds: minR:"
-              + this.minRow
-              + ", maxR:"
-              + this.maxRow
-              + ", minC:"
-              + this.minCol
-              + ", maxC:"
-              + this.maxCol
-              + ")");
+          "Corridor point " + adjacentCorridorPoint + " is not outside room " + roomName
+              + " (bounds: minR:" + this.minRow + ", maxR:" + this.maxRow + ", minC:" + this.minCol
+              + ", maxC:" + this.maxCol + ")");
     }
 
     Edge doorEdge = new Edge(roomBoundaryPoint, adjacentCorridorPoint);
@@ -189,9 +169,7 @@ public final class RoomTile extends AbstractCluedoTile {
   }
 
   private boolean isPointInsideRoom(Point point) {
-    return point.row() >= this.minRow
-        && point.row() <= this.maxRow
-        && point.col() >= this.minCol
+    return point.row() >= this.minRow && point.row() <= this.maxRow && point.col() >= this.minCol
         && point.col() <= this.maxCol;
   }
 
@@ -253,8 +231,8 @@ public final class RoomTile extends AbstractCluedoTile {
         return false;
       }
       Edge e = (Edge) o;
-      return (Objects.equals(a, e.a) && Objects.equals(b, e.b))
-          || (Objects.equals(a, e.b) && Objects.equals(b, e.a));
+      return (Objects.equals(a, e.a) && Objects.equals(b, e.b)) || (Objects.equals(a, e.b)
+          && Objects.equals(b, e.a));
     }
 
     @Override

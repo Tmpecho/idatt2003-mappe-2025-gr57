@@ -9,7 +9,7 @@ import java.util.List;
 public final class SnlGameStateDto extends GameStateDto {
 
   /**
-   * id of the player whose turn it is when the game is saved
+   * id of the player whose turn it is when the game is saved.
    */
   public int currentPlayerTurn;
 

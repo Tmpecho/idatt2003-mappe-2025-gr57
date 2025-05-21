@@ -43,6 +43,11 @@ public final class CluedoController extends GameController<GridPos> {
   private int currentIndex;
   private Phase phase = Phase.WAIT_ROLL;
 
+  /**
+   * Checks if the game is currently waiting for the player to roll the dice.
+   *
+   * @return true if the game is in the WAIT_ROLL phase, false otherwise.
+   */
   public boolean isWaitingForRoll() {
     return phase == Phase.WAIT_ROLL;
   }
@@ -115,6 +120,13 @@ public final class CluedoController extends GameController<GridPos> {
     System.out.println("Cluedo load game state not implemented yet from path: " + filePath);
   }
 
+  /**
+   * Initiates the movement phase for the current player after they have rolled the dice. Sets the
+   * number of steps the player can take and updates the game phase to MOVING. Notifies observers
+   * about the roll and available steps.
+   *
+   * @param rolled The number of steps the player rolled on the dice.
+   */
   public void beginMovePhase(int rolled) {
     this.stepsLeft = rolled;
     this.phase = Phase.MOVING;
@@ -126,6 +138,8 @@ public final class CluedoController extends GameController<GridPos> {
   /**
    * True if the current player is in a normal room (not the central “Cluedo” room) and so may make
    * a suggestion.
+   *
+   * @return true if the player can make a suggestion, false otherwise.
    */
   public boolean canSuggest() {
     GridPos pos = currentPlayer.getPosition();
@@ -138,6 +152,8 @@ public final class CluedoController extends GameController<GridPos> {
 
   /**
    * True if the current player is in the “Cluedo” room and so may make an accusation.
+   *
+   * @return true if the player can make an accusation, false otherwise.
    */
   public boolean canAccuse() {
     GridPos pos = currentPlayer.getPosition();
@@ -145,14 +161,32 @@ public final class CluedoController extends GameController<GridPos> {
     return tile instanceof RoomTile room && "Cluedo".equals(room.getRoomName());
   }
 
+  /**
+   * Handles the action triggered when the roll dice button is pressed. Executes a
+   * {@link RollAction} for the current player.
+   */
   public void onRollButton() {
     new RollAction(this, dice).execute();
   }
 
+  /**
+   * Handles the action triggered when a tile on the game board is clicked. Executes a
+   * {@link MoveAction} for the current player towards the target position.
+   *
+   * @param target The {@link GridPos} of the clicked tile.
+   */
   public void onBoardClick(GridPos target) {
     new MoveAction(this, target).execute();
   }
 
+  /**
+   * Handles the action triggered when the accuse button is pressed. Executes an
+   * {@link AccusationAction} with the provided suspect, weapon, and room.
+   *
+   * @param suspect The suspected character.
+   * @param weapon  The suspected weapon.
+   * @param room    The room where the crime is suspected to have occurred.
+   */
   public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
     new AccusationAction(this, suspect, weapon, room).execute();
   }
@@ -228,9 +262,11 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Allows the current player to make an accusation. This can usually be done at any time on the
-   * player's turn. If the accusation is correct, the player wins. If incorrect, the player may be
-   * out of the game or unable to make further accusations, depending on house rules.
+   * Allows the current player to make an accusation.
+   *
+   * @param suspect The suspected character.
+   * @param weapon  The suspected weapon.
+   * @param room    The room where the crime is suspected to have occurred.
    */
   public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
     if (suspect == null || weapon == null || room == null) {

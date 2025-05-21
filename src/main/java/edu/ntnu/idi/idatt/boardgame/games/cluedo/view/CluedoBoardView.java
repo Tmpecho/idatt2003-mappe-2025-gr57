@@ -380,6 +380,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private record RoomDimensions(int minRow, int maxRow, int minCol, int maxCol) {
 
     /**
+     * Returns the number of rows spanned by the room on the board grid.
+     *
      * @return The span of rows occupied by the room.
      */
     public int rowSpan() {
@@ -387,6 +389,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     }
 
     /**
+     * Returns the number of columns spanned by the room on the board grid.
+     *
      * @return The span of columns occupied by the room.
      */
     public int colSpan() {
