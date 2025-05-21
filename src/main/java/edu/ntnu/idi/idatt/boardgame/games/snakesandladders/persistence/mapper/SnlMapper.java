@@ -2,42 +2,42 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnLGameStateDTO;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnlController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnlGameStateDto;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mapper class for converting between {@link SnLController} state and {@link SnLGameStateDTO}. This
+ * Mapper class for converting between {@link SnlController} state and {@link SnlGameStateDto}. This
  * facilitates saving and loading the game state for Snakes and Ladders.
  */
-public final class SnLMapper {
+public final class SnlMapper {
 
   /**
    * Private constructor to prevent instantiation.
    */
-  private SnLMapper() {
+  private SnlMapper() {
     // Utility class
   }
 
   /**
-   * Converts the current state of an {@link SnLController} to an {@link SnLGameStateDTO}.
+   * Converts the current state of an {@link SnlController} to an {@link SnlGameStateDto}.
    *
    * @param controller The game controller whose state is to be converted.
-   * @return An {@link SnLGameStateDTO} representing the controller's state.
+   * @return An {@link SnlGameStateDto} representing the controller's state.
    */
-  public static SnLGameStateDTO toDto(SnLController controller) {
-    SnLGameStateDTO dto = new SnLGameStateDTO();
+  public static SnlGameStateDto toDto(SnlController controller) {
+    SnlGameStateDto dto = new SnlGameStateDto();
     dto.currentPlayerTurn = controller.getCurrentPlayer().getId();
 
-    List<SnLGameStateDTO.PlayerState> list = new ArrayList<>();
+    List<SnlGameStateDto.PlayerState> list = new ArrayList<>();
     controller
         .getPlayers()
         .values()
         .forEach(
             p -> {
-              var ps = new SnLGameStateDTO.PlayerState();
+              var ps = new SnlGameStateDto.PlayerState();
               ps.id = p.getId();
               ps.position = p.getPosition().index();
               ps.color = p.getColor().name();
@@ -48,7 +48,7 @@ public final class SnLMapper {
   }
 
   /**
-   * Applies the state from an {@link SnLGameStateDTO} to an {@link SnLController}. This method
+   * Applies the state from an {@link SnlGameStateDto} to an {@link SnlController}. This method
    * modifies the controller to reflect the loaded game state. Note: This assumes the
    * SnLController's players map is already initialized with the correct number of players and IDs.
    *
@@ -56,7 +56,7 @@ public final class SnLMapper {
    * @param controller The game controller to update.
    * @throws IllegalStateException if a player ID from the DTO is not found in the controller.
    */
-  public static void apply(SnLGameStateDTO dto, SnLController controller) {
+  public static void apply(SnlGameStateDto dto, SnlController controller) {
     dto.players.forEach(
         playerState -> {
           Player<LinearPos> p = controller.getPlayers().get(playerState.id);

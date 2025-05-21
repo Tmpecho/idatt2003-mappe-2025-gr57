@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
  * Represents the game board for Snakes and Ladders. It defines the grid of tiles, and the placement
  * of snakes and ladders.
  */
-public final class SnLBoard implements GameBoard<LinearPos> {
+public final class SnlBoard implements GameBoard<LinearPos> {
 
   private static final int ROWS = 10;
   private static final int COLS = 9; // E.g., 9 columns for a 90-tile board (10x9)
@@ -23,9 +23,9 @@ public final class SnLBoard implements GameBoard<LinearPos> {
   private static final int BOARD_SIZE = ROWS * COLS;
 
   /**
-   * Map of tile position number to {@link SnLTile} object.
+   * Map of tile position number to {@link SnlTile} object.
    */
-  private final Map<Integer, SnLTile> tiles = new HashMap<>();
+  private final Map<Integer, SnlTile> tiles = new HashMap<>();
   /**
    * Map of tile position number (start of connector) to {@link Connector} object.
    */
@@ -55,13 +55,13 @@ public final class SnLBoard implements GameBoard<LinearPos> {
   /**
    * Constructs the Snakes and Ladders board, initializing tiles, snakes, and ladders.
    */
-  public SnLBoard() {
+  public SnlBoard() {
     initializeTiles();
     addSnakesAndLadders();
   }
 
   private void initializeTiles() {
-    IntStream.rangeClosed(1, BOARD_SIZE).forEach(pos -> tiles.put(pos, new SnLTile(pos)));
+    IntStream.rangeClosed(1, BOARD_SIZE).forEach(pos -> tiles.put(pos, new SnlTile(pos)));
   }
 
   @Override
@@ -123,12 +123,12 @@ public final class SnLBoard implements GameBoard<LinearPos> {
   }
 
   /**
-   * Retrieves the {@link SnLTile} at the given 1-based position.
+   * Retrieves the {@link SnlTile} at the given 1-based position.
    *
    * @param pos The 1-based position of the tile.
-   * @return The {@link SnLTile} at that position, or null if invalid.
+   * @return The {@link SnlTile} at that position, or null if invalid.
    */
-  public SnLTile getTileAtPosition(int pos) {
+  public SnlTile getTileAtPosition(int pos) {
     return tiles.get(pos);
   }
 
@@ -148,11 +148,11 @@ public final class SnLBoard implements GameBoard<LinearPos> {
 
   /**
    * Gets an unmodifiable map of all tiles on the board. The key is the 1-based tile position, and
-   * the value is the {@link SnLTile}.
+   * the value is the {@link SnlTile}.
    *
    * @return An unmodifiable map of tiles.
    */
-  public Map<Integer, SnLTile> getTiles() {
+  public Map<Integer, SnlTile> getTiles() {
     return Collections.unmodifiableMap(tiles);
   }
 

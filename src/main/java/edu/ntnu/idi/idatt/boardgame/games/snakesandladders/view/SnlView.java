@@ -4,8 +4,8 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnlBoard;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnlController;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,7 +16,7 @@ import javafx.scene.layout.VBox;
  * The main view for the Snakes and Ladders game. It displays the game board, a roll dice button,
  * and a log label. Implements {@link GameObserver} to react to game state changes.
  */
-public final class SnLView implements GameObserver<LinearPos> {
+public final class SnlView implements GameObserver<LinearPos> {
 
   private final Button rollDiceButton;
   private final Label logLabel;
@@ -25,15 +25,15 @@ public final class SnLView implements GameObserver<LinearPos> {
   /**
    * Constructs the Snakes and Ladders game view.
    *
-   * @param controller The {@link SnLController} managing the game logic.
+   * @param controller The {@link SnlController} managing the game logic.
    */
-  public SnLView(SnLController controller) {
+  public SnlView(SnlController controller) {
     this.rollDiceButton = new Button("Roll dice");
     this.logLabel = new Label("Game log:");
     logLabel.setWrapText(true);
 
-    SnLBoard board = (SnLBoard) controller.getGameBoard();
-    SnLBoardView boardView = new SnLBoardView(board);
+    SnlBoard board = (SnlBoard) controller.getGameBoard();
+    SnlBoardView boardView = new SnlBoardView(board);
 
     VBox mainLayout = new VBox(10);
     mainLayout.setPadding(new Insets(10));
@@ -49,8 +49,8 @@ public final class SnLView implements GameObserver<LinearPos> {
   private void setupRollDiceButton(GameController<LinearPos> controller) {
     rollDiceButton.setOnAction(
         e -> {
-          if (controller instanceof SnLController) {
-            ((SnLController) controller).rollDice();
+          if (controller instanceof SnlController) {
+            ((SnlController) controller).rollDice();
           }
         });
   }

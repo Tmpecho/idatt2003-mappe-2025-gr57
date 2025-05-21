@@ -3,9 +3,9 @@ package edu.ntnu.idi.idatt.boardgame.ui;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnLView;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnlController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnlGameStateRepository;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnlView;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.io.File;
 import java.io.IOException;
@@ -194,11 +194,11 @@ public final class MainView {
       return;
     }
 
-    var repo = new JsonSnLGameStateRepository();
-    SnLController controller = new SnLController(2, repo);
+    var repo = new JsonSnlGameStateRepository();
+    SnlController controller = new SnlController(2, repo);
 
     this.currentController = controller;
-    SnLView view = new SnLView(controller);
+    SnlView view = new SnlView(controller);
     contentWrapper.getChildren().setAll(view.getRoot());
 
     saveGameButton.setDisable(false);

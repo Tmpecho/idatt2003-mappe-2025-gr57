@@ -4,32 +4,32 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.Connector;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnLBoard;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnlBoard;
 import javafx.scene.Group;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 
 /**
- * Represents the visual view of the Snakes and Ladders game board. It arranges {@link SnLTileView}
+ * Represents the visual view of the Snakes and Ladders game board. It arranges {@link SnlTileView}
  * instances in a grid and draws connectors (snakes and ladders). Implements {@link TileObserver} to
  * react to changes in individual tiles, though typically individual tile views handle their own
  * updates.
  */
-public final class SnLBoardView extends Pane implements TileObserver<LinearPos> {
+public final class SnlBoardView extends Pane implements TileObserver<LinearPos> {
 
   private static final int TILE_SIZE = 60;
   private static final int GAP_SIZE = 5;
   private final GridPane grid;
   private final Group connectorGroup;
-  private final SnLBoard boardModel;
+  private final SnlBoard boardModel;
 
   /**
    * Constructs an SnLBoardView.
    *
-   * @param boardModel The {@link SnLBoard} model this view represents.
+   * @param boardModel The {@link SnlBoard} model this view represents.
    */
-  public SnLBoardView(SnLBoard boardModel) {
+  public SnlBoardView(SnlBoard boardModel) {
     this.boardModel = boardModel;
     this.grid = new GridPane();
     this.connectorGroup = new Group();
@@ -48,7 +48,7 @@ public final class SnLBoardView extends Pane implements TileObserver<LinearPos> 
         .forEach(
             (pos, tile) -> {
               int[] gridPos = getGridCoordinates(pos);
-              SnLTileView tileView = new SnLTileView(tile, TILE_SIZE);
+              SnlTileView tileView = new SnlTileView(tile, TILE_SIZE);
               grid.add(tileView.getNode(), gridPos[0], gridPos[1]);
               // Register this board view as an observer of the tile
               tile.addObserver(this);

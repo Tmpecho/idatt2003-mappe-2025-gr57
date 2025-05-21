@@ -1,15 +1,15 @@
 package edu.ntnu.idi.idatt.boardgame.core.persistence;
 
-import edu.ntnu.idi.idatt.boardgame.core.persistence.dto.GameStateDTO;
+import edu.ntnu.idi.idatt.boardgame.core.persistence.dto.GameStateDto;
 import java.io.IOException;
 import java.nio.file.Path;
 
 /**
  * Interface for repositories that handle saving and loading game state.
  *
- * @param <T> The type of {@link GameStateDTO} this repository handles.
+ * @param <T> The type of {@link GameStateDto} this repository handles.
  */
-public interface GameStateRepository<T extends GameStateDTO> {
+public interface GameStateRepository<T extends GameStateDto> {
 
   /**
    * Saves the given game state DTO to a file.

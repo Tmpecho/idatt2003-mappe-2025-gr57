@@ -253,8 +253,8 @@ public final class RoomTile extends AbstractCluedoTile {
         return false;
       }
       Edge e = (Edge) o;
-      return (Objects.equals(a, e.a) && Objects.equals(b, e.b)) ||
-          (Objects.equals(a, e.b) && Objects.equals(b, e.a));
+      return (Objects.equals(a, e.a) && Objects.equals(b, e.b))
+          || (Objects.equals(a, e.b) && Objects.equals(b, e.a));
     }
 
     @Override

@@ -104,7 +104,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     return pane;
   }
 
-  private boolean isCorridorTileADoor(int corridorRow, int corridorCol) {
+  private boolean isCorridorTileDoor(int corridorRow, int corridorCol) {
     int[] dr = {-1, 1, 0, 0};
     int[] dc = {0, 0, -1, 1};
 
@@ -223,7 +223,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private void addCorridorTile(AbstractCluedoTile tileModel, int row, int col) {
     CluedoTileView tileView = new CluedoTileView(tileModel, TILE_SIZE);
     Node node = tileView.getNode();
-    if (isCorridorTileADoor(row, col)) {
+    if (isCorridorTileDoor(row, col)) {
       tileView.setAsDoorCorridor(true);
     }
     grid.add(node, col, row);

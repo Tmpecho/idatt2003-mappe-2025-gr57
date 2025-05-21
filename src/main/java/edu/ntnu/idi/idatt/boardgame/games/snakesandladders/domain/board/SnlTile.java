@@ -12,7 +12,7 @@ import java.util.List;
  * Represents a single tile on the Snakes and Ladders board. It holds a list of players currently on
  * this tile and its position number.
  */
-public final class SnLTile implements Tile<LinearPos> {
+public final class SnlTile implements Tile<LinearPos> {
 
   /**
    * List of players currently occupying this tile.
@@ -32,7 +32,7 @@ public final class SnLTile implements Tile<LinearPos> {
    *
    * @param position The 1-based position of this tile on the board.
    */
-  public SnLTile(int position) {
+  public SnlTile(int position) {
     this.position = position;
     this.players = new ArrayList<>();
   }
