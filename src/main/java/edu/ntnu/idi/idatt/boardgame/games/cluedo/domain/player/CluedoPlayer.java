@@ -23,28 +23,28 @@ public final class CluedoPlayer extends Player<GridPos> {
     super(id, name, color, startPos);
   }
 
-  public void addCard(Suspect s) {
-    suspectHand.add(s);
+  public void addCard(Suspect suspect) {
+    suspectHand.add(suspect);
   }
 
-  public void addCard(Weapon w) {
-    weaponHand.add(w);
+  public void addCard(Weapon weapon) {
+    weaponHand.add(weapon);
   }
 
-  public void addCard(Room r) {
-    roomHand.add(r);
+  public void addCard(Room room) {
+    roomHand.add(room);
   }
 
-  public boolean hasCard(Suspect s) {
-    return suspectHand.contains(s);
+  public boolean hasCard(Suspect suspect) {
+    return suspectHand.contains(suspect);
   }
 
-  public boolean hasCard(Weapon w) {
-    return weaponHand.contains(w);
+  public boolean hasCard(Weapon weapon) {
+    return weaponHand.contains(weapon);
   }
 
-  public boolean hasCard(Room r) {
-    return roomHand.contains(r);
+  public boolean hasCard(Room room) {
+    return roomHand.contains(room);
   }
 
   /** pick one at random if there are multiple options */
@@ -62,10 +62,15 @@ public final class CluedoPlayer extends Player<GridPos> {
                   if (card instanceof Room) {
                     return roomHand.contains(card);
                   }
-                  LoggingNotification.error(this.getName(), "Unknown card type: " + card);
+                  LoggingNotification.error(
+                      this.getClass().getName(), "Unknown card type: " + card);
                   throw new IllegalArgumentException("Unknown card type: " + card.getClass());
                 })
             .toList();
+    if (matches.isEmpty()) {
+      LoggingNotification.error(this.getClass().getName(), "No cards to show");
+      throw new IllegalArgumentException("No cards to show");
+    }
     return matches.get(rng.nextInt(matches.size()));
   }
 }
