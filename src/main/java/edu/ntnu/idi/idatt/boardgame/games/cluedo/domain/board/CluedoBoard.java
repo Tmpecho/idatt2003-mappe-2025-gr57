@@ -234,24 +234,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         }
       }
     }
-    // Making the central "Cluedo" area (which is a RoomTile) non-walkable internally.
-    // And the corridor tiles directly around it also non-walkable.
-    for (int r = 10; r <= 16; r++) {
-      for (int c = 9; c <= 14; c++) {
-        if (isValidPosition(new GridPos(r, c))) {
-          AbstractCluedoTile tile = board[r][c];
-          if (r >= 10 && r <= 14 && c >= 10 && c <= 14) { // Inside "Cluedo" room dimensions
-            if (tile instanceof RoomTile roomTile && roomTile.getRoomName().equals("Cluedo")) {
-              roomTile.setWalkable(false);
-            }
-          } else {
-            if (tile instanceof CorridorTile) {
-              tile.setWalkable(false);
-            }
-          }
-        }
-      }
-    }
   }
 
   private void placeStartPosAdjacentBorders() {
