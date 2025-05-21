@@ -13,6 +13,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.AccusationAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
 import java.security.SecureRandom;
@@ -23,12 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public final class CluedoController extends GameController<GridPos> {
   private final CluedoBoard boardModel;
   private final int numberOfPlayers;
   private int stepsLeft = 0;
-  private List<Card> deck = new ArrayList<>();
   private Suspect solutionSuspect;
   private Weapon solutionWeapon;
   private Room solutionRoom;
@@ -139,6 +141,10 @@ public final class CluedoController extends GameController<GridPos> {
     new MoveAction(this, target).execute();
   }
 
+  public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
+    new AccusationAction(this, suspect, weapon, room).execute();
+  }
+
   /**
    * Try to move the current player to the clicked tile. Only corridor→corridor or valid door→room
    * is allowed. Decrements stepsLeft and ends turn on room-entry or when stepsLeft hits zero.
@@ -213,7 +219,20 @@ public final class CluedoController extends GameController<GridPos> {
               + " in "
               + room.getName()
               + ". Wrong!");
+      eliminateCurrentPlayer(currentPlayer);
+
+      PauseTransition pause = new PauseTransition(Duration.seconds(2));
+      pause.setOnFinished(
+          e -> {
+            phase = Phase.WAIT_ROLL;
+            nextTurn();
+          });
+      pause.play();
     }
+  }
+
+  private void eliminateCurrentPlayer(Player<GridPos> currentPlayer) {
+    // todo
   }
 
   private enum Phase {
@@ -230,8 +249,12 @@ public final class CluedoController extends GameController<GridPos> {
     notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
   }
 
+  /**
+   * Selects the solution for the game by randomly picking one {@link Suspect}, one {@link Weapon},
+   * and one {@link Room} from the available cards. The selected cards are then assigned to the
+   * fields representing the solution of the game.
+   */
   private void pickSolution() {
-    // grab one of each, remove it from the pool
     var sList = Cards.shuffledSuspects(rng);
     solutionSuspect = sList.remove(0);
 
@@ -240,8 +263,6 @@ public final class CluedoController extends GameController<GridPos> {
 
     var rList = Cards.shuffledRooms(rng);
     solutionRoom = rList.remove(0);
-
-    // now sList, wList, rList hold the cards you will deal
   }
 
   private void dealRemainingCards() {
