@@ -19,10 +19,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+/**
+ * Controller for the Snakes and Ladders game.
+ * Manages game flow, player turns, dice rolls, and game state persistence.
+ */
 public final class SnLController extends GameController<LinearPos> {
+  /** Repository for saving and loading game state. */
   private final GameStateRepository<SnLGameStateDTO> repo;
 
   private final int numberOfPlayers;
+  /** List of player colors to assign to players. */
   private final List<PlayerColor> playerColors = List.of(
       PlayerColor.RED,
       PlayerColor.BLUE,
@@ -31,6 +37,12 @@ public final class SnLController extends GameController<LinearPos> {
       PlayerColor.ORANGE,
       PlayerColor.PURPLE);
 
+  /**
+   * Constructs an SnLController.
+   *
+   * @param numberOfPlayers The number of players in the game.
+   * @param repo The {@link GameStateRepository} for handling persistence of {@link SnLGameStateDTO}.
+   */
   public SnLController(
       int numberOfPlayers, GameStateRepository<SnLGameStateDTO> repo) {
     super(new SnLBoard(), new Dice(2));
@@ -39,14 +51,29 @@ public final class SnLController extends GameController<LinearPos> {
     initialize(numberOfPlayers);
   }
 
+  /**
+   * Gets the map of players in the game.
+   *
+   * @return A map where keys are player IDs and values are {@link Player} objects.
+   */
   public Map<Integer, Player<LinearPos>> getPlayers() {
     return players;
   }
 
+  /**
+   * Gets the player whose turn it is currently.
+   *
+   * @return The current {@link Player}.
+   */
   public Player<LinearPos> getCurrentPlayer() {
     return currentPlayer;
   }
 
+  /**
+   * Sets the current player. Used primarily when loading a game state.
+   *
+   * @param player The {@link Player} to set as current.
+   */
   public void setCurrentPlayer(Player<LinearPos> player) {
     this.currentPlayer = player;
   }
@@ -64,6 +91,10 @@ public final class SnLController extends GameController<LinearPos> {
     return players;
   }
 
+  /**
+   * Executes a dice roll for the current player, updates their position,
+   * checks for game over, and advances to the next player if the game is not over.
+   */
   public void rollDice() {
     Action roll = new RollAction((SnLBoard) gameBoard, currentPlayer, dice);
     roll.execute();
@@ -72,6 +103,7 @@ public final class SnLController extends GameController<LinearPos> {
       onGameFinish();
     } else {
       currentPlayer = getNextPlayer();
+      notifyObservers("Next turn: " + currentPlayer.getName());
     }
   }
 
@@ -94,6 +126,7 @@ public final class SnLController extends GameController<LinearPos> {
   public void saveGameState(String path) {
     try {
       repo.save(SnLMapper.toDto(this), Path.of(path));
+      LoggingNotification.info("Game Saved", "Game state saved to " + path);
     } catch (Exception e) {
       System.err.println("Save failed: " + e.getMessage());
       LoggingNotification.error("Save failed", e.getMessage());

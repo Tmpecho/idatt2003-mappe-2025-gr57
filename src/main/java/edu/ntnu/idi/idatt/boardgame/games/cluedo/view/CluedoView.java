@@ -12,6 +12,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
+/**
+ * The main view for the Cluedo game. It displays the game board and control panel.
+ * Implements {@link GameObserver} to react to game state changes.
+ */
 public final class CluedoView implements GameObserver<GridPos> {
   private final BorderPane root;
   private final CluedoBoardView boardView;
@@ -19,6 +23,11 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final Button rollDiceButton;
   private final CluedoController controller;
 
+  /**
+   * Constructs the Cluedo game view.
+   *
+   * @param controller The {@link CluedoController} managing the game logic.
+   */
   public CluedoView(CluedoController controller) {
     this.controller = controller;
     this.root = new BorderPane();
@@ -26,8 +35,8 @@ public final class CluedoView implements GameObserver<GridPos> {
 
     CluedoBoard board = (CluedoBoard) controller.getGameBoard();
     this.boardView =
-        new CluedoBoardView(
-            board, () -> controller.getCurrentPlayer().getPosition(), controller::movePlayerTo);
+            new CluedoBoardView(
+                    board, () -> controller.getCurrentPlayer().getPosition(), controller::movePlayerTo);
 
     ScrollPane scrollPane = new ScrollPane(boardView);
     scrollPane.setFitToWidth(true);
@@ -45,10 +54,10 @@ public final class CluedoView implements GameObserver<GridPos> {
 
     this.rollDiceButton = new Button("Roll Dice & Move");
     rollDiceButton.setOnAction(
-        e -> {
-          controller.rollDiceAndMove();
-          rollDiceButton.setDisable(true);
-        });
+            e -> {
+              controller.rollDiceAndMove();
+              rollDiceButton.setDisable(true);
+            });
 
     // TODO: Add more controls
     Button suggestButton = new Button("Make Suggestion");
@@ -66,6 +75,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     update("Game started. It's " + controller.getCurrentPlayer().getName() + "'s turn.");
   }
 
+  /**
+   * Returns the root {@link BorderPane} of this view.
+   *
+   * @return The root pane.
+   */
   public BorderPane getRoot() {
     return root;
   }
@@ -84,6 +98,7 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setText("Game Over! " + winner.getName() + " wins!");
     // Disable game action buttons
     rollDiceButton.setDisable(true);
+    // TODO: Consider diabling these too
     // suggestButton.setDisable(true);
     // accuseButton.setDisable(true);
   }
