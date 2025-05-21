@@ -192,7 +192,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     Node node = tileView.getNode();
     grid.add(node, col, row);
     tileMap.put(new GridPos(row, col), node);
-    // Border tiles are generally not clickable for movement, but binding for consistency or future use
+    // Border tiles are generally not clickable for movement,
+    // but binding for consistency or future use
     bindClick(node, row, col);
   }
 

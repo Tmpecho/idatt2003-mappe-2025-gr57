@@ -114,6 +114,13 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     initializeTiles();
   }
 
+  /**
+   * Checks if a move from one position to another is legal based on the game rules.
+   *
+   * @param fromPosition   The starting position.
+   * @param targetPosition The target position.
+   * @return True if the move is legal, false otherwise.
+   */
   public boolean isLegalDestination(GridPos fromPosition, GridPos targetPosition) {
     AbstractCluedoTile fromTile = getTileAtPosition(fromPosition);
     AbstractCluedoTile toTile = getTileAtPosition(targetPosition);
