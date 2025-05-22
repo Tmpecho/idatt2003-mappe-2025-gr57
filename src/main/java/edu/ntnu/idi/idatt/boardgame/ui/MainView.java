@@ -1,7 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.ui;
 
+import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnlController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnlGameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnlView;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -29,10 +32,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The {@code MainView} class serves as the primary container for the application, featuring a
- * sidebar with game selection and placeholders for save/load functionality.
- */
 public final class MainView {
 
   private static final Logger logger = LoggerFactory.getLogger(MainView.class);
@@ -104,11 +103,13 @@ public final class MainView {
           StackPane.setAlignment(welcomeLabel, Pos.CENTER);
           contentWrapper.getChildren().setAll(welcomeLabel);
           this.selectedGameType = null;
+          this.currentController = null;
           saveGameButton.setDisable(true);
           loadGameButton.setDisable(true);
         }
     );
     contentWrapper.getChildren().setAll(chooseGameView.getRoot());
+    this.currentController = null;
     saveGameButton.setDisable(true);
     loadGameButton.setDisable(false);
   }
@@ -116,7 +117,7 @@ public final class MainView {
   private void showPlayerConfigurationView(String gameType) {
     PlayerConfigurationView configView = new PlayerConfigurationView(
         gameType,
-        (type, playerDetailsList) -> { // onStartGame lambda
+        (type, playerDetailsList) -> {
           logger.info("Attempting to start game: {} with {} players.", type,
               playerDetailsList.size());
           playerDetailsList.forEach(pd -> logger.debug("Player Detail: {}", pd));
@@ -128,41 +129,54 @@ public final class MainView {
         }
     );
     contentWrapper.getChildren().setAll(configView.getRoot());
+    this.currentController = null;
     saveGameButton.setDisable(true);
     loadGameButton.setDisable(true);
   }
 
-  /**
-   * Placeholder for the actual game starting logic. This will be fully implemented in Phase 4.
-   *
-   * @param gameType          The type of game to start (e.g.,
-   *                          ChooseGameView.GAME_SNAKES_AND_LADDERS)
-   * @param playerDetailsList List of player configurations
-   */
   private void startGame(String gameType, List<PlayerSetupDetails> playerDetailsList) {
     logger.info("Starting game {} with {} players.", gameType, playerDetailsList.size());
+    this.currentController = null;
 
-    if (ChooseGameView.GAME_SNAKES_AND_LADDERS.equals(gameType)) {
-      Label gamePlaceholder = new Label("Placeholder for Snakes and Ladders game started with "
-          + playerDetailsList.size() + " players.");
-      gamePlaceholder.setStyle("-fx-font-size: 16px;");
-      contentWrapper.getChildren().setAll(gamePlaceholder);
-      LoggingNotification.info("Game Start Placeholder", "Snakes and Ladders would start here.");
-      saveGameButton.setDisable(false); // SnL can be saved
-      loadGameButton.setDisable(false);
-    } else if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-      Label gamePlaceholder = new Label("Placeholder for Cluedo game started with "
-          + playerDetailsList.size() + " players.");
-      gamePlaceholder.setStyle("-fx-font-size: 16px;");
-      contentWrapper.getChildren().setAll(gamePlaceholder);
-      LoggingNotification.info("Game Start Placeholder", "Cluedo would start here.");
-      saveGameButton.setDisable(true);
-      loadGameButton.setDisable(true);
-    } else {
-      LoggingNotification.error("Unknown Game Type", "Cannot start game: " + gameType);
+    try {
+      if (ChooseGameView.GAME_SNAKES_AND_LADDERS.equals(gameType)) {
+        var repo = new JsonSnlGameStateRepository();
+        SnlController snlController = new SnlController(playerDetailsList, repo);
+        this.currentController = snlController;
+        SnlView snlView = new SnlView(snlController);
+        contentWrapper.getChildren().setAll(snlView.getRoot());
+        saveGameButton.setDisable(false);
+        loadGameButton.setDisable(false);
+      } else if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
+        CluedoController cluedoController = new CluedoController(playerDetailsList);
+        this.currentController = cluedoController;
+        CluedoView cluedoView = new CluedoView(cluedoController);
+        contentWrapper.getChildren().setAll(cluedoView.getRoot());
+        saveGameButton.setDisable(true);
+        loadGameButton.setDisable(true);
+      } else {
+        LoggingNotification.error("Unknown Game Type", "Cannot start game: " + gameType);
+        showChooseGameView();
+        return;
+      }
+      LoggingNotification.info("Game Started",
+          getGameDisplayName(gameType) + " started with " + playerDetailsList.size()
+              + " players.");
+    } catch (Exception e) {
+      logger.error("Error starting game {}: {}", gameType, e.getMessage(), e);
+      LoggingNotification.error("Game Start Failed",
+          "Could not start " + getGameDisplayName(gameType) + ": " + e.getMessage());
       showChooseGameView();
-      return;
     }
+  }
+
+  private String getGameDisplayName(String type) {
+    if (ChooseGameView.GAME_SNAKES_AND_LADDERS.equals(type)) {
+      return "Snakes and Ladders";
+    } else if (ChooseGameView.GAME_CLUEDO.equals(type)) {
+      return "Cluedo";
+    }
+    return "Unknown Game";
   }
 
 
@@ -187,7 +201,13 @@ public final class MainView {
             }
           }
           chooser.setInitialDirectory(dir);
-          chooser.setInitialFileName("game_state.json");
+          String initialFileName = "game_state.json";
+          if (currentController instanceof SnlController) {
+            initialFileName = "snl_save.json";
+          } else if (currentController instanceof CluedoController) {
+            initialFileName = "cluedo_save.json";
+          }
+          chooser.setInitialFileName(initialFileName);
           chooser
               .getExtensionFilters()
               .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
@@ -223,7 +243,7 @@ public final class MainView {
           chooser.setInitialDirectory(dir);
           chooser
               .getExtensionFilters()
-              .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+              .add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
           Stage stage = getStage();
           if (stage == null) {
             logger.error("Could not get the stage to show load dialog.");
@@ -273,7 +293,19 @@ public final class MainView {
     }
 
     var repo = new JsonSnlGameStateRepository();
-    SnlController controller = new SnlController(2, repo);
+    SnlController controller;
+    try {
+      List<PlayerSetupDetails> dummyDetails = List.of(
+          new PlayerSetupDetails("Dummy1", Optional.of(PlayerColor.RED), Optional.empty()),
+          new PlayerSetupDetails("Dummy2", Optional.of(PlayerColor.BLUE), Optional.empty())
+      );
+      controller = new SnlController(dummyDetails, repo);
+
+    } catch (Exception ex) {
+      logger.error("Failed to init SnlController for loading: {}", ex.getMessage(), ex);
+      this.currentController = null;
+      return;
+    }
 
     this.currentController = controller;
     SnlView view = new SnlView(controller);
@@ -282,10 +314,12 @@ public final class MainView {
 
   @SuppressWarnings("unused")
   private void loadSnakesAndLadders() {
+    // This method is effectively replaced by the new startGame flow.
   }
 
   @SuppressWarnings("unused")
   private void loadCluedo() {
+    // This method is effectively replaced by the new startGame flow.
   }
 
   private Stage getStage() {
