@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
@@ -12,7 +13,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoControl
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -205,9 +206,30 @@ public final class CluedoView implements GameObserver<GridPos> {
 
   private void buildNotesBox() {
     initializeNotesBox();
-    addCategorySection("Suspects", Suspect.values(), this::createSuspectCheckBox);
-    addCategorySection("Weapons", Weapon.values(), this::createWeaponCheckBox);
-    addCategorySection("Rooms", Room.values(), this::createRoomCheckBox);
+
+    notesBox
+        .getChildren()
+        .addAll(
+            buildCategory(
+                "Suspects",
+                Suspect.values(),
+                Suspect::getName,
+                (suspect, selected) ->
+                    ((CluedoPlayer) controller.getCurrentPlayer())
+                        .setSuspectNoted(suspect, selected)),
+            buildCategory(
+                "Weapons",
+                Weapon.values(),
+                Weapon::getName,
+                (weapon, selected) ->
+                    ((CluedoPlayer) controller.getCurrentPlayer())
+                        .setWeaponNoted(weapon, selected)),
+            buildCategory(
+                "Rooms",
+                Room.values(),
+                Room::getName,
+                (room, selected) ->
+                    ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, selected)));
   }
 
   private void initializeNotesBox() {
@@ -216,51 +238,29 @@ public final class CluedoView implements GameObserver<GridPos> {
     notesBox.getChildren().add(new Label("Notes"));
   }
 
-  private <T extends Enum<T>> void addCategorySection(
-      String categoryName, T[] items, Function<T, CheckBox> checkBoxFactory) {
-    notesBox.getChildren().add(new Label(categoryName + ":"));
-    Arrays.stream(items)
-        .map(checkBoxFactory)
-        .forEach(checkBox -> notesBox.getChildren().add(checkBox));
+  private <T extends Card> VBox buildCategory(
+      String title, T[] cards, Function<T, String> labelFunction, BiConsumer<T, Boolean> onToggle) {
+    VBox box = new VBox(5, new Label(title));
+    Arrays.stream(cards)
+        .forEach(
+            card -> {
+              CheckBox checkBox = new CheckBox(labelFunction.apply(card));
+              checkBox.selectedProperty().addListener((obs, oldV, newV) -> onToggle.accept(card, newV));
+              box.getChildren().add(checkBox);
+
+              addItemToNoteBox(card, checkBox);
+            });
+    return box;
   }
 
-  private CheckBox createSuspectCheckBox(Suspect suspect) {
-    CheckBox checkBox = createCheckBox(suspect.getName());
-    suspectNoteBoxes.put(suspect, checkBox);
-    bindCheckBoxToPlayer(
-        checkBox,
-        (newValue) ->
-            ((CluedoPlayer) controller.getCurrentPlayer()).setSuspectNoted(suspect, newValue));
-    return checkBox;
-  }
-
-  private CheckBox createWeaponCheckBox(Weapon weapon) {
-    CheckBox checkBox = createCheckBox(weapon.getName());
-    weaponNoteBoxes.put(weapon, checkBox);
-    bindCheckBoxToPlayer(
-        checkBox,
-        (newValue) ->
-            ((CluedoPlayer) controller.getCurrentPlayer()).setWeaponNoted(weapon, newValue));
-    return checkBox;
-  }
-
-  private CheckBox createRoomCheckBox(Room room) {
-    CheckBox checkBox = createCheckBox(room.getName());
-    roomNoteBoxes.put(room, checkBox);
-    bindCheckBoxToPlayer(
-        checkBox,
-        (newValue) -> ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, newValue));
-    return checkBox;
-  }
-
-  private CheckBox createCheckBox(String name) {
-    return new CheckBox(name);
-  }
-
-  private void bindCheckBoxToPlayer(CheckBox checkBox, Consumer<Boolean> updateAction) {
-    checkBox
-        .selectedProperty()
-        .addListener((obs, oldValue, newValue) -> updateAction.accept(newValue));
+  private <T extends Card> void addItemToNoteBox(T card, CheckBox checkBox) {
+    if (card instanceof Suspect) {
+      suspectNoteBoxes.put((Suspect) card, checkBox);
+    } else if (card instanceof Weapon) {
+      weaponNoteBoxes.put((Weapon) card, checkBox);
+    } else if (card instanceof Room) {
+      roomNoteBoxes.put((Room) card, checkBox);
+    }
   }
 
   private void showAccusationForm() {
