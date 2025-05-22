@@ -12,6 +12,8 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoControl
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -51,6 +53,11 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final Map<Room, CheckBox> roomNoteBoxes = new HashMap<>();
   private VBox notesBox;
 
+  public static final String CONTROL_PANEL_STYLE = "-fx-background-color: #f0f0f0;";
+  private static final String NOTES_BOX_STYLE =
+      "-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;";
+  private static final double SPACING = 5.0;
+
   /**
    * Constructs the Cluedo game view.
    *
@@ -74,7 +81,7 @@ public final class CluedoView implements GameObserver<GridPos> {
     this.controlPanel = new VBox(10);
     controlPanel.setPrefWidth(250);
     controlPanel.setPadding(new Insets(10));
-    controlPanel.setStyle("-fx-background-color: #f0f0f0;");
+    controlPanel.setStyle(CONTROL_PANEL_STYLE);
 
     this.statusLabel = new Label("Welcome to Cluedo!");
     statusLabel.setWrapText(true);
@@ -197,57 +204,63 @@ public final class CluedoView implements GameObserver<GridPos> {
   }
 
   private void buildNotesBox() {
-    notesBox = new VBox(5);
-    notesBox.setStyle("-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;");
+    initializeNotesBox();
+    addCategorySection("Suspects", Suspect.values(), this::createSuspectCheckBox);
+    addCategorySection("Weapons", Weapon.values(), this::createWeaponCheckBox);
+    addCategorySection("Rooms", Room.values(), this::createRoomCheckBox);
+  }
+
+  private void initializeNotesBox() {
+    notesBox = new VBox(SPACING);
+    notesBox.setStyle(NOTES_BOX_STYLE);
     notesBox.getChildren().add(new Label("Notes"));
+  }
 
-    // Suspects
-    notesBox.getChildren().add(new Label("Suspects:"));
-    // when toggled, save to current player
-    Arrays.stream(Suspect.values())
-        .forEach(
-            suspect -> {
-              CheckBox checkBox = new CheckBox(suspect.getName());
-              suspectNoteBoxes.put(suspect, checkBox);
-              notesBox.getChildren().add(checkBox);
-              checkBox
-                  .selectedProperty()
-                  .addListener(
-                      (obs, oldV, newV) ->
-                          ((CluedoPlayer) controller.getCurrentPlayer())
-                              .setSuspectNoted(suspect, newV));
-            });
+  private <T extends Enum<T>> void addCategorySection(
+      String categoryName, T[] items, Function<T, CheckBox> checkBoxFactory) {
+    notesBox.getChildren().add(new Label(categoryName + ":"));
+    Arrays.stream(items)
+        .map(checkBoxFactory)
+        .forEach(checkBox -> notesBox.getChildren().add(checkBox));
+  }
 
-    // Weapons
-    notesBox.getChildren().add(new Label("Weapons:"));
-    Arrays.stream(Weapon.values())
-        .forEach(
-            weapon -> {
-              CheckBox checkBox = new CheckBox(weapon.getName());
-              weaponNoteBoxes.put(weapon, checkBox);
-              notesBox.getChildren().add(checkBox);
-              checkBox
-                  .selectedProperty()
-                  .addListener(
-                      (obs, oldV, newV) ->
-                          ((CluedoPlayer) controller.getCurrentPlayer())
-                              .setWeaponNoted(weapon, newV));
-            });
+  private CheckBox createSuspectCheckBox(Suspect suspect) {
+    CheckBox checkBox = createCheckBox(suspect.getName());
+    suspectNoteBoxes.put(suspect, checkBox);
+    bindCheckBoxToPlayer(
+        checkBox,
+        (newValue) ->
+            ((CluedoPlayer) controller.getCurrentPlayer()).setSuspectNoted(suspect, newValue));
+    return checkBox;
+  }
 
-    // Rooms
-    notesBox.getChildren().add(new Label("Rooms:"));
-    Arrays.stream(Room.values())
-        .forEach(
-            room -> {
-              CheckBox checkBox = new CheckBox(room.getName());
-              roomNoteBoxes.put(room, checkBox);
-              notesBox.getChildren().add(checkBox);
-              checkBox
-                  .selectedProperty()
-                  .addListener(
-                      (obs, oldV, newV) ->
-                          ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, newV));
-            });
+  private CheckBox createWeaponCheckBox(Weapon weapon) {
+    CheckBox checkBox = createCheckBox(weapon.getName());
+    weaponNoteBoxes.put(weapon, checkBox);
+    bindCheckBoxToPlayer(
+        checkBox,
+        (newValue) ->
+            ((CluedoPlayer) controller.getCurrentPlayer()).setWeaponNoted(weapon, newValue));
+    return checkBox;
+  }
+
+  private CheckBox createRoomCheckBox(Room room) {
+    CheckBox checkBox = createCheckBox(room.getName());
+    roomNoteBoxes.put(room, checkBox);
+    bindCheckBoxToPlayer(
+        checkBox,
+        (newValue) -> ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, newValue));
+    return checkBox;
+  }
+
+  private CheckBox createCheckBox(String name) {
+    return new CheckBox(name);
+  }
+
+  private void bindCheckBoxToPlayer(CheckBox checkBox, Consumer<Boolean> updateAction) {
+    checkBox
+        .selectedProperty()
+        .addListener((obs, oldValue, newValue) -> updateAction.accept(newValue));
   }
 
   private void showAccusationForm() {

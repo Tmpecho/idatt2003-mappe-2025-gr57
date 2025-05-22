@@ -290,6 +290,8 @@ public final class CluedoController extends GameController<GridPos> {
       }
 
       // If they hold more than one, pick one at random to show
+      // This is a bit of a simplification. In the real game, the player
+      // would pick the card they want to show.
       Card shownCard =
           respondent.showOneOf(List.of(suggestedSuspect, suggestedWeapon, suggestedRoom), rng);
 
