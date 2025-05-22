@@ -31,6 +31,22 @@ public final class CluedoGameStateDto extends GameStateDto {
   public List<PlayerState> players;
 
   /**
+   * The name of the suspect card in the solution envelope.
+   */
+  public String solutionSuspect;
+
+  /**
+   * The name of the weapon card in the solution envelope.
+   */
+  public String solutionWeapon;
+
+  /**
+   * The name of the room card in the solution envelope.
+   */
+  public String solutionRoom;
+
+
+  /**
    * Represents the persisted state of a single Cluedo player.
    */
   public static class PlayerState {

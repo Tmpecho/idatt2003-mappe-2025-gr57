@@ -65,7 +65,7 @@ public final class CluedoController extends GameController<GridPos> {
   /**
    * Constructs a CluedoController with the specified player details and game state repository.
    *
-   * @param playerDetailsList List of player setup details.
+   * @param playerDetailsList List of player setup details. Can be null/empty for loading.
    * @param repo              Repository for saving and loading game state.
    */
   public CluedoController(List<PlayerSetupDetails> playerDetailsList,
@@ -74,76 +74,58 @@ public final class CluedoController extends GameController<GridPos> {
     this.boardModel = (CluedoBoard) this.gameBoard;
     this.repo = Objects.requireNonNull(repo);
 
-    if (playerDetailsList == null || playerDetailsList.size() < 2 || playerDetailsList.size() > 6) {
-      throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
+    boolean isNewGameSetup = playerDetailsList != null && !playerDetailsList.isEmpty();
+
+    if (isNewGameSetup) {
+      if (playerDetailsList.size() < 2 || playerDetailsList.size() > 6) {
+        throw new IllegalArgumentException("Cluedo requires 2 to 6 players for a new game.");
+      }
     }
 
-    initializeGame(playerDetailsList);
+    initializeGame(playerDetailsList); // Calls our overridden setupPlayers
 
-    pickSolution();
-    dealRemainingCards();
-
-    notifyObservers("Game initialised. " + currentPlayer.getName() + " starts.");
-  }
-
-  @Deprecated
-  public CluedoController(int numberOfPlayers, GameStateRepository<CluedoGameStateDto> repo) {
-    super(new CluedoBoard(), new Dice(2));
-    this.boardModel = (CluedoBoard) this.gameBoard;
-    this.repo = Objects.requireNonNull(repo);
-
-    if (numberOfPlayers < 2 || numberOfPlayers > 6) {
-      throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
+    if (isNewGameSetup) {
+      pickSolution();
+      dealRemainingCards();
+      notifyObservers("Game initialised. " + currentPlayer.getName() + " starts.");
     }
-    initialize(numberOfPlayers);
-
-    pickSolution();
-    dealRemainingCards();
-    notifyObservers("Game initialised. " + currentPlayer.getName() + " starts.");
+    // For loading, observers are notified by loadGameState after state is fully restored.
   }
+
 
   @Override
   protected Map<Integer, Player<GridPos>> setupPlayers(List<PlayerSetupDetails> playerDetailsList) {
     LinkedHashMap<Integer, Player<GridPos>> newPlayersMap = new LinkedHashMap<>();
-    this.turnOrder.clear();
-    AtomicInteger playerIdCounter = new AtomicInteger(1);
+    this.turnOrder.clear(); // Clear before setup or load
 
+    if (playerDetailsList == null || playerDetailsList.isEmpty()) {
+      // This indicates a loading scenario.
+      // Players will be populated by loadGameState.
+      // CurrentPlayer will also be set by loadGameState.
+      return newPlayersMap; // Return empty map
+    }
+
+    AtomicInteger playerIdCounter = new AtomicInteger(1);
     for (PlayerSetupDetails detail : playerDetailsList) {
       int id = playerIdCounter.getAndIncrement();
       String name = detail.name();
       Suspect suspect = detail.suspectIfCluedo().orElseThrow(
           () -> new IllegalArgumentException("Suspect details missing for Cluedo player: " + name)
       );
-      CluedoPlayer player = new CluedoPlayer(id, name, suspect.colour(),
-          new GridPos(0, 0));
+      // Start position is nominal; actual placement is handled by gameBoard.addPlayersToStart
+      CluedoPlayer player = new CluedoPlayer(id, name, suspect.colour(), new GridPos(0, 0));
       newPlayersMap.put(id, player);
       this.turnOrder.add(player);
     }
 
     if (!this.turnOrder.isEmpty()) {
-      this.currentIndex = 0;
+      this.currentIndex = 0; // Reset for new game
       this.currentPlayer = this.turnOrder.get(this.currentIndex);
-    } else {
-      throw new IllegalStateException("No players were created for Cluedo.");
+    } else { // This case should ideally not be hit if playerDetailsList was valid for a new game
+      throw new IllegalStateException(
+          "No players were created for Cluedo from non-empty playerDetailsList.");
     }
     return newPlayersMap;
-  }
-
-  @Deprecated
-  @Override
-  protected Map<Integer, Player<GridPos>> createPlayers(int n) {
-    final List<Suspect> defaultSuspectOrder = List.of(Suspect.values());
-    LinkedHashMap<Integer, Player<GridPos>> map = new LinkedHashMap<>();
-    this.turnOrder.clear();
-
-    for (int i = 0; i < n; i++) { // Use 0-based index for defaultSuspectOrder
-      int playerId = i + 1;
-      Suspect s = defaultSuspectOrder.get(i % defaultSuspectOrder.size());
-      CluedoPlayer p = new CluedoPlayer(playerId, s.getName(), s.colour(), new GridPos(0, 0));
-      map.put(playerId, p);
-      this.turnOrder.add(p);
-    }
-    return map;
   }
 
   @Override
@@ -201,22 +183,25 @@ public final class CluedoController extends GameController<GridPos> {
       for (CluedoGameStateDto.PlayerState ps : dto.players) {
         PlayerColor playerColor = PlayerColor.valueOf(ps.colour);
         Suspect suspect = Suspect.from(playerColor);
+        // Actual name from Suspect might be better than "Player X" if details were stored
         CluedoPlayer player = new CluedoPlayer(ps.id, suspect.getName(), playerColor,
             new GridPos(ps.row, ps.col));
         loadedPlayers.put(ps.id, player);
-        this.turnOrder.add(player);
+        this.turnOrder.add(player); // Rebuild turnOrder based on DTO's player list order
       }
       this.players = loadedPlayers;
 
-      CluedoMapper.apply(dto, this);
+      CluedoMapper.apply(dto, this); // This will set solution, cards, notes, currentPlayer etc.
 
+      // Ensure currentPlayer and currentIndex are correctly set after loading
       if (this.currentPlayer != null && this.turnOrder.contains(this.currentPlayer)) {
         this.currentIndex = this.turnOrder.indexOf(this.currentPlayer);
       } else if (!this.turnOrder.isEmpty()) {
         logger.warn(
-            "Loaded currentPlayer not in turnOrder or turnOrder empty. Resetting currentIndex.");
-        this.currentIndex = 0;
-        this.currentPlayer = this.turnOrder.get(this.currentIndex);
+            "Loaded currentPlayer not in turnOrder or turnOrder empty after apply."
+                + " Resetting currentIndex.");
+        this.currentIndex = 0; // Or find current player ID from DTO and set index
+        this.currentPlayer = this.turnOrder.get(this.currentIndex); // Fallback
       } else {
         logger.error("Failed to set current player after load - turn order is empty.");
       }
@@ -228,7 +213,7 @@ public final class CluedoController extends GameController<GridPos> {
         } else if (phase == Phase.MOVING) {
           message += " " + currentPlayer.getName() + " to move with " + stepsLeft + " steps left.";
         } else {
-          message += " Current turn: " + currentPlayer.getName() + ".";
+          message += " Current turn: " + currentPlayer.getName() + ". Phase: " + phase;
         }
       } else {
         message += " No current player found after load.";
@@ -448,17 +433,23 @@ public final class CluedoController extends GameController<GridPos> {
       throw new IllegalArgumentException("Suggestion cannot be null.");
     }
 
-    Player<GridPos> suggestedPlayer = null;
+    // Move the suggested player (if they are not the current player) to the current room
+    Player<GridPos> playerToMove = null;
     for (Player<GridPos> p : players.values()) {
-      if (p instanceof CluedoPlayer cp && cp.getName().equals(suggestedSuspect.getName())) {
-        suggestedPlayer = p;
-        break;
+      if (p instanceof CluedoPlayer cp) {
+        // Assuming Player names are set to Suspect display names during setup
+        if (cp.getName().equals(suggestedSuspect.getName())) {
+          playerToMove = p;
+          break;
+        }
       }
     }
-    if (suggestedPlayer != null && suggestedPlayer != currentPlayer) {
-      boardModel.setPlayerPosition(suggestedPlayer, currentPlayer.getPosition());
+
+    if (playerToMove != null && playerToMove != currentPlayer) {
+      boardModel.setPlayerPosition(playerToMove, currentPlayer.getPosition());
       LoggingNotification.info("Player Moved",
-          suggestedSuspect.getName() + " has been moved to the " + suggestedRoom.getName());
+          suggestedSuspect.getName() + " has been moved to the " + suggestedRoom.getName()
+              + " for the suggestion.");
     }
 
     int totalPlayersInOrder = turnOrder.size();
@@ -467,7 +458,7 @@ public final class CluedoController extends GameController<GridPos> {
       int respondentIdx = (this.currentIndex + i) % totalPlayersInOrder;
       CluedoPlayer respondent = (CluedoPlayer) turnOrder.get(respondentIdx);
 
-      if (respondent == currentPlayer) {
+      if (respondent == currentPlayer) { // Should not happen if iteration is correct, but safeguard
         continue;
       }
 
@@ -552,7 +543,7 @@ public final class CluedoController extends GameController<GridPos> {
         this.currentIndex--;
       } else if (removedPlayerIndexInTurnOrder == this.currentIndex) {
         if (currentIndex >= turnOrder.size() && !turnOrder.isEmpty()) {
-          currentIndex = turnOrder.size() - 1;
+          currentIndex = turnOrder.size() - 1; // or 0 if it should wrap to start
         }
       }
       notifyObservers(p.getName() + " has been eliminated and removed from the board.");
@@ -567,7 +558,7 @@ public final class CluedoController extends GameController<GridPos> {
       onGameFinish();
     } else if (turnOrder.isEmpty() && !isGameOver()) {
       notifyObservers("All players have been eliminated. The house wins!");
-      onGameFinish();
+      onGameFinish(); // Ensure game ends
     }
   }
 
@@ -683,14 +674,24 @@ public final class CluedoController extends GameController<GridPos> {
       this.currentIndex = this.turnOrder.indexOf(currentPlayer);
     } else if (currentPlayer != null) {
       logger.warn(
-          "setCurrentPlayer called with a player not found in turnOrder. "
-              + "This might occur during load if turnOrder isn't perfectly aligned yet.");
-      if (!this.turnOrder.contains(currentPlayer)) {
+          "setCurrentPlayer called with a player not found in turnOrder or turnOrder is "
+              + "inconsistent. Player: {}, TurnOrder size: {}",
+          currentPlayer.getName(), this.turnOrder.size());
+      // Attempt to find by ID if names differ, or re-evaluate turnOrder setup during load
+      boolean found = false;
+      for (int i = 0; i < this.turnOrder.size(); i++) {
+        if (this.turnOrder.get(i).getId() == currentPlayer.getId()) {
+          this.currentIndex = i;
+          found = true;
+          break;
+        }
       }
-      if (this.turnOrder.contains(currentPlayer)) {
-        this.currentIndex = this.turnOrder.indexOf(currentPlayer);
-      } else if (!this.turnOrder.isEmpty()) {
-        this.currentIndex = 0;
+      if (!found && !this.turnOrder.isEmpty()) {
+        logger.warn("Fallback: Setting currentIndex to 0 as player ID {} not in turnOrder.",
+            currentPlayer.getId());
+        this.currentIndex = 0; // Fallback, may need adjustment if DTO stores turn order explicitly
+      } else if (this.turnOrder.isEmpty()) {
+        logger.error("Cannot set current player; turnOrder is empty.");
       }
     }
   }
@@ -729,5 +730,47 @@ public final class CluedoController extends GameController<GridPos> {
    */
   public void setStepsLeft(int stepsLeft) {
     this.stepsLeft = stepsLeft;
+  }
+
+  /**
+   * Retrieves the solution suspect for the game.
+   *
+   * @return The {@link Suspect} object representing the solution suspect.
+   */
+  public Suspect getSolutionSuspect() {
+    return solutionSuspect;
+  }
+
+  /**
+   * Retrieves the solution weapon for the game.
+   *
+   * @return The {@link Weapon} object representing the solution weapon.
+   */
+  public Weapon getSolutionWeapon() {
+    return solutionWeapon;
+  }
+
+  /**
+   * Retrieves the solution room for the game.
+   *
+   * @return The {@link Room} object representing the solution room.
+   */
+  public Room getSolutionRoom() {
+    return solutionRoom;
+  }
+
+  /**
+   * Sets the solution for the game, including the suspect, weapon, and room.
+   *
+   * @param suspect The {@link Suspect} object representing the solution suspect.
+   * @param weapon  The {@link Weapon} object representing the solution weapon.
+   * @param room    The {@link Room} object representing the solution room.
+   */
+  public void setSolution(Suspect suspect, Weapon weapon, Room room) {
+    this.solutionSuspect = suspect;
+    this.solutionWeapon = weapon;
+    this.solutionRoom = room;
+    logger.info("Solution loaded: {} with {} in {}",
+        solutionSuspect.getName(), solutionWeapon.getName(), solutionRoom.getName());
   }
 }

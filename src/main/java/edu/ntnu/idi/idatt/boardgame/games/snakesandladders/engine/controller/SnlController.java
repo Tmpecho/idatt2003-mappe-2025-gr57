@@ -39,32 +39,27 @@ public final class SnlController extends GameController<LinearPos> {
   /**
    * Constructs a SnlController with the specified player details and game state repository.
    *
-   * @param playerDetailsList List of player setup details.
+   * @param playerDetailsList List of player setup details. Can be null/empty for loading.
    * @param repo              Repository for saving and loading game state.
    */
   public SnlController(
       List<PlayerSetupDetails> playerDetailsList, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
     this.repo = Objects.requireNonNull(repo);
-    this.actualNumberOfPlayers = playerDetailsList.size();
     initializeGame(playerDetailsList);
-  }
-
-  @Deprecated
-  public SnlController(
-      int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
-    super(new SnlBoard(), new Dice(2));
-    this.repo = Objects.requireNonNull(repo);
-    this.actualNumberOfPlayers = numberOfPlayers;
-    initialize(numberOfPlayers);
   }
 
   @Override
   protected Map<Integer, Player<LinearPos>> setupPlayers(
       List<PlayerSetupDetails> playerDetailsList) {
     Map<Integer, Player<LinearPos>> newPlayersMap = new HashMap<>();
-    AtomicInteger playerIdCounter = new AtomicInteger(1);
 
+    if (playerDetailsList == null || playerDetailsList.isEmpty()) {
+      this.actualNumberOfPlayers = 0;
+      return newPlayersMap; // Return empty map
+    }
+
+    AtomicInteger playerIdCounter = new AtomicInteger(1);
     playerDetailsList.forEach(detail -> {
       int id = playerIdCounter.getAndIncrement();
       String name = detail.name();
@@ -73,26 +68,10 @@ public final class SnlController extends GameController<LinearPos> {
       Player<LinearPos> player = new Player<>(id, name, color, new LinearPos(1));
       newPlayersMap.put(id, player);
     });
-    this.actualNumberOfPlayers = newPlayersMap.size();
+    this.actualNumberOfPlayers = newPlayersMap.size(); // Set for new game
     return newPlayersMap;
   }
 
-  @Deprecated
-  @Override
-  protected Map<Integer, Player<LinearPos>> createPlayers(int numberOfPlayers) {
-    final List<PlayerColor> playerColors = List.of(
-        PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN,
-        PlayerColor.YELLOW, PlayerColor.ORANGE, PlayerColor.PURPLE);
-    Map<Integer, Player<LinearPos>> tempPlayers = new HashMap<>();
-    for (int i = 0; i < numberOfPlayers; i++) {
-      int playerId = i + 1;
-      PlayerColor color = playerColors.get(i % playerColors.size());
-      Player<LinearPos> player = new Player<>(playerId, "Player " + playerId, color,
-          new LinearPos(1));
-      tempPlayers.put(playerId, player);
-    }
-    return tempPlayers;
-  }
 
   public Map<Integer, Player<LinearPos>> getPlayers() {
     return players;
@@ -146,10 +125,16 @@ public final class SnlController extends GameController<LinearPos> {
   protected Player<LinearPos> getNextPlayer() {
     if (players == null || players.isEmpty() || actualNumberOfPlayers == 0) {
       throw new IllegalStateException(
-          "Cannot get next player, player map is empty or not initialized.");
+          "Cannot get next player, player map is empty or not initialized properly.");
     }
     int nextPlayerId = (currentPlayer.getId() % actualNumberOfPlayers) + 1;
-    return players.get(nextPlayerId);
+    Player<LinearPos> nextPlayer = players.get(nextPlayerId);
+    if (nextPlayer == null) {
+      throw new IllegalStateException(
+          "Next player ID " + nextPlayerId + " not found in players map. Current player: "
+              + currentPlayer.getId() + ", actualNum: " + actualNumberOfPlayers);
+    }
+    return nextPlayer;
   }
 
   @Override
@@ -171,14 +156,15 @@ public final class SnlController extends GameController<LinearPos> {
       Map<Integer, Player<LinearPos>> loadedPlayers = new HashMap<>();
       for (SnlGameStateDto.PlayerState ps : dto.players) {
         PlayerColor color = PlayerColor.valueOf(ps.color); // Assuming color string matches enum
+        // Consider storing/loading actual player name from PlayerSetupDetails if it was saved
         Player<LinearPos> p = new Player<>(ps.id, "Player " + ps.id, color,
             new LinearPos(ps.position));
         loadedPlayers.put(ps.id, p);
       }
       this.players = loadedPlayers;
-      this.actualNumberOfPlayers = this.players.size();
+      this.actualNumberOfPlayers = this.players.size(); // Crucial for getNextPlayer
       // Apply positions to the now correctly populated this.players map
-      SnlMapper.apply(dto, this);
+      SnlMapper.apply(dto, this); // This will set currentPlayer
 
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (Exception e) {

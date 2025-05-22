@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -44,7 +45,7 @@ public final class MainView {
   private GameController<?> currentController;
   private Button saveGameButton;
   private Button loadGameButton;
-  private String selectedGameType;
+  private String selectedGameType; // Retained for context, though load button tries to infer
 
   /**
    * Constructs the main view of the application. Initializes the root layout and loads the main
@@ -118,6 +119,7 @@ public final class MainView {
           this.selectedGameType = gameType;
           logger.info("Game selected: {}", gameType);
           showPlayerConfigurationView(gameType);
+          loadGameButton.setDisable(false); // Enable load once a game type context is selected
         },
         () -> {
           logger.info("Back to main menu from ChooseGameView.");
@@ -134,7 +136,6 @@ public final class MainView {
     contentWrapper.getChildren().setAll(chooseGameView.getRoot());
     this.currentController = null;
     saveGameButton.setDisable(true);
-    loadGameButton.setDisable(false);
   }
 
   private void showPlayerConfigurationView(String gameType) {
@@ -154,7 +155,8 @@ public final class MainView {
     contentWrapper.getChildren().setAll(configView.getRoot());
     this.currentController = null;
     saveGameButton.setDisable(true);
-    loadGameButton.setDisable(true);
+    loadGameButton.setDisable(
+        true);
   }
 
   private void startGame(String gameType, List<PlayerSetupDetails> playerDetailsList) {
@@ -171,12 +173,11 @@ public final class MainView {
         saveGameButton.setDisable(false);
         loadGameButton.setDisable(false);
       } else if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        var cluedoRepo = new JsonCluedoGameStateRepository(); // Use Cluedo repo
+        var cluedoRepo = new JsonCluedoGameStateRepository();
         CluedoController cluedoController = new CluedoController(playerDetailsList, cluedoRepo);
         this.currentController = cluedoController;
         CluedoView cluedoView = new CluedoView(cluedoController);
         contentWrapper.getChildren().setAll(cluedoView.getRoot());
-        // Cluedo save/load is now assumed to be implemented via its controller
         saveGameButton.setDisable(false);
         loadGameButton.setDisable(false);
       } else {
@@ -216,8 +217,7 @@ public final class MainView {
           }
           FileChooser chooser = new FileChooser();
           chooser.setTitle("Save Game State");
-          File dir = new File("saves"); // Ensure this directory exists or is created.
-          // Already handled in loadMenu for initial setup.
+          File dir = new File("saves");
           chooser.setInitialDirectory(dir);
           String initialFileName = "game_state.json";
           if (currentController instanceof SnlController) {
@@ -269,56 +269,54 @@ public final class MainView {
             return;
           }
 
-          // Phase 5: Ideally, determine game type from file or prompt user.
-          // For now, if a game is already selected/active, try loading into that.
-          // If no game active, current workaround is to try SnL context.
-          // This means loading a Cluedo save when no game
-          // is active will fail gracefully or misbehave.
-
           String filePath = file.getPath();
           String fileName = file.getName().toLowerCase();
-
           boolean loadedSuccessfully = false;
+
+          // Empty list for PlayerSetupDetails when creating controller for loading
+          List<PlayerSetupDetails> emptyPlayerDetails = new ArrayList<>();
 
           if (fileName.contains("cluedo")) {
             logger.info("Attempting to load as Cluedo game: {}", filePath);
             try {
               JsonCluedoGameStateRepository cluedoRepo = new JsonCluedoGameStateRepository();
-              CluedoController cluedoController = new CluedoController(2,
-                  cluedoRepo); // Min players for constructor
-              this.currentController = cluedoController;
-              CluedoView cluedoView = new CluedoView(cluedoController);
+              CluedoController cluedoController = new CluedoController(emptyPlayerDetails,
+                  cluedoRepo);
+              this.currentController = cluedoController; // Set controller BEFORE load
+              cluedoController.loadGameState(
+                  filePath); // Now load can populate players in the controller
+              CluedoView cluedoView = new CluedoView(
+                  cluedoController); // View after controller is ready
               contentWrapper.getChildren().setAll(cluedoView.getRoot());
-              currentController.loadGameState(filePath);
-              saveGameButton.setDisable(false); // Cluedo save is now implemented
-              loadGameButton.setDisable(false);
+              saveGameButton.setDisable(false);
+              loadGameButton.setDisable(false); // Re-enable load, game is active
               loadedSuccessfully = true;
+              this.selectedGameType = ChooseGameView.GAME_CLUEDO; // Update game type context
             } catch (Exception ex) {
               logger.error("Failed to load Cluedo game from {}: {}", filePath, ex.getMessage(), ex);
               LoggingNotification.error("Load Failed",
                   "Could not load Cluedo game. " + ex.getMessage());
-              this.currentController = null; // Reset controller on failure
+              this.currentController = null;
             }
-          } else if (fileName.contains("snl")) { // Default or if 'snl' in name
+          } else if (fileName.contains("snl")) {
             logger.info("Attempting to load as Snakes and Ladders game: {}", filePath);
             try {
               JsonSnlGameStateRepository snlRepo = new JsonSnlGameStateRepository();
-              // Similar to Cluedo, provide minimal details for constructor.
-              SnlController snlController = new SnlController(2,
-                  snlRepo); // Min players for constructor
+              SnlController snlController = new SnlController(emptyPlayerDetails, snlRepo);
               this.currentController = snlController;
+              snlController.loadGameState(filePath);
               SnlView snlView = new SnlView(snlController);
               contentWrapper.getChildren().setAll(snlView.getRoot());
-              currentController.loadGameState(filePath);
               saveGameButton.setDisable(false);
               loadGameButton.setDisable(false);
               loadedSuccessfully = true;
+              this.selectedGameType = ChooseGameView.GAME_SNAKES_AND_LADDERS;
             } catch (Exception ex) {
               logger.error("Failed to load Snakes and Ladders game from {}: {}", filePath,
                   ex.getMessage(), ex);
               LoggingNotification.error("Load Failed",
                   "Could not load S&L game. " + ex.getMessage());
-              this.currentController = null; // Reset controller on failure
+              this.currentController = null;
             }
           } else {
             LoggingNotification.warn("Load Canceled",
@@ -327,45 +325,11 @@ public final class MainView {
           }
 
           if (!loadedSuccessfully && this.currentController == null) {
-            // If load failed and controller is null, revert to choose game view or welcome
-            showChooseGameView(); // Or a welcome screen
+            showChooseGameView();
             saveGameButton.setDisable(true);
-            // loadGameButton remains enabled to try again.
           }
         });
     return button;
-  }
-
-
-  // loadSnakesAndLaddersForLoading is no longer the primary mechanism for load.
-  // The buildLoadButton logic now tries to infer game type.
-  @Deprecated
-  private void loadSnakesAndLaddersForLoading() {
-    // This method's direct usage is reduced. Kept for reference or specific fallback.
-    Path savesDir = Path.of("saves");
-    try {
-      Files.createDirectories(savesDir);
-    } catch (IOException e) {
-      logger.error("Failed to create saves directory: {}", e.getMessage(), e);
-      this.currentController = null;
-      return;
-    }
-    var repo = new JsonSnlGameStateRepository();
-    SnlController controller = new SnlController(2, repo); // Use deprecated constructor
-    this.currentController = controller;
-    SnlView view = new SnlView(controller);
-    contentWrapper.getChildren().setAll(view.getRoot());
-  }
-
-
-  @SuppressWarnings("unused")
-  private void loadSnakesAndLadders() {
-    // This method is effectively replaced by the new startGame flow.
-  }
-
-  @SuppressWarnings("unused")
-  private void loadCluedo() {
-    // This method is effectively replaced by the new startGame flow.
   }
 
   private Stage getStage() {
