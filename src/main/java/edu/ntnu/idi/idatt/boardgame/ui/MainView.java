@@ -7,12 +7,14 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.Snl
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnlGameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnlView;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
+import edu.ntnu.idi.idatt.boardgame.ui.view.ChooseGameView;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -38,6 +40,7 @@ public final class MainView {
   private GameController<?> currentController;
   private Button saveGameButton;
   private Button loadGameButton;
+  private String selectedGameType; // To store the selected game type
 
   /**
    * Constructs the main view of the application. Initializes the root layout and loads the main
@@ -49,7 +52,10 @@ public final class MainView {
     contentWrapper = new StackPane();
     contentWrapper.setPadding(new Insets(10));
     // Set a default message or view in the contentWrapper
-    contentWrapper.getChildren().add(new Label("Welcome! Click 'Menu' to start."));
+    Label welcomeLabel = new Label("Welcome! Click 'Menu' to start.");
+    welcomeLabel.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
+    StackPane.setAlignment(welcomeLabel, Pos.CENTER); // Center the label in StackPane
+    contentWrapper.getChildren().add(welcomeLabel);
     root.setCenter(contentWrapper);
 
     loadMenu();
@@ -70,7 +76,6 @@ public final class MainView {
     sidebar.setAlignment(javafx.geometry.Pos.TOP_CENTER);
     sidebar.setStyle("-fx-background-color: #336699;");
 
-    // Create the new Menu button
     Button menuButton = new Button("Menu");
     menuButton.setOnAction(e -> showChooseGameView());
     menuButton.setMaxWidth(Double.MAX_VALUE);
@@ -96,31 +101,54 @@ public final class MainView {
   }
 
   /**
-   * Shows a placeholder for the "Choose Game" view in the content wrapper.
+   * Shows the "Choose Game" view in the content wrapper.
    */
   private void showChooseGameView() {
-    // Placeholder for now. This will be replaced with the actual ChooseGameView in Phase 2.
-    Label chooseGamePlaceholder = new Label("Choose Game View Placeholder\n\n"
-        + " (This will show game options like Snakes & Ladders and Cluedo)");
-    chooseGamePlaceholder.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
-    chooseGamePlaceholder.setWrapText(true);
-    contentWrapper.getChildren().setAll(chooseGamePlaceholder);
+    ChooseGameView chooseGameView = new ChooseGameView(
+        gameType -> { // onGameSelected lambda
+          this.selectedGameType = gameType;
+          logger.info("Game selected: {}", gameType);
+          showPlayerConfigurationView(gameType);
+        },
+        () -> { // onBack lambda
+          logger.info("Back to main menu from ChooseGameView.");
+          // Reset contentWrapper to initial state
+          Label welcomeLabel = new Label("Welcome! Click 'Menu' to start.");
+          welcomeLabel.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
+          StackPane.setAlignment(welcomeLabel, Pos.CENTER);
+          contentWrapper.getChildren().setAll(welcomeLabel);
 
-    if (currentController != null) {
-      // Consider if we want to clear currentController here or prompt the user
-      // For now, let's assume we might be navigating away from an active game,
-      // but the game state itself isn't cleared until a new game starts.
-      // Save/Load buttons should reflect the state of `currentController`.
-      // However, if we are at the menu, save/load for a *new* game doesn't make sense yet.
-    }
+          this.selectedGameType = null;
+          saveGameButton.setDisable(true);
+          loadGameButton.setDisable(true);
+        }
+    );
+    contentWrapper.getChildren().setAll(chooseGameView.getRoot());
     saveGameButton.setDisable(true);
     loadGameButton.setDisable(false);
+  }
+
+  /**
+   * Placeholder for showing the Player Configuration View. This will be implemented in Phase 3.
+   *
+   * @param gameType The type of game selected
+   */
+  private void showPlayerConfigurationView(String gameType) {
+    logger.info("Transitioning to Player Configuration for game: {}", gameType);
+    Label configPlaceholder = new Label("Player Configuration for " + gameType + "\n\n"
+        + "(This will allow setting up players, names, colors, etc.)");
+    configPlaceholder.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
+    configPlaceholder.setWrapText(true);
+    StackPane.setAlignment(configPlaceholder, Pos.CENTER);
+    contentWrapper.getChildren().setAll(configPlaceholder);
+
+    saveGameButton.setDisable(true);
+    loadGameButton.setDisable(true);
   }
 
 
   private Button buildSaveButton() {
     Button button = new Button("Save game");
-    // button.setDisable(true); // Initial state set in loadMenu
     button.setOnAction(
         e -> {
           if (currentController == null) {
@@ -133,7 +161,6 @@ public final class MainView {
           File dir = new File("saves");
           if (!dir.exists()) {
             boolean success = dir.mkdirs();
-
             if (!success) {
               logger.error("Failed to create saves directory. Cannot save game.");
               LoggingNotification.error("Failed to create saves directory", "Cannot save game.");
@@ -164,7 +191,6 @@ public final class MainView {
 
   private Button buildLoadButton() {
     Button button = new Button("Load game");
-    // button.setDisable(true); // Initial state set in loadMenu
     button.setOnAction(
         e -> {
           FileChooser chooser = new FileChooser();
@@ -191,13 +217,10 @@ public final class MainView {
             return;
           }
 
-          boolean wasGameActive = currentController != null;
-
           if (currentController == null) {
-            // Attempt to load Snakes and Ladders by default if no game is active
             logger.warn(
-                "No game context for loading. Attempting to load as Snakes and Ladders.");
-            loadSnakesAndLaddersForLoading(); // A specific method to set up for loading
+                "No game context for loading. Attempting to set up Snakes and Ladders context.");
+            loadSnakesAndLaddersForLoading();
           }
 
           if (currentController == null) {
@@ -208,18 +231,11 @@ public final class MainView {
 
           currentController.loadGameState(file.getPath());
           saveGameButton.setDisable(false);
-          loadGameButton.setDisable(false);
-
-
+          loadGameButton.setDisable(false); // Still possible to load another game.
         });
     return button;
   }
 
-  /**
-   * Helper method to initialize Snakes and Ladders specifically for the purpose of loading a save
-   * file, without necessarily making it the "active" game being played from scratch. This method
-   * sets up the controller and view, then the loadGameState will be called on it.
-   */
   private void loadSnakesAndLaddersForLoading() {
     Path savesDir = Path.of("saves");
     try {
@@ -227,20 +243,19 @@ public final class MainView {
     } catch (IOException e) {
       logger.error("Failed to create saves directory: {}", e.getMessage());
       LoggingNotification.error("Failed to create saves directory", "Cannot load game.");
-      this.currentController = null; // Ensure controller is null if setup fails
+      this.currentController = null;
       return;
     }
 
     var repo = new JsonSnlGameStateRepository();
-    SnlController controller = new SnlController(2,
-        repo); // Default to 2 players for loading context
+    SnlController controller = new SnlController(2, repo);
 
     this.currentController = controller;
-    SnlView view = new SnlView(controller); // View is created, observers will be notified by load
+    SnlView view = new SnlView(controller);
     contentWrapper.getChildren().setAll(view.getRoot());
-    // Save/load buttons will be managed by the calling load method
   }
 
+  @SuppressWarnings("unused")
   private void loadSnakesAndLadders() {
     Path savesDir = Path.of("saves");
     try {
@@ -252,7 +267,7 @@ public final class MainView {
     }
 
     var repo = new JsonSnlGameStateRepository();
-    SnlController controller = new SnlController(2, repo); // Default to 2 players for now
+    SnlController controller = new SnlController(2, repo);
 
     this.currentController = controller;
     SnlView view = new SnlView(controller);
@@ -262,8 +277,9 @@ public final class MainView {
     loadGameButton.setDisable(false);
   }
 
+  @SuppressWarnings("unused")
   private void loadCluedo() {
-    int numberOfPlayers = 6; // Default to 6 players for now
+    int numberOfPlayers = 6;
     try {
       CluedoController cluedoController = new CluedoController(numberOfPlayers);
       this.currentController = cluedoController;
