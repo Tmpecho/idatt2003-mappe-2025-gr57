@@ -112,12 +112,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   }
 
   private boolean isCorridorTileDoor(int corridorRow, int corridorCol) {
-    int[] rowOffsets = {-1, 1, 0, 0};
-    int[] colOffsets = {0, 0, -1, 1};
-
-    for (int i = 0; i < 4; i++) {
-      int neighborRow = corridorRow + rowOffsets[i];
-      int neighborCol = corridorCol + colOffsets[i];
+    for (Direction direction : Direction.values()) {
+      int neighborRow = corridorRow + direction.directionRow;
+      int neighborCol = corridorCol + direction.directionCol;
 
       // Check bounds for neighbor
       if (neighborRow < 0
@@ -279,11 +276,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     roomPane.setOnMouseClicked(
         e -> {
           GridPos here = currentPlayerPositionSupplier.get();
-          int[] rowOffsets = {-1, 1, 0, 0};
-          int[] colOffsets = {0, 0, -1, 1};
-          for (int offsetIdx = 0; offsetIdx < 4; offsetIdx++) {
+          for (Direction direction : Direction.values()) {
             GridPos candidate =
-                new GridPos(here.row() + rowOffsets[offsetIdx], here.col() + colOffsets[offsetIdx]);
+                new GridPos(here.row() + direction.directionRow, here.col() + direction.directionCol);
             if (boardModel.getTileAtPosition(candidate) == roomTile) {
               onTileClick.accept(candidate);
               return;
@@ -405,6 +400,19 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
      */
     public int colSpan() {
       return maxCol - minCol + 1;
+    }
+  }
+
+  private enum Direction {
+    NORTH(-1, 0),
+    SOUTH(1, 0),
+    WEST(0, -1),
+    EAST(0, 1);
+    public final int directionRow, directionCol;
+
+    Direction(int directionRow, int directionCol) {
+      this.directionRow = directionRow;
+      this.directionCol = directionCol;
     }
   }
 }
