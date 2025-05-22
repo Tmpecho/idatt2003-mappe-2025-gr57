@@ -84,8 +84,8 @@ public final class CluedoController extends GameController<GridPos> {
 
   @Override
   public boolean isGameOver() {
-	  // TODO: Don't know if this is needed
-	  return false;
+    // TODO: Don't know if this is needed
+    return false;
   }
 
   @Override
@@ -111,14 +111,14 @@ public final class CluedoController extends GameController<GridPos> {
     System.out.println("Cluedo load game state not implemented yet from path: " + filePath);
   }
 
-	/**
-	 * Checks if the game is currently waiting for the player to roll the dice.
-	 *
-	 * @return true if the game is in the WAIT_ROLL phase, false otherwise.
-	 */
-	public boolean isWaitingForRoll() {
-		return phase == Phase.WAIT_ROLL;
-	}
+  /**
+   * Checks if the game is currently waiting for the player to roll the dice.
+   *
+   * @return true if the game is in the WAIT_ROLL phase, false otherwise.
+   */
+  public boolean isWaitingForRoll() {
+    return phase == Phase.WAIT_ROLL;
+  }
 
   /**
    * Initiates the movement phase for the current player after they have rolled the dice. Sets the
@@ -162,16 +162,16 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the roll dice button is pressed. Executes a
-   * {@link RollAction} for the current player.
+   * Handles the action triggered when the roll dice button is pressed. Executes a {@link
+   * RollAction} for the current player.
    */
   public void onRollButton() {
     new RollAction(this, dice).execute();
   }
 
   /**
-   * Handles the action triggered when a tile on the game board is clicked. Executes a
-   * {@link MoveAction} for the current player towards the target position.
+   * Handles the action triggered when a tile on the game board is clicked. Executes a {@link
+   * MoveAction} for the current player towards the target position.
    *
    * @param target The {@link GridPos} of the clicked tile.
    */
@@ -180,17 +180,25 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the accuse button is pressed. Executes an
-   * {@link AccusationAction} with the provided suspect, weapon, and room.
+   * Handles the action triggered when the accuse button is pressed. Executes an {@link
+   * AccusationAction} with the provided suspect, weapon, and room.
    *
    * @param suspect The suspected character.
-   * @param weapon  The suspected weapon.
-   * @param room    The room where the crime is suspected to have occurred.
+   * @param weapon The suspected weapon.
+   * @param room The room where the crime is suspected to have occurred.
    */
   public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
     new AccusationAction(this, suspect, weapon, room).execute();
   }
 
+  /**
+   * Handles the action triggered when the suggest button is pressed. Executes a {@link
+   * SuggestionAction} with the provided suspect, weapon, and room.
+   *
+   * @param suspect The suspected character involved in the suggestion.
+   * @param weapon The suspected weapon used in the suggestion.
+   * @param room The room where the suggestion is being made.
+   */
   public void onSuggestButton(Suspect suspect, Weapon weapon, Room room) {
     new SuggestionAction(this, suspect, weapon, room).execute();
   }
@@ -249,11 +257,11 @@ public final class CluedoController extends GameController<GridPos> {
     return currentPlayer;
   }
 
-	/**
-	 * Allows the current player to make a suggestion. This is typically done when the player is in a
-	 * room. The player suggests a suspect, a weapon, and the current room. Other players then attempt
-	 * to disprove the suggestion.
-	 */
+  /**
+   * Allows the current player to make a suggestion. This is typically done when the player is in a
+   * room. The player suggests a suspect, a weapon, and the current room. Other players then attempt
+   * to disprove the suggestion.
+   */
   public void makeSuggestion(Suspect suggestedSuspect, Weapon suggestedWeapon, Room suggestedRoom) {
     if (suggestedSuspect == null || suggestedWeapon == null || suggestedRoom == null) {
       throw new IllegalArgumentException("Suggestion cannot be null.");
@@ -315,8 +323,8 @@ public final class CluedoController extends GameController<GridPos> {
    * Allows the current player to make an accusation.
    *
    * @param suspect The suspected character.
-   * @param weapon  The suspected weapon.
-   * @param room    The room where the crime is suspected to have occurred.
+   * @param weapon The suspected weapon.
+   * @param room The room where the crime is suspected to have occurred.
    */
   public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
     if (suspect == null || weapon == null || room == null) {
@@ -363,6 +371,15 @@ public final class CluedoController extends GameController<GridPos> {
     notifyObservers(p.getName() + " has been eliminated and removed from the board.");
   }
 
+  /**
+   * Retrieves the room in which the current player is located. This method checks the tile at the
+   * player's current position on the board. If the tile corresponds to a room, it converts the
+   * room's display name into a {@link Room} object and returns it. If the player is not in a room,
+   * the method returns null.
+   *
+   * @return The {@link Room} object representing the current player's location if they are in a
+   *     room, or null if the player is not in a room.
+   */
   public Room getRoomOfCurrentPlayer() {
     GridPos pos = currentPlayer.getPosition();
     AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
@@ -394,9 +411,7 @@ public final class CluedoController extends GameController<GridPos> {
     solutionRoom = roomList.remove(0);
   }
 
-  /**
-   * Deal the remaining deck clockwise, one at a time, until empty.
-   */
+  /** Deal the remaining deck clockwise, one at a time, until empty. */
   private void dealRemainingCards() {
     List<Card> deck = new ArrayList<>();
     deck.addAll(Cards.shuffledSuspects(rng));

@@ -32,6 +32,13 @@ public enum Room implements Card {
     return Arrays.stream(Room.values()).map(Room::getName).toArray(String[]::new);
   }
 
+  /**
+   * Retrieves a {@link Room} enum constant by its display name.
+   *
+   * @param name the display name of the room to retrieve
+   * @return the {@link Room} corresponding to the given display name
+   * @throws IllegalArgumentException if no room matches the given display name
+   */
   public static Room fromDisplayName(String name) {
     return Arrays.stream(values())
         .filter(r -> r.getName().equals(name))

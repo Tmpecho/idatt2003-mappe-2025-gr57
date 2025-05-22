@@ -8,14 +8,14 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
-import java.util.HashSet;
-import java.util.EnumMap;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.Map;
-import java.util.List;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Represents a player in the Cluedo game, extending the generic {@link Player} class. Cluedo
@@ -33,9 +33,9 @@ public final class CluedoPlayer extends Player<GridPos> {
   /**
    * Constructs a new CluedoPlayer.
    *
-   * @param id       The unique identifier for the player.
-   * @param name     The name of the player (typically the suspect name).
-   * @param color    The {@link PlayerColor} associated with the player/suspect.
+   * @param id The unique identifier for the player.
+   * @param name The name of the player (typically the suspect name).
+   * @param color The {@link PlayerColor} associated with the player/suspect.
    * @param startPos The starting {@link GridPos} of the player on the board.
    */
   public CluedoPlayer(int id, String name, PlayerColor color, GridPos startPos) {
@@ -109,10 +109,10 @@ public final class CluedoPlayer extends Player<GridPos> {
    * {@link Random} instance.
    *
    * @param options the collection of cards to check against the player's hand
-   * @param rng     the random number generator used to select a card if multiple matches are found
+   * @param rng the random number generator used to select a card if multiple matches are found
    * @return a card from the player's hand that matches one of the options
    * @throws IllegalArgumentException if none of the options are in the player's hand or if an
-   *                                  unknown card type is encountered
+   *     unknown card type is encountered
    */
   public Card showOneOf(Collection<Card> options, Random rng) {
     List<Card> matches =
@@ -140,27 +140,66 @@ public final class CluedoPlayer extends Player<GridPos> {
     return matches.get(rng.nextInt(matches.size()));
   }
 
-  public boolean isSuspectNoted(Suspect s) {
-    return suspectNotes.get(s);
+  /**
+   * Checks if a specific suspect is noted in the player' suspect notes.
+   *
+   * @param suspect the suspect to check
+   * @return true if the suspect is noted, false otherwise
+   */
+  public boolean isSuspectNoted(Suspect suspect) {
+    return suspectNotes.get(suspect);
   }
 
-  public void setSuspectNoted(Suspect s, boolean v) {
-    suspectNotes.put(s, v);
+  /**
+   * Updates the suspect notes for the player, marking the given suspect as either noted or not.
+   *
+   * @param suspect The suspect to update in the player's notes.
+   * @param v A boolean value where {@code true} marks the suspect as noted, and {@code false} marks
+   *     the suspect as not noted.
+   */
+  public void setSuspectNoted(Suspect suspect, boolean v) {
+    suspectNotes.put(suspect, v);
   }
 
-  public boolean isWeaponNoted(Weapon w) {
-    return weaponNotes.get(w);
+  /**
+   * Checks if a specific weapon is noted in the player' weapon notes.
+   *
+   * @param weapon the weapon to check
+   * @return true if the weapon is noted, false otherwise
+   */
+  public boolean isWeaponNoted(Weapon weapon) {
+    return weaponNotes.get(weapon);
   }
 
-  public void setWeaponNoted(Weapon w, boolean v) {
-    weaponNotes.put(w, v);
+  /**
+   * Updates the weapon notes for the player, marking the given weapon as either noted or not.
+   *
+   * @param weapon The weapon to update in the player's notes.
+   * @param v A boolean value where {@code true} marks the weapon as noted, and {@code false} marks
+   *     the weapon as not noted.
+   */
+  public void setWeaponNoted(Weapon weapon, boolean v) {
+    weaponNotes.put(weapon, v);
   }
 
-  public boolean isRoomNoted(Room r) {
-    return roomNotes.get(r);
+  /**
+   * Checks if a specific room is noted in the player' room notes.
+   *
+   * @param room the room to check
+   * @return true if the room is noted, false otherwise
+   */
+  public boolean isRoomNoted(Room room) {
+    return roomNotes.get(room);
   }
 
-  public void setRoomNoted(Room r, boolean v) {
-    roomNotes.put(r, v);
+  /**
+   * Updates the room notes for the player, marking the given room as either noted or not.
+   *
+   * @param room The room to update in the player's notes.
+   * @param v A boolean value where {@code true} marks the room as noted, and {@code false} marks
+   *     the room as not noted.
+   */
+  public void setRoomNoted(Room room, boolean v) {
+    roomNotes.put(room, v);
   }
 }
