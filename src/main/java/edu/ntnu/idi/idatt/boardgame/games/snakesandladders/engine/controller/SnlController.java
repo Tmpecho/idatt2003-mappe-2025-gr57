@@ -1,5 +1,15 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller;
 
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
@@ -12,12 +22,6 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAct
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnlGameStateDto;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnlMapper;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.IntStream;
 
 /**
  * Controller for the Snakes and Ladders game. Manages game flow, player turns, dice rolls, and game
@@ -41,6 +45,8 @@ public final class SnlController extends GameController<LinearPos> {
       PlayerColor.YELLOW,
       PlayerColor.ORANGE,
       PlayerColor.PURPLE);
+
+  private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
 
   /**
    * Constructs an SnLController.
@@ -135,7 +141,7 @@ public final class SnlController extends GameController<LinearPos> {
       repo.save(SnlMapper.toDto(this), Path.of(path));
       LoggingNotification.info("Game Saved", "Game state saved to " + path);
     } catch (Exception e) {
-      System.err.println("Save failed: " + e.getMessage());
+      logger.error("Save failed: {}", e.getMessage());
       LoggingNotification.error("Save failed", e.getMessage());
     }
   }
@@ -146,7 +152,7 @@ public final class SnlController extends GameController<LinearPos> {
       SnlMapper.apply(repo.load(Path.of(path)), this);
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (Exception e) {
-      System.err.println("Load failed: " + e.getMessage());
+      logger.error("Load failed: {}", e.getMessage());
       LoggingNotification.error("Load failed", e.getMessage());
     }
   }

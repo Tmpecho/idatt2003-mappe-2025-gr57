@@ -5,25 +5,46 @@ import javafx.geometry.Pos;
 import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility for showing non‑blocking, toast‑style log messages.
  *
  * <p>Uses ControlsFX {@link Notifications}. Must be called on the JavaFX Application Thread.
+ * Also logs the notification to SLF4J logger.
  */
 public final class LoggingNotification {
+
+  private static final Logger logger = LoggerFactory.getLogger(
+      LoggingNotification.class); // NEW LOGGER INSTANCE
 
   private LoggingNotification() {
   }
 
   /**
-   * Shows a notification with sensible defaults for the given log type.
+   * Shows a notification with sensible defaults for the given log type. Also logs the message to
+   * the SLF4J logger.
    *
    * @param type    severity/category (see {@link LoggingType})
    * @param title   short summary
    * @param message detailed message (optional)
    */
   public static void show(LoggingType type, String title, String message) {
+    String fullMessage = (message == null || message.isEmpty()) ? title : title + ": " + message;
+
+    // **** NEW: Log to SLF4J first ****
+    switch (type) {
+      case INFO -> logger.info("[UI INFO] {}", fullMessage);
+      case DEBUG -> logger.debug("[UI DEBUG] {}", fullMessage);
+      case WARN -> logger.warn("[UI WARN] {}", fullMessage);
+      case ERROR -> logger.error("[UI ERROR] {}", fullMessage);
+      case FATAL ->
+          logger.error("[UI FATAL] {}", fullMessage); // SLF4J doesn't have FATAL, maps to ERROR
+      default -> logger.info("[UI UNKNOWN TYPE {}] {}", type, fullMessage);
+    }
+
+    // UI Popup logic remains
     Runnable task = () -> build(type, title, message).show();
     runOnFxThread(task);
   }
@@ -92,7 +113,10 @@ public final class LoggingNotification {
       case WARN -> notifications.graphic(Icon.WARN.view());
       case ERROR -> notifications.graphic(Icon.ERROR.view()).hideAfter(Duration.seconds(6));
       case FATAL -> notifications.graphic(Icon.FATAL.view()).hideAfter(Duration.seconds(8));
-      default -> throw new IllegalStateException("Unexpected value: " + type);
+      default -> {
+        logger.error("Unexpected LoggingType value in build(): {}", type); // NEW internal log
+        throw new IllegalStateException("Unexpected value: " + type);
+      }
     }
     return notifications;
   }
@@ -106,13 +130,14 @@ public final class LoggingNotification {
       }
     } catch (IllegalStateException e) {
       // (toolkit not initialized) — swallow or log to console
+      logger.warn(
+          "JavaFX toolkit not initialized when trying to show notification."
+              + " Running on current thread.",
+          e); // NEW internal log
       r.run();
     }
   }
 
-  /**
-   * Icon helper.
-   */
   private enum Icon {
     INFO("/icons/info64.png"),
     DEBUG("/icons/debug64.png"),

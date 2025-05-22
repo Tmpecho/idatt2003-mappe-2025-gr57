@@ -1,5 +1,14 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.view;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
@@ -10,11 +19,6 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerTokenFactory;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -40,6 +44,8 @@ import javafx.scene.text.TextAlignment;
  * tiles, particularly rooms.
  */
 public final class CluedoBoardView extends Pane implements TileObserver<GridPos> {
+
+  private static final Logger logger = LoggerFactory.getLogger(CluedoBoardView.class);
 
   private static final int TILE_SIZE = 30;
   private static final int GAP_SIZE = 1;
@@ -354,7 +360,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     FlowPane pane = roomTokenPanes.get(room);
     if (pane == null) {
       // This can happen if the room wasn't fully initialized or is not in the map
-      // System.err.println("CluedoBoardView: No token pane found for room: " + room.getRoomName());
+      logger.warn("CluedoBoardView: No token pane found for room: {}", room.getRoomName());
       return;
     }
 
