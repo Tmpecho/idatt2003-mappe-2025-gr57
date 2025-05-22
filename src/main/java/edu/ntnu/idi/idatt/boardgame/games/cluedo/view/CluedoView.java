@@ -245,7 +245,9 @@ public final class CluedoView implements GameObserver<GridPos> {
         .forEach(
             card -> {
               CheckBox checkBox = new CheckBox(labelFunction.apply(card));
-              checkBox.selectedProperty().addListener((obs, oldV, newV) -> onToggle.accept(card, newV));
+              checkBox
+                  .selectedProperty()
+                  .addListener((obs, oldV, newV) -> onToggle.accept(card, newV));
               box.getChildren().add(checkBox);
 
               addItemToNoteBox(card, checkBox);
