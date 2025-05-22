@@ -61,7 +61,7 @@ public final class CluedoController extends GameController<GridPos> {
     this.boardModel = (CluedoBoard) this.gameBoard;
     this.repo = Objects.requireNonNull(repo);
 
-    if (playerDetailsList.size() < 2 || playerDetailsList.size() > 6) {
+    if (playerDetailsList == null || playerDetailsList.size() < 2 || playerDetailsList.size() > 6) {
       throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
     }
 
@@ -102,7 +102,7 @@ public final class CluedoController extends GameController<GridPos> {
           () -> new IllegalArgumentException("Suspect details missing for Cluedo player: " + name)
       );
       CluedoPlayer player = new CluedoPlayer(id, name, suspect.colour(),
-          new GridPos(0, 0)); // Dummy start pos
+          new GridPos(0, 0));
       newPlayersMap.put(id, player);
       this.turnOrder.add(player);
     }
@@ -130,7 +130,6 @@ public final class CluedoController extends GameController<GridPos> {
       map.put(playerId, p);
       this.turnOrder.add(p);
     }
-    // currentPlayer will be set by GameController.initialize based on ID 1
     return map;
   }
 
@@ -141,7 +140,7 @@ public final class CluedoController extends GameController<GridPos> {
 
   @Override
   protected void onGameFinish() {
-    if (phase != Phase.TURN_OVER) { // Avoid double notification if already set
+    if (phase != Phase.TURN_OVER) {
       phase = Phase.TURN_OVER;
       notifyGameFinished(currentPlayer);
     }
@@ -172,48 +171,54 @@ public final class CluedoController extends GameController<GridPos> {
   public void loadGameState(String path) {
     try {
       CluedoGameStateDto dto = repo.load(Path.of(path));
-      // Rebuild players and turnOrder from DTO
-      Map<Integer, Player<GridPos>> loadedPlayers = new LinkedHashMap<>();
-      this.turnOrder.clear();
-      for (CluedoGameStateDto.PlayerState ps : dto.players) {
-        Suspect suspect = Suspect.from(
-            PlayerColor.valueOf(ps.colour)); // Assuming color maps to unique suspect
-        CluedoPlayer player = new CluedoPlayer(ps.id, suspect.getName(), suspect.colour(),
-            new GridPos(ps.row, ps.col));
-        loadedPlayers.put(ps.id, player);
-        // The turn order in DTO might not be explicitly saved,
-        // but CluedoMapper.apply will set the correct currentPlayer, which implicitly sets currentIndex.
-        // For safety, we can rebuild turnOrder based on loaded player IDs if they are sequential.
-        // Or, if Cluedo always uses a fixed set of suspects, re-create turnOrder from them.
-        // For now, rely on CluedoMapper.apply to set the correct current player and phase.
-        // The actual order of players in turnOrder if some were eliminated needs careful handling.
-        // The simplest is to re-add all players from DTO to turnOrder.
-        this.turnOrder.add(
-            player); // Simplistic, assumes all players in DTO are active and in order.
-        // A more robust solution would store turnOrder (or active players) in DTO.
-      }
-      this.players = loadedPlayers;
 
-      CluedoMapper.apply(dto, this); // This will set currentPlayer, phase, stepsLeft, hands, notes
-
-      // Ensure currentIndex is consistent with currentPlayer
-      if (this.currentPlayer != null) {
-        this.currentIndex = this.turnOrder.indexOf(this.currentPlayer);
-        if (this.currentIndex == -1) { // Should not happen if turnOrder is rebuilt correctly
-          logger.error("Loaded currentPlayer not found in re-established turnOrder.");
-          if (!this.turnOrder.isEmpty()) {
-            this.currentIndex = 0; // Fallback
+      CluedoBoard board = (CluedoBoard) this.gameBoard;
+      for (int r = 0; r < board.getBoardSize(); r++) {
+        for (int c = 0; c < board.getBoardSize(); c++) {
+          AbstractCluedoTile tile = board.getTileAtPosition(new GridPos(r, c));
+          if (tile != null && !tile.getPlayers().isEmpty()) {
+            new ArrayList<>(tile.getPlayers()).forEach(tile::removePlayer);
           }
         }
       }
 
-      String message = "Game state loaded.";
-      if (phase == Phase.WAIT_ROLL) {
-        message += " " + currentPlayer.getName() + " to roll.";
-      } else if (phase == Phase.MOVING) {
-        message += " " + currentPlayer.getName() + " to move with " + stepsLeft + " steps left.";
+      Map<Integer, Player<GridPos>> loadedPlayers = new LinkedHashMap<>();
+      this.turnOrder.clear();
+
+      for (CluedoGameStateDto.PlayerState ps : dto.players) {
+        PlayerColor playerColor = PlayerColor.valueOf(ps.colour);
+        Suspect suspect = Suspect.from(playerColor);
+        CluedoPlayer player = new CluedoPlayer(ps.id, suspect.getName(), playerColor,
+            new GridPos(ps.row, ps.col));
+        loadedPlayers.put(ps.id, player);
+        this.turnOrder.add(player);
+      }
+      this.players = loadedPlayers;
+
+      CluedoMapper.apply(dto, this);
+
+      if (this.currentPlayer != null && this.turnOrder.contains(this.currentPlayer)) {
+        this.currentIndex = this.turnOrder.indexOf(this.currentPlayer);
+      } else if (!this.turnOrder.isEmpty()) {
+        logger.warn(
+            "Loaded currentPlayer not in turnOrder or turnOrder empty. Resetting currentIndex.");
+        this.currentIndex = 0;
+        this.currentPlayer = this.turnOrder.get(this.currentIndex);
       } else {
-        message += "Current turn: " + currentPlayer.getName() + ".";
+        logger.error("Failed to set current player after load - turn order is empty.");
+      }
+
+      String message = "Game state loaded.";
+      if (currentPlayer != null) {
+        if (phase == Phase.WAIT_ROLL) {
+          message += " " + currentPlayer.getName() + " to roll.";
+        } else if (phase == Phase.MOVING) {
+          message += " " + currentPlayer.getName() + " to move with " + stepsLeft + " steps left.";
+        } else {
+          message += " Current turn: " + currentPlayer.getName() + ".";
+        }
+      } else {
+        message += " No current player found after load.";
       }
       notifyObservers(message);
     } catch (Exception e) {
@@ -222,11 +227,12 @@ public final class CluedoController extends GameController<GridPos> {
     }
   }
 
+
   public boolean isWaitingForRoll() {
     return phase == Phase.WAIT_ROLL;
   }
 
-  public boolean isNotWaitingForRoll() { // From dev, keep if CluedoView uses it
+  public boolean isNotWaitingForRoll() {
     return phase != Phase.WAIT_ROLL;
   }
 
@@ -258,7 +264,7 @@ public final class CluedoController extends GameController<GridPos> {
     return tile instanceof RoomTile room && "Cluedo".equals(room.getRoomName());
   }
 
-  public boolean canNotAccuse() { // From dev
+  public boolean canNotAccuse() {
     return !canAccuse();
   }
 
@@ -282,6 +288,7 @@ public final class CluedoController extends GameController<GridPos> {
   public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
     if (!canAccuse()) {
       logger.warn("Accuse button clicked when accusation is not allowed (Phase: {}).", phase);
+      LoggingNotification.warn("Cannot Accuse", "You must be in the 'Cluedo' room to accuse.");
       return;
     }
     new AccusationAction(this, suspect, weapon, room).execute();
@@ -290,6 +297,8 @@ public final class CluedoController extends GameController<GridPos> {
   public void onSuggestButton(Suspect suspect, Weapon weapon, Room room) {
     if (!canSuggest()) {
       logger.warn("Suggest button clicked when suggestion is not allowed (Phase: {}).", phase);
+      LoggingNotification.warn("Cannot Suggest",
+          "You must be in a regular room to make a suggestion.");
       return;
     }
     new SuggestionAction(this, suspect, weapon, room).execute();
@@ -317,8 +326,10 @@ public final class CluedoController extends GameController<GridPos> {
     if (stepsLeft == 0) {
       if (enteringRoom) {
         phase = Phase.IN_ROOM;
+        String roomName = ((RoomTile) boardModel.getTileAtPosition(target)).getRoomName();
         notifyObservers(
-            currentPlayer.getName() + " is in a room. Make a suggestion/accusation or end turn.");
+            currentPlayer.getName() + " entered the " + roomName
+                + ". Make a suggestion/accusation or end turn.");
       } else {
         endTurn();
       }
@@ -326,7 +337,7 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   private void nextTurn() {
-    if (turnOrder.isEmpty() || isGameOver()) { // isGameOver check added for safety
+    if (turnOrder.isEmpty() || isGameOver()) {
       logger.info("Game is over or no players left, not starting next turn.");
       if (!isGameOver()) {
         onGameFinish();
@@ -335,6 +346,7 @@ public final class CluedoController extends GameController<GridPos> {
     }
     currentPlayer = getNextPlayer();
     phase = Phase.WAIT_ROLL;
+    stepsLeft = 0;
     notifyObservers("Turn over. " + currentPlayer.getName() + " to roll.");
   }
 
@@ -346,9 +358,18 @@ public final class CluedoController extends GameController<GridPos> {
     if (suggestedSuspect == null || suggestedWeapon == null || suggestedRoom == null) {
       throw new IllegalArgumentException("Suggestion cannot be null.");
     }
-    if (phase != Phase.IN_ROOM) {
-      logger.warn("Suggestion made in invalid phase: {}", phase);
-      return;
+
+    Player<GridPos> suggestedPlayer = null;
+    for (Player<GridPos> p : players.values()) {
+      if (p instanceof CluedoPlayer cp && cp.getName().equals(suggestedSuspect.getName())) {
+        suggestedPlayer = p;
+        break;
+      }
+    }
+    if (suggestedPlayer != null && suggestedPlayer != currentPlayer) {
+      boardModel.setPlayerPosition(suggestedPlayer, currentPlayer.getPosition());
+      LoggingNotification.info("Player Moved",
+          suggestedSuspect.getName() + " has been moved to the " + suggestedRoom.getName());
     }
 
     int totalPlayersInOrder = turnOrder.size();
@@ -397,11 +418,6 @@ public final class CluedoController extends GameController<GridPos> {
     if (suspect == null || weapon == null || room == null) {
       throw new IllegalArgumentException("Accusation cannot be null.");
     }
-    if (phase != Phase.IN_ROOM || !("Cluedo".equals(getRoomOfCurrentPlayerName()))) {
-      logger.warn("Accusation made in invalid phase ({}) or location ({}).", phase,
-          getRoomOfCurrentPlayerName());
-      return;
-    }
 
     if (suspect == solutionSuspect && weapon == solutionWeapon && room == solutionRoom) {
       notifyObservers(currentPlayer.getName() + " wins! The solution was indeed " +
@@ -416,7 +432,9 @@ public final class CluedoController extends GameController<GridPos> {
       eliminateCurrentPlayer(currentPlayer);
 
       if (isGameOver()) {
-        onGameFinish();
+        if (phase != Phase.TURN_OVER) {
+          onGameFinish();
+        }
       } else {
         PauseTransition pause = new PauseTransition(Duration.seconds(1));
         pause.setOnFinished(event -> nextTurn());
@@ -436,6 +454,10 @@ public final class CluedoController extends GameController<GridPos> {
       turnOrder.remove(removedPlayerIndexInTurnOrder);
       if (removedPlayerIndexInTurnOrder < this.currentIndex) {
         this.currentIndex--;
+      } else if (removedPlayerIndexInTurnOrder == this.currentIndex) {
+        if (currentIndex >= turnOrder.size() && !turnOrder.isEmpty()) {
+          currentIndex = turnOrder.size() - 1;
+        }
       }
       notifyObservers(p.getName() + " has been eliminated and removed from the board.");
     } else {
@@ -536,9 +558,8 @@ public final class CluedoController extends GameController<GridPos> {
     }
   }
 
-  // Getters and Setters for DTO mapping (from dev branch)
   public Map<Integer, Player<GridPos>> getPlayers() {
-    return players.values().stream()
+    return this.players.values().stream()
         .collect(
             Collectors.toMap(Player::getId, player -> player, (a, b) -> b, LinkedHashMap::new));
   }
@@ -548,13 +569,15 @@ public final class CluedoController extends GameController<GridPos> {
     if (currentPlayer != null && this.turnOrder.contains(currentPlayer)) {
       this.currentIndex = this.turnOrder.indexOf(currentPlayer);
     } else if (currentPlayer != null) {
-      // This case might happen if turnOrder was not correctly rebuilt before calling this
       logger.warn(
-          "setCurrentPlayer called with a player not found in turnOrder. Attempting to add.");
-      if (!this.turnOrder.contains(currentPlayer)) { // Ensure not to add duplicates
-        this.turnOrder.add(currentPlayer); // This might mess up turn order from save
+          "setCurrentPlayer called with a player not found in turnOrder. This might occur during load if turnOrder isn't perfectly aligned yet.");
+      if (!this.turnOrder.contains(currentPlayer)) {
       }
-      this.currentIndex = this.turnOrder.indexOf(currentPlayer);
+      if (this.turnOrder.contains(currentPlayer)) {
+        this.currentIndex = this.turnOrder.indexOf(currentPlayer);
+      } else if (!this.turnOrder.isEmpty()) {
+        this.currentIndex = 0;
+      }
     }
   }
 
