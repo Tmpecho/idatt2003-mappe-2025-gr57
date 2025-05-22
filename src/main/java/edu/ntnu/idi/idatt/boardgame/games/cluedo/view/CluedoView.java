@@ -301,9 +301,12 @@ public final class CluedoView implements GameObserver<GridPos> {
   }
 
   private void refreshNotes() {
-    CluedoPlayer p = (CluedoPlayer) controller.getCurrentPlayer();
-    suspectNoteBoxes.forEach((s, cb) -> cb.setSelected(p.isSuspectNoted(s)));
-    weaponNoteBoxes.forEach((w, cb) -> cb.setSelected(p.isWeaponNoted(w)));
-    roomNoteBoxes.forEach((r, cb) -> cb.setSelected(p.isRoomNoted(r)));
+    CluedoPlayer currentPlayer = (CluedoPlayer) controller.getCurrentPlayer();
+    suspectNoteBoxes.forEach(
+        (suspect, checkBox) -> checkBox.setSelected(currentPlayer.isSuspectNoted(suspect)));
+    weaponNoteBoxes.forEach(
+        (weapon, checkBox) -> checkBox.setSelected(currentPlayer.isWeaponNoted(weapon)));
+    roomNoteBoxes.forEach(
+        (room, checkBox) -> checkBox.setSelected(currentPlayer.isRoomNoted(room)));
   }
 }

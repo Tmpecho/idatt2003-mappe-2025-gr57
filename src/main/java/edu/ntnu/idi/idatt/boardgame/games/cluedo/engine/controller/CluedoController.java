@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.IntStream;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import org.slf4j.Logger;
@@ -77,12 +78,15 @@ public final class CluedoController extends GameController<GridPos> {
   @Override
   protected Map<Integer, Player<GridPos>> createPlayers(int n) {
     LinkedHashMap<Integer, Player<GridPos>> map = new LinkedHashMap<>();
-    for (int i = 1; i <= n; i++) {
-      Suspect s = suspects.get((i - 1) % suspects.size());
-      CluedoPlayer p = new CluedoPlayer(i, s.getName(), s.colour(), new GridPos(0, 0));
-      map.put(i, p);
-      turnOrder.add(p);
-    }
+    IntStream.rangeClosed(1, n)
+        .forEach(
+            i -> {
+              Suspect suspect = suspects.get((i - 1) % suspects.size());
+              CluedoPlayer player =
+                  new CluedoPlayer(i, suspect.getName(), suspect.colour(), new GridPos(0, 0));
+              map.put(i, player);
+              turnOrder.add(player);
+            });
     return map;
   }
 

@@ -1,14 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.view;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
@@ -19,6 +10,11 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerTokenFactory;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -37,6 +33,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the visual view of the Cluedo game board. It arranges {@link CluedoTileView} instances
@@ -59,20 +57,23 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private final Map<RoomTile, FlowPane> roomTokenPanes = new HashMap<>();
   private final Consumer<GridPos> onTileClick;
   private final CluedoBoard boardModel;
-  private final Supplier<GridPos> currentPlayerPos;
+  private final Supplier<GridPos> currentPlayerPositionSupplier;
 
   /**
    * Constructs a CluedoBoardView.
    *
-   * @param boardModel       The {@link CluedoBoard} model this view represents.
-   * @param currentPlayerPos A supplier for the current player's position, used for click handling.
-   * @param onTileClick      A consumer that handles tile click events.
+   * @param boardModel The {@link CluedoBoard} model this view represents.
+   * @param currentPlayerPositionSupplier A supplier for the current player's position, used for
+   *     click handling.
+   * @param onTileClick A consumer that handles tile click events.
    */
   public CluedoBoardView(
-      CluedoBoard boardModel, Supplier<GridPos> currentPlayerPos, Consumer<GridPos> onTileClick) {
+      CluedoBoard boardModel,
+      Supplier<GridPos> currentPlayerPositionSupplier,
+      Consumer<GridPos> onTileClick) {
     this.boardModel = boardModel;
     this.onTileClick = onTileClick;
-    this.currentPlayerPos = currentPlayerPos;
+    this.currentPlayerPositionSupplier = currentPlayerPositionSupplier;
     this.grid = new GridPane();
 
     grid.setHgap(GAP_SIZE);
@@ -102,21 +103,21 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   }
 
   private static FlowPane makePlayerPane() {
-    FlowPane pane = new FlowPane();
-    pane.setAlignment(Pos.CENTER);
-    pane.setHgap(1);
-    pane.setVgap(1);
-    pane.setPickOnBounds(false);
-    return pane;
+    FlowPane playerTokenPane = new FlowPane();
+    playerTokenPane.setAlignment(Pos.CENTER);
+    playerTokenPane.setHgap(1);
+    playerTokenPane.setVgap(1);
+    playerTokenPane.setPickOnBounds(false);
+    return playerTokenPane;
   }
 
   private boolean isCorridorTileDoor(int corridorRow, int corridorCol) {
-    int[] dr = {-1, 1, 0, 0};
-    int[] dc = {0, 0, -1, 1};
+    int[] rowOffsets = {-1, 1, 0, 0};
+    int[] colOffsets = {0, 0, -1, 1};
 
     for (int i = 0; i < 4; i++) {
-      int neighborRow = corridorRow + dr[i];
-      int neighborCol = corridorCol + dc[i];
+      int neighborRow = corridorRow + rowOffsets[i];
+      int neighborCol = corridorCol + colOffsets[i];
 
       // Check bounds for neighbor
       if (neighborRow < 0
@@ -277,11 +278,12 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     // A player must be on an adjacent corridor tile that is a door to this room.
     roomPane.setOnMouseClicked(
         e -> {
-          GridPos here = currentPlayerPos.get();
-          int[] dr = {-1, 1, 0, 0};
-          int[] dc = {0, 0, -1, 1};
-          for (int k = 0; k < 4; k++) {
-            GridPos candidate = new GridPos(here.row() + dr[k], here.col() + dc[k]);
+          GridPos here = currentPlayerPositionSupplier.get();
+          int[] rowOffsets = {-1, 1, 0, 0};
+          int[] colOffsets = {0, 0, -1, 1};
+          for (int offsetIdx = 0; offsetIdx < 4; offsetIdx++) {
+            GridPos candidate =
+                new GridPos(here.row() + rowOffsets[offsetIdx], here.col() + colOffsets[offsetIdx]);
             if (boardModel.getTileAtPosition(candidate) == roomTile) {
               onTileClick.accept(candidate);
               return;
@@ -340,10 +342,10 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       RoomTile roomTile,
       AbstractCluedoTile[][] boardGrid,
       boolean[][] visitedRoomCells) {
-    for (int r = dimensions.minRow(); r <= dimensions.maxRow(); r++) {
-      for (int c = dimensions.minCol(); c <= dimensions.maxCol(); c++) {
-        if (boardGrid[r][c] == roomTile) {
-          visitedRoomCells[r][c] = true;
+    for (int row = dimensions.minRow(); row <= dimensions.maxRow(); row++) {
+      for (int col = dimensions.minCol(); col <= dimensions.maxCol(); col++) {
+        if (boardGrid[row][col] == roomTile) {
+          visitedRoomCells[row][col] = true;
         }
       }
     }
@@ -367,7 +369,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     pane.getChildren().clear();
     room.getPlayers()
         .forEach(
-            p -> pane.getChildren().add(PlayerTokenFactory.createPlayerToken(p, TILE_SIZE, 0.10)));
+            player ->
+                pane.getChildren()
+                    .add(PlayerTokenFactory.createPlayerToken(player, TILE_SIZE, 0.10)));
   }
 
   private void bindClick(Node node, int row, int col) {
