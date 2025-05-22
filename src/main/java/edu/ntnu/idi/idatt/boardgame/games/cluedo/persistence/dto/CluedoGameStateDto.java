@@ -11,7 +11,10 @@ public final class CluedoGameStateDto extends GameStateDto {
   /** id of the player whose turn it is when the game is saved. */
   public int currentPlayerTurn;
 
+  /** Phase of the game when the game is saved. */
   public Phase phase;
+
+  /** Number of steps left for the current player when the game is saved. */
   public int stepsLeft;
 
   /** List of player states. */
