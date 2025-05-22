@@ -1,15 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
@@ -22,6 +12,14 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAct
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnlGameStateDto;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnlMapper;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.IntStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller for the Snakes and Ladders game. Manages game flow, player turns, dice rolls, and game
@@ -29,22 +27,20 @@ import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
  */
 public final class SnlController extends GameController<LinearPos> {
 
-  /**
-   * Repository for saving and loading game state.
-   */
+  /** Repository for saving and loading game state. */
   private final GameStateRepository<SnlGameStateDto> repo;
 
   private final int numberOfPlayers;
-  /**
-   * List of player colors to assign to players.
-   */
-  private final List<PlayerColor> playerColors = List.of(
-      PlayerColor.RED,
-      PlayerColor.BLUE,
-      PlayerColor.GREEN,
-      PlayerColor.YELLOW,
-      PlayerColor.ORANGE,
-      PlayerColor.PURPLE);
+
+  /** List of player colors to assign to players. */
+  private final List<PlayerColor> playerColors =
+      List.of(
+          PlayerColor.RED,
+          PlayerColor.BLUE,
+          PlayerColor.GREEN,
+          PlayerColor.YELLOW,
+          PlayerColor.ORANGE,
+          PlayerColor.PURPLE);
 
   private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
 
@@ -52,11 +48,10 @@ public final class SnlController extends GameController<LinearPos> {
    * Constructs an SnLController.
    *
    * @param numberOfPlayers The number of players in the game.
-   * @param repo            The {@link GameStateRepository} for handling persistence of
-   *                        {@link SnlGameStateDto}.
+   * @param repo The {@link GameStateRepository} for handling persistence of {@link
+   *     SnlGameStateDto}.
    */
-  public SnlController(
-      int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
+  public SnlController(int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
     this.numberOfPlayers = numberOfPlayers;
     this.repo = Objects.requireNonNull(repo);
@@ -97,8 +92,8 @@ public final class SnlController extends GameController<LinearPos> {
         .forEach(
             playerId -> {
               PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-              Player<LinearPos> player = new Player<>(playerId, "Player " + playerId, color,
-                  new LinearPos(1));
+              Player<LinearPos> player =
+                  new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
               players.put(playerId, player);
             });
     return players;

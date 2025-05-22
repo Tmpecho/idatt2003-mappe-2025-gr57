@@ -142,7 +142,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
           if (board[row][col] != null) {
             logger.warn(
-                "Warning: Overwriting existing tile at ({}, {}) while populating room {}. Existing: {}",
+                "Warning: Overwriting existing tile at ({}, {}) while populating room {}."
+                    + " Existing: {}",
                 row,
                 col,
                 room.getRoomName(),
@@ -208,7 +209,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               || spec.dims.bottom >= BOARD_SIZE - 1
               || spec.dims.right >= BOARD_SIZE - 1) {
             logger.error(
-                "CRITICAL Error: Room {} with dimensions {} extends into the border area or outside bounds.",
+                "CRITICAL Error: Room {} with dimensions {} extends into the border"
+                    + " area or outside bounds.",
                 spec.name,
                 spec.dims);
             return;
@@ -376,14 +378,17 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                 AbstractCluedoTile startTile = getTileAtPosition(startPos);
                 if (startTile instanceof BorderTile) {
                   logger.error(
-                      "CRITICAL Error: Calculated start position {} for player {} is a BorderTile. Adjust start positions.",
+                      "CRITICAL Error: Calculated start position {} for player {} is a "
+                          + "BorderTile. Adjust start positions.",
                       startPos,
                       player.getName());
                   return;
                 }
                 if (startTile == null) {
                   logger.error(
-                      "CRITICAL Error: Start tile is null at supposedly valid position {} for player {}. This might be due to board initialization order or incorrect coordinates.",
+                      "CRITICAL Error: Start tile is null at supposedly valid position {} "
+                          + "for player {}. This might be due to board initialization order "
+                          + "or incorrect coordinates.",
                       startPos,
                       player.getName());
                   return;
@@ -394,7 +399,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                 if (!startTile.isWalkable()
                     && !(startTile instanceof RoomTile)) { // Rooms are fine to start in.
                   logger.error(
-                      "Error: Start tile at {} for player {} is not walkable and not a Room! Type: {}",
+                      "Error: Start tile at {} for player {} is not walkable and not "
+                          + "a Room! Type: {}",
                       startPos,
                       player.getName(),
                       startTile.getClass().getSimpleName());

@@ -114,16 +114,6 @@ public final class SnlBoard implements GameBoard<LinearPos> {
     movePlayer(player, pos, computeDestination(c.getEnd()));
   }
 
-  /**
-   * Retrieves the {@link SnlTile} at the given 1-based position.
-   *
-   * @param pos The 1-based position of the tile.
-   * @return The {@link SnlTile} at that position, or null if invalid.
-   */
-  public SnlTile getTileAtPosition(int pos) {
-    return tiles.get(pos);
-  }
-
   private void addSnakesAndLadders() {
     SNAKES.forEach(
         (start, length) -> {

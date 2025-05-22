@@ -170,16 +170,16 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the roll dice button is pressed. Executes a
-   * {@link RollAction} for the current player.
+   * Handles the action triggered when the roll dice button is pressed. Executes a {@link
+   * RollAction} for the current player.
    */
   public void onRollButton() {
     new RollAction(this, dice).execute();
   }
 
   /**
-   * Handles the action triggered when a tile on the game board is clicked. Executes a
-   * {@link MoveAction} for the current player towards the target position.
+   * Handles the action triggered when a tile on the game board is clicked. Executes a {@link
+   * MoveAction} for the current player towards the target position.
    *
    * @param target The {@link GridPos} of the clicked tile.
    */
@@ -188,24 +188,24 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the accuse button is pressed. Executes an
-   * {@link AccusationAction} with the provided suspect, weapon, and room.
+   * Handles the action triggered when the accuse button is pressed. Executes an {@link
+   * AccusationAction} with the provided suspect, weapon, and room.
    *
    * @param suspect The suspected character.
-   * @param weapon  The suspected weapon.
-   * @param room    The room where the crime is suspected to have occurred.
+   * @param weapon The suspected weapon.
+   * @param room The room where the crime is suspected to have occurred.
    */
   public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
     new AccusationAction(this, suspect, weapon, room).execute();
   }
 
   /**
-   * Handles the action triggered when the suggest button is pressed. Executes a
-   * {@link SuggestionAction} with the provided suspect, weapon, and room.
+   * Handles the action triggered when the suggest button is pressed. Executes a {@link
+   * SuggestionAction} with the provided suspect, weapon, and room.
    *
    * @param suspect The suspected character involved in the suggestion.
-   * @param weapon  The suspected weapon used in the suggestion.
-   * @param room    The room where the suggestion is being made.
+   * @param weapon The suspected weapon used in the suggestion.
+   * @param room The room where the suggestion is being made.
    */
   public void onSuggestButton(Suspect suspect, Weapon weapon, Room room) {
     new SuggestionAction(this, suspect, weapon, room).execute();
@@ -331,8 +331,8 @@ public final class CluedoController extends GameController<GridPos> {
    * Allows the current player to make an accusation.
    *
    * @param suspect The suspected character.
-   * @param weapon  The suspected weapon.
-   * @param room    The room where the crime is suspected to have occurred.
+   * @param weapon The suspected weapon.
+   * @param room The room where the crime is suspected to have occurred.
    */
   public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
     if (suspect == null || weapon == null || room == null) {
@@ -386,7 +386,7 @@ public final class CluedoController extends GameController<GridPos> {
    * the method returns null.
    *
    * @return The {@link Room} object representing the current player's location if they are in a
-   * room, or null if the player is not in a room.
+   *     room, or null if the player is not in a room.
    */
   public Room getRoomOfCurrentPlayer() {
     GridPos pos = currentPlayer.getPosition();
@@ -397,9 +397,7 @@ public final class CluedoController extends GameController<GridPos> {
     return null;
   }
 
-  /**
-   * Called when this player’s movement finishes. Advances turn.
-   */
+  /** Called when this player’s movement finishes. Advances turn. */
   public void endTurn() {
     this.phase = Phase.WAIT_ROLL;
     nextTurn();
@@ -421,9 +419,7 @@ public final class CluedoController extends GameController<GridPos> {
     solutionRoom = roomList.remove(0);
   }
 
-  /**
-   * Deal the remaining deck clockwise, one at a time, until empty.
-   */
+  /** Deal the remaining deck clockwise, one at a time, until empty. */
   private void dealRemainingCards() {
     List<Card> deck = new ArrayList<>();
     deck.addAll(Cards.shuffledSuspects(rng));
