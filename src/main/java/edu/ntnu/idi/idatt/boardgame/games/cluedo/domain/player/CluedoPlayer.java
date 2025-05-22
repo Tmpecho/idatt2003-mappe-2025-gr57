@@ -8,7 +8,14 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
-import java.util.*;
+import java.util.HashSet;
+import java.util.EnumMap;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.Map;
+import java.util.List;
+import java.util.Collection;
+import java.util.Random;
 
 public final class CluedoPlayer extends Player<GridPos> {
   private final Set<Suspect> suspectHand = new HashSet<>();
