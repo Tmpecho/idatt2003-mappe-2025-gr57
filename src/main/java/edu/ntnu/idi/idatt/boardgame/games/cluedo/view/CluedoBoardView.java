@@ -22,13 +22,25 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Represents the visual view of the Cluedo game board. It arranges {@link CluedoTileView} instances
+ * and handles room rendering. Implements {@link TileObserver} to react to changes in individual
+ * tiles, particularly rooms.
+ */
 public final class CluedoBoardView extends Pane implements TileObserver<GridPos> {
+
   private static final int TILE_SIZE = 30;
   private static final int GAP_SIZE = 1;
   private static final int ROOM_CORNER_RADIUS = 10;
@@ -43,6 +55,13 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private final CluedoBoard boardModel;
   private final Supplier<GridPos> currentPlayerPos;
 
+  /**
+   * Constructs a CluedoBoardView.
+   *
+   * @param boardModel       The {@link CluedoBoard} model this view represents.
+   * @param currentPlayerPos A supplier for the current player's position, used for click handling.
+   * @param onTileClick      A consumer that handles tile click events.
+   */
   public CluedoBoardView(
       CluedoBoard boardModel, Supplier<GridPos> currentPlayerPos, Consumer<GridPos> onTileClick) {
     this.boardModel = boardModel;
@@ -59,6 +78,12 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     getChildren().add(grid);
   }
 
+  /**
+   * Highlights the tile at the given grid position. Any previously highlighted tile will be
+   * un-highlighted.
+   *
+   * @param pos The {@link GridPos} of the tile to highlight.
+   */
   public void highlightTile(GridPos pos) {
     if (highlightedNode != null) {
       highlightedNode.setStyle("");
@@ -79,7 +104,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     return pane;
   }
 
-  private boolean isCorridorTileADoor(int corridorRow, int corridorCol) {
+  private boolean isCorridorTileDoor(int corridorRow, int corridorCol) {
     int[] dr = {-1, 1, 0, 0};
     int[] dc = {0, 0, -1, 1};
 
@@ -100,6 +125,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       if (!(neighborTile instanceof RoomTile adjacentRoomTile)) {
         continue;
       }
+      // Check if the adjacent room tile considers the corridor tile a door entry point
       if (adjacentRoomTile.canEnterFrom(corridorRow, corridorCol)) {
         return true;
       }
@@ -166,7 +192,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     Node node = tileView.getNode();
     grid.add(node, col, row);
     tileMap.put(new GridPos(row, col), node);
-
+    // Border tiles are generally not clickable for movement,
+    // but binding for consistency or future use
     bindClick(node, row, col);
   }
 
@@ -196,7 +223,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private void addCorridorTile(AbstractCluedoTile tileModel, int row, int col) {
     CluedoTileView tileView = new CluedoTileView(tileModel, TILE_SIZE);
     Node node = tileView.getNode();
-    if (isCorridorTileADoor(row, col)) {
+    if (isCorridorTileDoor(row, col)) {
       tileView.setAsDoorCorridor(true);
     }
     grid.add(node, col, row);
@@ -240,6 +267,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       }
     }
 
+    // Click handler for entering the room
+    // A player must be on an adjacent corridor tile that is a door to this room.
     roomPane.setOnMouseClicked(
         e -> {
           GridPos here = currentPlayerPos.get();
@@ -324,6 +353,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private void refreshRoomTokens(RoomTile room) {
     FlowPane pane = roomTokenPanes.get(room);
     if (pane == null) {
+      // This can happen if the room wasn't fully initialized or is not in the map
+      // System.err.println("CluedoBoardView: No token pane found for room: " + room.getRoomName());
       return;
     }
 
@@ -335,15 +366,33 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
 
   private void bindClick(Node node, int row, int col) {
     GridPos pos = new GridPos(row, col);
-    tileMap.put(pos, node);
     node.setOnMouseClicked(e -> onTileClick.accept(pos));
   }
 
+  /**
+   * Record to store the dimensions of a room on the grid.
+   *
+   * @param minRow The minimum row index of the room.
+   * @param maxRow The maximum row index of the room.
+   * @param minCol The minimum column index of the room.
+   * @param maxCol The maximum column index of the room.
+   */
   private record RoomDimensions(int minRow, int maxRow, int minCol, int maxCol) {
+
+    /**
+     * Returns the number of rows spanned by the room on the board grid.
+     *
+     * @return The span of rows occupied by the room.
+     */
     public int rowSpan() {
       return maxRow - minRow + 1;
     }
 
+    /**
+     * Returns the number of columns spanned by the room on the board grid.
+     *
+     * @return The span of columns occupied by the room.
+     */
     public int colSpan() {
       return maxCol - minCol + 1;
     }

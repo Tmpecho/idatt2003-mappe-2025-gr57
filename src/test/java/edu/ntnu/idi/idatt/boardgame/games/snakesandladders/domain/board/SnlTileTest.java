@@ -1,6 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -12,16 +15,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-class SnLTileTest {
+class SnlTileTest {
 
-  private SnLTile tile;
+  private SnlTile tile;
   private Player<LinearPos> player1;
   private Player<LinearPos> player2;
   private TileObserver<LinearPos> mockObserver;
 
   @BeforeEach
   void setUp() {
-    tile = new SnLTile(5);
+    tile = new SnlTile(5);
     player1 = new Player<>(1, "P1", PlayerColor.RED, new LinearPos(5));
     player2 = new Player<>(2, "P2", PlayerColor.BLUE, new LinearPos(5));
     mockObserver = Mockito.mock(TileObserver.class);
@@ -86,7 +89,7 @@ class SnLTileTest {
 
   @Test
   void addAndRemoveObserver() {
-    SnLTile newTile = new SnLTile(10);
+    SnlTile newTile = new SnlTile(10);
     TileObserver<LinearPos> newMockObserver = Mockito.mock(TileObserver.class);
 
     newTile.addObserver(newMockObserver);

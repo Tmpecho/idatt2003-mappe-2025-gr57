@@ -24,7 +24,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+/**
+ * The main view for the Cluedo game. It displays the game board and control panel. Implements
+ * {@link GameObserver} to react to game state changes.
+ */
 public final class CluedoView implements GameObserver<GridPos> {
+
   private final BorderPane root;
   private final CluedoBoardView boardView;
   private final VBox controlPanel;
@@ -46,6 +51,11 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final Map<Room, CheckBox> roomNoteBoxes = new HashMap<>();
   private VBox notesBox;
 
+  /**
+   * Constructs the Cluedo game view.
+   *
+   * @param controller The {@link CluedoController} managing the game logic.
+   */
   public CluedoView(CluedoController controller) {
     this.controller = controller;
     this.root = new BorderPane();
@@ -145,6 +155,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     update("Game started. It's " + controller.getCurrentPlayer().getName() + "'s turn.");
   }
 
+  /**
+   * Returns the root {@link BorderPane} of this view.
+   *
+   * @return The root pane.
+   */
   public BorderPane getRoot() {
     return root;
   }

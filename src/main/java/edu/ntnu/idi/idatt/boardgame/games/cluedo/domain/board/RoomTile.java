@@ -16,9 +16,16 @@ public final class RoomTile extends AbstractCluedoTile {
    */
   private final Set<Edge> doorEdges = new HashSet<>();
 
+  /** The minimum row index this room occupies. */
   private final int minRow;
+
+  /** The maximum row index this room occupies. */
   private final int maxRow;
+
+  /** The minimum column index this room occupies. */
   private final int minCol;
+
+  /** The maximum column index this room occupies. */
   private final int maxCol;
 
   /**
@@ -50,6 +57,8 @@ public final class RoomTile extends AbstractCluedoTile {
    *
    * @param roomBoundaryPoint The point on the room's boundary.
    * @param adjacentCorridorPoint The adjacent point in the corridor.
+   * @throws IllegalArgumentException if roomBoundaryPoint is not on the room's perimeter or if
+   *     adjacentCorridorPoint is not outside the room.
    */
   public void addDoor(Point roomBoundaryPoint, Point adjacentCorridorPoint) {
     // Check roomBoundaryPoint is actually on the boundary of this room
@@ -103,7 +112,13 @@ public final class RoomTile extends AbstractCluedoTile {
     doorEdges.add(doorEdge);
   }
 
-  /** Checks if a player can enter this room from the given corridor coordinates. */
+  /**
+   * Checks if a player can enter this room from the given corridor coordinates.
+   *
+   * @param corridorRow The row of the corridor tile.
+   * @param corridorCol The column of the corridor tile.
+   * @return True if entry is allowed, false otherwise.
+   */
   public boolean canEnterFrom(int corridorRow, int corridorCol) {
     // Cluedo has a special rule that you can enter from any adjacent corridor square
     if ("Cluedo".equals(roomName)) {
@@ -115,7 +130,13 @@ public final class RoomTile extends AbstractCluedoTile {
     return doorEdges.stream().anyMatch(door -> corridorMatchesDoor(corridorPoint, door));
   }
 
-  /** Checks if a player can exit this room to the given corridor coordinates. */
+  /**
+   * Checks if a player can exit this room to the given corridor coordinates.
+   *
+   * @param corridorRow The row of the corridor tile.
+   * @param corridorCol The column of the corridor tile.
+   * @return True if exit is allowed, false otherwise.
+   */
   public boolean canExitTo(int corridorRow, int corridorCol) {
     // Cluedo has a special rule that you can exit to any adjacent corridor square
     if ("Cluedo".equals(roomName)) {
@@ -126,7 +147,13 @@ public final class RoomTile extends AbstractCluedoTile {
     return doorEdges.stream().anyMatch(door -> corridorMatchesDoor(corridorPoint, door));
   }
 
-  /** true if {@code (row,col)} is next to the room’s perimeter but outside it. */
+  /**
+   * true if {@code (row,col)} is next to the room’s perimeter but outside it.
+   *
+   * @param row The row to check.
+   * @param col The column to check.
+   * @return True if adjacent to perimeter, false otherwise.
+   */
   private boolean isAdjacentToPerimeter(int row, int col) {
     boolean left = col == minCol - 1 && row >= minRow && row <= maxRow;
     boolean right = col == maxCol + 1 && row >= minRow && row <= maxRow;
@@ -138,6 +165,11 @@ public final class RoomTile extends AbstractCluedoTile {
   /**
    * true when {@code corridorPoint} equals the corridor side of {@code door}. (The *other* endpoint
    * must be inside the room.)
+   *
+   * @param corridorPoint The point in the corridor.
+   * @param door The door edge to check against.
+   * @return True if the corridor point matches one side of the door and the other side is inside
+   *     the room.
    */
   private boolean corridorMatchesDoor(Point corridorPoint, Edge door) {
     if (door.a().equals(corridorPoint)) {
@@ -156,32 +188,67 @@ public final class RoomTile extends AbstractCluedoTile {
         && point.col() <= this.maxCol;
   }
 
+  /**
+   * Gets the name of the room.
+   *
+   * @return The room name.
+   */
   public String getRoomName() {
     return roomName;
   }
 
+  /**
+   * Represents a point (coordinate) on the Cluedo board grid.
+   *
+   * @param row The row index.
+   * @param col The column index.
+   */
   public record Point(int row, int col) {}
 
+  /**
+   * Represents an edge connecting two adjacent {@link Point}s on the board. Typically used to
+   * define doorways between a room cell and a corridor cell.
+   *
+   * @param a The first point of the edge.
+   * @param b The second point of the edge.
+   * @throws IllegalArgumentException if the points are not adjacent.
+   */
   public record Edge(Point a, Point b) {
+
+    /** Constructs an Edge. Ensures that the two points are orthogonally adjacent. */
     public Edge {
       if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1) {
         throw new IllegalArgumentException("Edge must connect adjacent squares: " + a + ", " + b);
       }
     }
 
+    /**
+     * Checks if this edge is adjacent to the given point (i.e., if the point is one of its
+     * endpoints).
+     *
+     * @param p The point to check.
+     * @return True if the point is one of the endpoints of this edge, false otherwise.
+     */
     boolean adjacentTo(Point p) {
       return p.equals(a) || p.equals(b);
     }
 
     @Override
     public boolean equals(Object o) {
-      return o instanceof Edge e
-          && (e.a.equals(a) && e.b.equals(b) || e.a.equals(b) && e.b.equals(a));
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      Edge e = (Edge) o;
+      return (Objects.equals(a, e.a) && Objects.equals(b, e.b))
+          || (Objects.equals(a, e.b) && Objects.equals(b, e.a));
     }
 
     @Override
     public int hashCode() {
-      return a.hashCode() + b.hashCode();
+      return Objects.hashCode(a) + Objects.hashCode(b);
     }
   }
 }

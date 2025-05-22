@@ -3,9 +3,9 @@ package edu.ntnu.idi.idatt.boardgame.ui;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnLController;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnLGameStateRepository;
-import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnLView;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnlController;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnlGameStateRepository;
+import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.view.SnlView;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.io.File;
 import java.io.IOException;
@@ -28,12 +28,17 @@ import javafx.stage.Stage;
  * sidebar with game selection and placeholders for save/load functionality.
  */
 public final class MainView {
+
   private final BorderPane root;
   private final StackPane contentWrapper;
   private GameController<?> currentController;
   private Button saveGameButton;
   private Button loadGameButton;
 
+  /**
+   * Constructs the main view of the application. Initializes the root layout and loads the main
+   * menu sidebar.
+   */
   public MainView() {
     root = new BorderPane();
 
@@ -44,6 +49,11 @@ public final class MainView {
     loadMenu();
   }
 
+  /**
+   * Returns the root {@link BorderPane} of this view.
+   *
+   * @return The root pane.
+   */
   public BorderPane getRoot() {
     return root;
   }
@@ -184,11 +194,11 @@ public final class MainView {
       return;
     }
 
-    var repo = new JsonSnLGameStateRepository();
-    SnLController controller = new SnLController(2, repo);
+    var repo = new JsonSnlGameStateRepository();
+    SnlController controller = new SnlController(2, repo);
 
     this.currentController = controller;
-    SnLView view = new SnLView(controller);
+    SnlView view = new SnlView(controller);
     contentWrapper.getChildren().setAll(view.getRoot());
 
     saveGameButton.setDisable(false);
@@ -204,8 +214,8 @@ public final class MainView {
       CluedoView view = new CluedoView(cluedoController);
       contentWrapper.getChildren().setAll(view.getRoot());
 
-      saveGameButton.setDisable(true);
-      loadGameButton.setDisable(true);
+      saveGameButton.setDisable(true); // Cluedo save/load not implemented
+      loadGameButton.setDisable(true); // Cluedo save/load not implemented
 
     } catch (IllegalArgumentException ex) {
       System.err.println("Failed to load Cluedo: " + ex.getMessage());

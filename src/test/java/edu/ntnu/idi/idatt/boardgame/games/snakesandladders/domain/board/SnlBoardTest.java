@@ -1,6 +1,9 @@
 package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
@@ -10,16 +13,16 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SnLBoardTest {
+class SnlBoardTest {
 
-  private SnLBoard board;
+  private SnlBoard board;
   private Player<LinearPos> player1;
   private Player<LinearPos> player2;
   private Map<Integer, Player<LinearPos>> playersMap;
 
   @BeforeEach
   void setUp() {
-    board = new SnLBoard();
+    board = new SnlBoard();
     player1 = new Player<>(1, "P1", PlayerColor.RED, new LinearPos(1));
     player2 = new Player<>(2, "P2", PlayerColor.BLUE, new LinearPos(1));
     playersMap = new HashMap<>();
