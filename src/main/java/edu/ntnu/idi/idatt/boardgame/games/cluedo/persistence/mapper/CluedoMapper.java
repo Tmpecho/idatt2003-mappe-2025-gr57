@@ -18,9 +18,13 @@ import java.util.List;
  * object and the `CluedoGameStateDto` persistence structure.
  */
 public final class CluedoMapper {
-  private CluedoMapper() {}
 
-  /** Snapshot the entire CluedoController state into a DTO. */
+  private CluedoMapper() {
+  }
+
+  /**
+   * Snapshot the entire CluedoController state into a DTO.
+   */
   public static CluedoGameStateDto toDto(CluedoController controller) {
     CluedoGameStateDto dto = new CluedoGameStateDto();
     dto.currentPlayerTurn = controller.getCurrentPlayer().getId();
@@ -76,17 +80,41 @@ public final class CluedoMapper {
             });
 
     dto.players = list;
+
+    // Save solution
+    if (controller.getSolutionSuspect() != null) {
+      dto.solutionSuspect = controller.getSolutionSuspect().name();
+    }
+    if (controller.getSolutionWeapon() != null) {
+      dto.solutionWeapon = controller.getSolutionWeapon().name();
+    }
+    if (controller.getSolutionRoom() != null) {
+      dto.solutionRoom = controller.getSolutionRoom().name();
+    }
+
     return dto;
   }
 
-  /** Apply a previously‐saved DTO back onto a fresh CluedoController. */
+  /**
+   * Apply a previously‐saved DTO back onto a CluedoController. Assumes controller.players map is
+   * already populated by loadGameState in CluedoController.
+   */
   public static void apply(CluedoGameStateDto dto, CluedoController controller) {
+    // Restore solution first, as it's independent of players
+    controller.setSolution(
+        Suspect.valueOf(dto.solutionSuspect),
+        Weapon.valueOf(dto.solutionWeapon),
+        Room.valueOf(dto.solutionRoom)
+    );
+
     dto.players.forEach(
         playerState -> {
           CluedoPlayer player = (CluedoPlayer) controller.getPlayers().get(playerState.id);
           if (player == null) {
-            LoggingNotification.error("Load error", "No player with id " + playerState.id);
-            throw new IllegalStateException("No player with id " + playerState.id);
+            LoggingNotification.error("Load error",
+                "No player with id " + playerState.id + " found in controller during apply.");
+            throw new IllegalStateException(
+                "No player with id " + playerState.id + " found in controller during apply.");
           }
 
           // restore position
@@ -94,18 +122,14 @@ public final class CluedoMapper {
               .getGameBoard()
               .setPlayerPosition(player, new GridPos(playerState.row, playerState.col));
 
-          // restore hand
           playerState.suspectHand.stream()
               .map(Suspect::valueOf)
-              .filter(suspect -> !player.hasCard(suspect))
               .forEach(player::addCard);
           playerState.weaponHand.stream()
               .map(Weapon::valueOf)
-              .filter(weapon -> !player.hasCard(weapon))
               .forEach(player::addCard);
           playerState.roomHand.stream()
               .map(Room::valueOf)
-              .filter(room -> !player.hasCard(room))
               .forEach(player::addCard);
 
           // restore notes
@@ -129,8 +153,17 @@ public final class CluedoMapper {
     // restore whose turn it is
     CluedoPlayer current = (CluedoPlayer) controller.getPlayers().get(dto.currentPlayerTurn);
     if (current == null) {
-      LoggingNotification.error("Load error", "No player with id " + dto.currentPlayerTurn);
-      throw new IllegalStateException("No player with id " + dto.currentPlayerTurn);
+      LoggingNotification.error("Load error",
+          "Current player ID " + dto.currentPlayerTurn + " not found after populating players.");
+      // Attempt to recover or throw:
+      if (!controller.getPlayers().isEmpty()) {
+        current = (CluedoPlayer) controller.getPlayers().values().iterator().next(); // Fallback
+        LoggingNotification.warn("Load Warning", "Defaulting current player to first in list.");
+      } else {
+        throw new IllegalStateException(
+            "Save-file error: no player with id " + dto.currentPlayerTurn
+                + " and no players available to default to.");
+      }
     }
     controller.setPhase(dto.phase);
     controller.setStepsLeft(dto.stepsLeft);

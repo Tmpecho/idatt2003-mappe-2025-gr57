@@ -30,7 +30,7 @@ public abstract class AbstractCluedoTile implements Tile<GridPos> {
    */
   protected boolean walkable = true;
 
-  private final List<TileObserver> observers = new ArrayList<>();
+  private final List<TileObserver<GridPos>> observers = new ArrayList<>(); // Use generic type
 
   /**
    * Constructs an AbstractCluedoTile at the given row and column.
@@ -54,7 +54,6 @@ public abstract class AbstractCluedoTile implements Tile<GridPos> {
     if (players.remove(player)) {
       notifyChange();
     }
-    ;
   }
 
   @Override
@@ -63,14 +62,14 @@ public abstract class AbstractCluedoTile implements Tile<GridPos> {
   }
 
   @Override
-  public void addObserver(TileObserver obs) {
+  public void addObserver(TileObserver<GridPos> obs) { // Use generic type
     if (!observers.contains(obs)) {
       observers.add(obs);
     }
   }
 
   @Override
-  public void removeObserver(TileObserver obs) {
+  public void removeObserver(TileObserver<GridPos> obs) { // Use generic type
     observers.remove(obs);
   }
 
@@ -78,8 +77,7 @@ public abstract class AbstractCluedoTile implements Tile<GridPos> {
    * Notifies all registered observers that this tile has changed.
    */
   protected void notifyChange() {
-    // Create a copy to avoid ConcurrentModificationException if an observer modifies the list
-    List<TileObserver> observersCopy = new ArrayList<>(observers);
+    List<TileObserver<GridPos>> observersCopy = new ArrayList<>(observers);
     observersCopy.forEach(o -> o.onTileChanged(this));
   }
 

@@ -5,6 +5,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Position;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
+import edu.ntnu.idi.idatt.boardgame.ui.dto.PlayerSetupDetails;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,24 +52,41 @@ public abstract class GameController<P extends Position> {
   }
 
   /**
-   * Implementations must create the players that participate in the game.
+   * Sets up players based on the provided details. Subclasses must implement this to create
+   * specific player types and populate the players map. The implementation should also handle
+   * setting the initial currentPlayer if the game has specific turn order rules not based on player
+   * ID 1. For loading scenarios, this method might be called with an empty or null list, and
+   * players will be populated later by loadGameState.
    *
-   * @param numberOfPlayers The number of players to create.
+   * @param playerDetailsList List of {@link PlayerSetupDetails} for each player.
    * @return A map of player IDs to Player objects.
    */
-  protected abstract Map<Integer, Player<P>> createPlayers(int numberOfPlayers);
+  protected abstract Map<Integer, Player<P>> setupPlayers(
+      List<PlayerSetupDetails> playerDetailsList);
 
   /**
-   * Must be called by subclass constructor after fields are set up. Initializes players and places
-   * them on the board.
+   * Initializes the game with a list of player setup details. This method should be called by
+   * subclass constructors after super() and after any game-specific board/dice setup.
    *
-   * @param numberOfPlayers The number of players in the game.
+   * @param playerDetailsList The list of player configurations. Can be null or empty for loading.
    */
-  protected void initialize(int numberOfPlayers) {
-    this.players = createPlayers(numberOfPlayers);
-    gameBoard.addPlayersToStart(players);
-    currentPlayer = players.get(1); // Default to player 1 starts
+  public void initializeGame(List<PlayerSetupDetails> playerDetailsList) {
+    this.players = setupPlayers(playerDetailsList);
+    if (this.players == null) {
+      throw new IllegalStateException("setupPlayers must return a non-null map of players.");
+    }
+
+    gameBoard.addPlayersToStart(this.players);
+
+    if (this.currentPlayer == null && !this.players.isEmpty()) {
+      this.currentPlayer = this.players.get(1);
+      if (this.currentPlayer == null) {
+        // Fallback if no player with ID 1, take the first available if any
+        this.currentPlayer = this.players.values().iterator().next();
+      }
+    }
   }
+
 
   /**
    * Adds a game observer.

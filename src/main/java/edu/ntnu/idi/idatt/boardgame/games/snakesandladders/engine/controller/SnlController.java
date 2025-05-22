@@ -11,13 +11,14 @@ import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnlBoard
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.action.RollAction;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.dto.SnlGameStateDto;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.mapper.SnlMapper;
+import edu.ntnu.idi.idatt.boardgame.ui.dto.PlayerSetupDetails;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.IntStream;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,42 +28,51 @@ import org.slf4j.LoggerFactory;
  */
 public final class SnlController extends GameController<LinearPos> {
 
-  /** Repository for saving and loading game state. */
+  /**
+   * Repository for saving and loading game state.
+   */
   private final GameStateRepository<SnlGameStateDto> repo;
-
-  private final int numberOfPlayers;
-
-  /** List of player colors to assign to players. */
-  private final List<PlayerColor> playerColors =
-      List.of(
-          PlayerColor.RED,
-          PlayerColor.BLUE,
-          PlayerColor.GREEN,
-          PlayerColor.YELLOW,
-          PlayerColor.ORANGE,
-          PlayerColor.PURPLE);
+  private int actualNumberOfPlayers;
 
   private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
 
   /**
-   * Constructs an SnLController.
+   * Constructs a SnlController with the specified player details and game state repository.
    *
-   * @param numberOfPlayers The number of players in the game.
-   * @param repo The {@link GameStateRepository} for handling persistence of {@link
-   *     SnlGameStateDto}.
+   * @param playerDetailsList List of player setup details. Can be null/empty for loading.
+   * @param repo              Repository for saving and loading game state.
    */
-  public SnlController(int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
+  public SnlController(
+      List<PlayerSetupDetails> playerDetailsList, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
-    this.numberOfPlayers = numberOfPlayers;
     this.repo = Objects.requireNonNull(repo);
-    initialize(numberOfPlayers);
+    initializeGame(playerDetailsList);
   }
 
-  /**
-   * Gets the map of players in the game.
-   *
-   * @return A map where keys are player IDs and values are {@link Player} objects.
-   */
+  @Override
+  protected Map<Integer, Player<LinearPos>> setupPlayers(
+      List<PlayerSetupDetails> playerDetailsList) {
+    Map<Integer, Player<LinearPos>> newPlayersMap = new HashMap<>();
+
+    if (playerDetailsList == null || playerDetailsList.isEmpty()) {
+      this.actualNumberOfPlayers = 0;
+      return newPlayersMap; // Return empty map
+    }
+
+    AtomicInteger playerIdCounter = new AtomicInteger(1);
+    playerDetailsList.forEach(detail -> {
+      int id = playerIdCounter.getAndIncrement();
+      String name = detail.name();
+      PlayerColor color = detail.color().orElseThrow(() ->
+          new IllegalArgumentException("Player color is missing for SnL player: " + name));
+      Player<LinearPos> player = new Player<>(id, name, color, new LinearPos(1));
+      newPlayersMap.put(id, player);
+    });
+    this.actualNumberOfPlayers = newPlayersMap.size(); // Set for new game
+    return newPlayersMap;
+  }
+
+
   public Map<Integer, Player<LinearPos>> getPlayers() {
     return players;
   }
@@ -85,28 +95,14 @@ public final class SnlController extends GameController<LinearPos> {
     this.currentPlayer = player;
   }
 
-  @Override
-  protected Map<Integer, Player<LinearPos>> createPlayers(int numberOfPlayers) {
-    Map<Integer, Player<LinearPos>> players = new HashMap<>();
-    IntStream.rangeClosed(1, numberOfPlayers)
-        .forEach(
-            playerId -> {
-              PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-              Player<LinearPos> player =
-                  new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
-              players.put(playerId, player);
-            });
-    return players;
-  }
-
   /**
-   * Executes a dice roll for the current player, updates their position, checks for game over, and
-   * advances to the next player if the game is not over.
+   * Rolls the dice for the current player and updates their position on the board.
    */
   public void rollDice() {
     Action roll = new RollAction((SnlBoard) gameBoard, currentPlayer, dice);
     roll.execute();
-    notifyObservers(currentPlayer.getName() + " is now at tile " + currentPlayer.getPosition());
+    notifyObservers(currentPlayer.getName() + " rolled " + (dice.getDie(0) + dice.getDie(1))
+        + " and is now at tile " + currentPlayer.getPosition());
     if (isGameOver()) {
       onGameFinish();
     } else {
@@ -127,7 +123,18 @@ public final class SnlController extends GameController<LinearPos> {
 
   @Override
   protected Player<LinearPos> getNextPlayer() {
-    return players.get((currentPlayer.getId() % numberOfPlayers) + 1);
+    if (players == null || players.isEmpty() || actualNumberOfPlayers == 0) {
+      throw new IllegalStateException(
+          "Cannot get next player, player map is empty or not initialized properly.");
+    }
+    int nextPlayerId = (currentPlayer.getId() % actualNumberOfPlayers) + 1;
+    Player<LinearPos> nextPlayer = players.get(nextPlayerId);
+    if (nextPlayer == null) {
+      throw new IllegalStateException(
+          "Next player ID " + nextPlayerId + " not found in players map. Current player: "
+              + currentPlayer.getId() + ", actualNum: " + actualNumberOfPlayers);
+    }
+    return nextPlayer;
   }
 
   @Override
@@ -136,7 +143,7 @@ public final class SnlController extends GameController<LinearPos> {
       repo.save(SnlMapper.toDto(this), Path.of(path));
       LoggingNotification.info("Game Saved", "Game state saved to " + path);
     } catch (Exception e) {
-      logger.error("Save failed: {}", e.getMessage());
+      logger.error("Save failed: {}", e.getMessage(), e);
       LoggingNotification.error("Save failed", e.getMessage());
     }
   }
@@ -144,11 +151,26 @@ public final class SnlController extends GameController<LinearPos> {
   @Override
   public void loadGameState(String path) {
     try {
-      SnlMapper.apply(repo.load(Path.of(path)), this);
+      SnlGameStateDto dto = repo.load(Path.of(path));
+      // Important: Re-initialize players map based on DTO before applying positions
+      Map<Integer, Player<LinearPos>> loadedPlayers = new HashMap<>();
+      for (SnlGameStateDto.PlayerState ps : dto.players) {
+        PlayerColor color = PlayerColor.valueOf(ps.color); // Assuming color string matches enum
+        // Consider storing/loading actual player name from PlayerSetupDetails if it was saved
+        Player<LinearPos> p = new Player<>(ps.id, "Player " + ps.id, color,
+            new LinearPos(ps.position));
+        loadedPlayers.put(ps.id, p);
+      }
+      this.players = loadedPlayers;
+      this.actualNumberOfPlayers = this.players.size(); // Crucial for getNextPlayer
+      // Apply positions to the now correctly populated this.players map
+      SnlMapper.apply(dto, this); // This will set currentPlayer
+
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (Exception e) {
-      logger.error("Load failed: {}", e.getMessage());
+      logger.error("Load failed: {}", e.getMessage(), e);
       LoggingNotification.error("Load failed", e.getMessage());
+      // Potentially reset game or go back to menu
     }
   }
 }
