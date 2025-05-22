@@ -1,6 +1,7 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
+import edu.ntnu.idi.idatt.boardgame.core.exception.InvalidCardException;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.Arrays;
 
@@ -56,8 +57,8 @@ public enum Suspect implements Card {
    *
    * @param playerColor The player color to map.
    * @return The {@link Suspect} corresponding to the given color.
-   * @throws NullPointerException     if {@code playerColor} is {@code null}
-   * @throws IllegalArgumentException if the colour is not used by any suspect
+   * @throws NullPointerException if {@code playerColor} is {@code null}
+   * @throws InvalidCardException if the colour is not used by any suspect
    */
   public static Suspect from(PlayerColor playerColor) {
     if (playerColor == null) {
@@ -74,7 +75,7 @@ public enum Suspect implements Card {
                 LoggingNotification.error("Unknown colour", "No suspect for " + playerColor);
               } catch (RuntimeException ignored) {
               }
-              return new IllegalArgumentException("No suspect for " + playerColor);
+              return new InvalidCardException("No suspect for " + playerColor);
             });
   }
 
