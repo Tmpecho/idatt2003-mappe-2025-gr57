@@ -120,9 +120,9 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Checks if the game is currently waiting for the player to roll the dice.
+   * Determines whether the game is not in the "WAIT_ROLL" phase.
    *
-   * @return true if the game is in the WAIT_ROLL phase, false otherwise.
+   * @return true if the current game phase is not "WAIT_ROLL", false otherwise.
    */
   public boolean isNotWaitingForRoll() {
     return phase != Phase.WAIT_ROLL;
@@ -159,9 +159,11 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * True if the current player is in the “Cluedo” room and so may make an accusation.
+   * Determines whether the current player cannot make an accusation. A player cannot accuse unless
+   * they are located in the central "Cluedo" room on the board.
    *
-   * @return true if the player can make an accusation, false otherwise.
+   * @return true if the player is not in the "Cluedo" room or is not on a room tile; false
+   *     otherwise.
    */
   public boolean canNotAccuse() {
     GridPos pos = currentPlayer.getPosition();

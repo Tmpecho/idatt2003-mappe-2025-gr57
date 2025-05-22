@@ -118,9 +118,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
 
       // Check bounds for neighbor
       if (neighborRow < 0
-          || neighborRow >= boardModel.getRows()
+          || neighborRow >= boardModel.getBoardSize()
           || neighborCol < 0
-          || neighborCol >= boardModel.getCols()) {
+          || neighborCol >= boardModel.getBoardSize()) {
         continue;
       }
 
@@ -139,8 +139,9 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
 
   private void initializeBoard() {
     grid.getChildren().clear();
-    int numRows = boardModel.getRows();
-    int numCols = boardModel.getCols();
+    int numRows = boardModel.getBoardSize();
+    int numCols = boardModel.getBoardSize();
+
     AbstractCluedoTile[][] boardGrid = boardModel.getBoardGrid();
     boolean[][] visitedRoomCells = new boolean[numRows][numCols];
 
@@ -202,7 +203,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   }
 
   private void createFixedGridConstraints() {
-    IntStream.range(0, boardModel.getCols())
+    IntStream.range(0, boardModel.getBoardSize())
         .mapToObj(column -> new ColumnConstraints(TILE_SIZE))
         .forEach(
             columnConstraints -> {
@@ -212,7 +213,7 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
               columnConstraints.setHalignment(HPos.CENTER);
               grid.getColumnConstraints().add(columnConstraints);
             });
-    IntStream.range(0, boardModel.getRows())
+    IntStream.range(0, boardModel.getBoardSize())
         .mapToObj(row -> new RowConstraints(TILE_SIZE))
         .forEach(
             rowConstraints -> {
@@ -278,7 +279,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
           GridPos here = currentPlayerPositionSupplier.get();
           for (Direction direction : Direction.values()) {
             GridPos candidate =
-                new GridPos(here.row() + direction.directionRow, here.col() + direction.directionCol);
+                new GridPos(
+                    here.row() + direction.directionRow, here.col() + direction.directionCol);
             if (boardModel.getTileAtPosition(candidate) == roomTile) {
               onTileClick.accept(candidate);
               return;
@@ -408,7 +410,8 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     SOUTH(1, 0),
     WEST(0, -1),
     EAST(0, 1);
-    public final int directionRow, directionCol;
+    public final int directionRow;
+    public final int directionCol;
 
     Direction(int directionRow, int directionCol) {
       this.directionRow = directionRow;

@@ -349,24 +349,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     return BOARD_SIZE;
   }
 
-  /**
-   * Gets the number of rows on the board.
-   *
-   * @return The number of rows.
-   */
-  public int getRows() {
-    return BOARD_SIZE;
-  }
-
-  /**
-   * Gets the number of columns on the board.
-   *
-   * @return The number of columns.
-   */
-  public int getCols() {
-    return BOARD_SIZE;
-  }
-
   @Override
   public void addPlayersToStart(Map<Integer, Player<GridPos>> players) {
     players
