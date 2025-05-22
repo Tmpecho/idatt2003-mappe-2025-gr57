@@ -7,14 +7,21 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 public final class CluedoView implements GameObserver<GridPos> {
@@ -34,6 +41,10 @@ public final class CluedoView implements GameObserver<GridPos> {
   private VBox accusationForm;
   private VBox suggestionForm;
   private final CluedoController controller;
+  private final Map<Suspect, CheckBox> suspectNoteBoxes = new HashMap<>();
+  private final Map<Weapon, CheckBox> weaponNoteBoxes = new HashMap<>();
+  private final Map<Room, CheckBox> roomNoteBoxes = new HashMap<>();
+  private VBox notesBox;
 
   public CluedoView(CluedoController controller) {
     this.controller = controller;
@@ -51,7 +62,7 @@ public final class CluedoView implements GameObserver<GridPos> {
 
     // Control Panel (Right Side)
     this.controlPanel = new VBox(10);
-    controlPanel.setPrefWidth(200);
+    controlPanel.setPrefWidth(250);
     controlPanel.setPadding(new Insets(10));
     controlPanel.setStyle("-fx-background-color: #f0f0f0;");
 
@@ -102,7 +113,8 @@ public final class CluedoView implements GameObserver<GridPos> {
             controller.onSuggestButton(suspect, weapon, room);
 
             hideSuggestionForm();
-            controlPanel.getChildren().add(endTurnButton);
+            int idx = controlPanel.getChildren().indexOf(notesBox);
+            controlPanel.getChildren().add(idx, endTurnButton);
 
             suggestButton.setDisable(true);
             accuseButton.setDisable(true);
@@ -118,8 +130,15 @@ public final class CluedoView implements GameObserver<GridPos> {
           rollDiceButton.setDisable(true);
         });
 
-    controlPanel.getChildren().addAll(statusLabel, rollDiceButton, suggestButton, accuseButton);
+    buildNotesBox();
 
+    // push notes to the bottom
+    Region spacer = new Region();
+    VBox.setVgrow(spacer, Priority.ALWAYS);
+
+    controlPanel
+        .getChildren()
+        .addAll(statusLabel, rollDiceButton, suggestButton, accuseButton, spacer, notesBox);
     root.setRight(controlPanel);
 
     controller.addObserver(this);
@@ -149,6 +168,8 @@ public final class CluedoView implements GameObserver<GridPos> {
       suggestButton.setDisable(!controller.canSuggest());
       accuseButton.setDisable(!controller.canAccuse());
     }
+
+    refreshNotes();
   }
 
   @Override
@@ -158,6 +179,60 @@ public final class CluedoView implements GameObserver<GridPos> {
     rollDiceButton.setDisable(true);
     suggestButton.setDisable(true);
     accuseButton.setDisable(true);
+  }
+
+  private void buildNotesBox() {
+    notesBox = new VBox(5);
+    notesBox.setStyle("-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;");
+    notesBox.getChildren().add(new Label("Notes"));
+
+    // Suspects
+    notesBox.getChildren().add(new Label("Suspects:"));
+    // when toggled, save to current player
+    Arrays.stream(Suspect.values())
+        .forEach(
+            suspect -> {
+              CheckBox checkBox = new CheckBox(suspect.getName());
+              suspectNoteBoxes.put(suspect, checkBox);
+              notesBox.getChildren().add(checkBox);
+              checkBox
+                  .selectedProperty()
+                  .addListener(
+                      (obs, oldV, newV) ->
+                          ((CluedoPlayer) controller.getCurrentPlayer())
+                              .setSuspectNoted(suspect, newV));
+            });
+
+    // Weapons
+    notesBox.getChildren().add(new Label("Weapons:"));
+    Arrays.stream(Weapon.values())
+        .forEach(
+            weapon -> {
+              CheckBox checkBox = new CheckBox(weapon.getName());
+              weaponNoteBoxes.put(weapon, checkBox);
+              notesBox.getChildren().add(checkBox);
+              checkBox
+                  .selectedProperty()
+                  .addListener(
+                      (obs, oldV, newV) ->
+                          ((CluedoPlayer) controller.getCurrentPlayer())
+                              .setWeaponNoted(weapon, newV));
+            });
+
+    // Rooms
+    notesBox.getChildren().add(new Label("Rooms:"));
+    Arrays.stream(Room.values())
+        .forEach(
+            room -> {
+              CheckBox checkBox = new CheckBox(room.getName());
+              roomNoteBoxes.put(room, checkBox);
+              notesBox.getChildren().add(checkBox);
+              checkBox
+                  .selectedProperty()
+                  .addListener(
+                      (obs, oldV, newV) ->
+                          ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, newV));
+            });
   }
 
   private void showAccusationForm() {
@@ -174,7 +249,8 @@ public final class CluedoView implements GameObserver<GridPos> {
             roomChoice,
             submitAccusationButton);
 
-    controlPanel.getChildren().add(accusationForm);
+    int idx = controlPanel.getChildren().indexOf(notesBox);
+    controlPanel.getChildren().add(idx, accusationForm);
   }
 
   private void hideAccusationForm() {
@@ -200,11 +276,19 @@ public final class CluedoView implements GameObserver<GridPos> {
     roomChoice.setValue(controller.getRoomOfCurrentPlayer());
     roomChoice.setDisable(true);
 
-    controlPanel.getChildren().add(suggestionForm);
+    int idx = controlPanel.getChildren().indexOf(notesBox);
+    controlPanel.getChildren().add(idx, suggestionForm);
   }
 
   private void hideSuggestionForm() {
     controlPanel.getChildren().remove(suggestionForm);
     roomChoice.setDisable(false);
+  }
+
+  private void refreshNotes() {
+    CluedoPlayer p = (CluedoPlayer) controller.getCurrentPlayer();
+    suspectNoteBoxes.forEach((s, cb) -> cb.setSelected(p.isSuspectNoted(s)));
+    weaponNoteBoxes.forEach((w, cb) -> cb.setSelected(p.isWeaponNoted(w)));
+    roomNoteBoxes.forEach((r, cb) -> cb.setSelected(p.isRoomNoted(r)));
   }
 }
