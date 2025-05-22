@@ -1,14 +1,18 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
+import edu.ntnu.idi.idatt.boardgame.core.exception.InvalidCardException;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link Suspect}. */
+/**
+ * Unit tests for {@link Suspect}.
+ */
 class SuspectTest {
 
   @Nested
@@ -56,7 +60,7 @@ class SuspectTest {
     @DisplayName("throws when colour is not mapped")
     void throwsForUnknownColour() {
       assertThrows(
-          IllegalArgumentException.class,
+          InvalidCardException.class,
           () -> Suspect.from(PlayerColor.ORANGE),
           "ORANGE is not mapped to a Suspect and should cause an exception");
     }
