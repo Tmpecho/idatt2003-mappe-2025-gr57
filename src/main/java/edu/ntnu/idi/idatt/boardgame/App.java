@@ -24,6 +24,7 @@ public final class App extends Application {
     Scene scene = new Scene(mainView.getRoot(), 900, 800);
     stage.setScene(scene);
     stage.setTitle("Board Games Hub");
+    stage.setFullScreen(true);
     stage.show();
   }
 
