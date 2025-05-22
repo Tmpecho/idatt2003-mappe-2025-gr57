@@ -31,6 +31,10 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The {@code MainView} class serves as the primary container for the application, featuring a
+ * sidebar with game selection and placeholders for save/load functionality.
+ */
 public final class MainView {
 
   private static final Logger logger = LoggerFactory.getLogger(MainView.class);
@@ -42,8 +46,13 @@ public final class MainView {
   private Button loadGameButton;
   private String selectedGameType;
 
+  /**
+   * Constructs the main view of the application. Initializes the root layout and loads the main
+   * menu sidebar.
+   */
   public MainView() {
     root = new BorderPane();
+
     contentWrapper = new StackPane();
     contentWrapper.setPadding(new Insets(10));
     Label welcomeLabel = new Label("Welcome! Click 'Menu' to start.");
@@ -51,9 +60,15 @@ public final class MainView {
     StackPane.setAlignment(welcomeLabel, Pos.CENTER);
     contentWrapper.getChildren().add(welcomeLabel);
     root.setCenter(contentWrapper);
+
     loadMenu();
   }
 
+  /**
+   * Returns the root {@link BorderPane} of this view.
+   *
+   * @return The root pane.
+   */
   public BorderPane getRoot() {
     return root;
   }
@@ -257,7 +272,8 @@ public final class MainView {
           // Phase 5: Ideally, determine game type from file or prompt user.
           // For now, if a game is already selected/active, try loading into that.
           // If no game active, current workaround is to try SnL context.
-          // This means loading a Cluedo save when no game is active will fail gracefully or misbehave.
+          // This means loading a Cluedo save when no game
+          // is active will fail gracefully or misbehave.
 
           String filePath = file.getPath();
           String fileName = file.getName().toLowerCase();
@@ -268,11 +284,6 @@ public final class MainView {
             logger.info("Attempting to load as Cluedo game: {}", filePath);
             try {
               JsonCluedoGameStateRepository cluedoRepo = new JsonCluedoGameStateRepository();
-              // CluedoController requires player details. For loading, we pass a dummy list or
-              // rely on the controller's loadGameState to reconstruct players.
-              // The DTO contains player info, so CluedoMapper.apply should handle it.
-              // We need a CluedoController instance first.
-              // The deprecated constructor might be suitable here if loadGameState re-populates players.
               CluedoController cluedoController = new CluedoController(2,
                   cluedoRepo); // Min players for constructor
               this.currentController = cluedoController;
@@ -311,7 +322,8 @@ public final class MainView {
             }
           } else {
             LoggingNotification.warn("Load Canceled",
-                "Could not determine game type from filename. Please ensure filename contains 'cluedo' or 'snl'.");
+                "Could not determine game type from filename. "
+                    + "Please ensure filename contains 'cluedo' or 'snl'.");
           }
 
           if (!loadedSuccessfully && this.currentController == null) {

@@ -9,6 +9,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+/**
+ * View for choosing a game in the application.
+ *
+ * <p>This class provides a user interface for
+ * selecting between different games. It includes buttons for each game and a back button to return
+ * to the main menu.
+ */
 public class ChooseGameView {
 
   private final VBox root;

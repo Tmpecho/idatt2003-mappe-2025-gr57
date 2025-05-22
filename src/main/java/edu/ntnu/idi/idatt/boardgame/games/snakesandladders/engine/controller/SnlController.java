@@ -22,13 +22,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Controller for the Snakes and Ladders game. Manages game flow, player turns, dice rolls, and game
+ * state persistence.
+ */
 public final class SnlController extends GameController<LinearPos> {
 
+  /**
+   * Repository for saving and loading game state.
+   */
   private final GameStateRepository<SnlGameStateDto> repo;
   private int actualNumberOfPlayers;
 
   private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
 
+  /**
+   * Constructs a SnlController with the specified player details and game state repository.
+   *
+   * @param playerDetailsList List of player setup details.
+   * @param repo              Repository for saving and loading game state.
+   */
   public SnlController(
       List<PlayerSetupDetails> playerDetailsList, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
@@ -85,14 +98,27 @@ public final class SnlController extends GameController<LinearPos> {
     return players;
   }
 
+  /**
+   * Gets the player whose turn it is currently.
+   *
+   * @return The current {@link Player}.
+   */
   public Player<LinearPos> getCurrentPlayer() {
     return currentPlayer;
   }
 
+  /**
+   * Sets the current player. Used primarily when loading a game state.
+   *
+   * @param player The {@link Player} to set as current.
+   */
   public void setCurrentPlayer(Player<LinearPos> player) {
     this.currentPlayer = player;
   }
 
+  /**
+   * Rolls the dice for the current player and updates their position on the board.
+   */
   public void rollDice() {
     Action roll = new RollAction((SnlBoard) gameBoard, currentPlayer, dice);
     roll.execute();

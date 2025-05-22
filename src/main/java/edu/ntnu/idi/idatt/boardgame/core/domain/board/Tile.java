@@ -12,13 +12,38 @@ import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
  */
 public interface Tile<P extends Position> {
 
+  /**
+   * Called when a player arrives on this tile.
+   *
+   * @param player The player arriving on this tile.
+   */
   void addPlayer(Player<P> player);
 
+  /**
+   * Called when a player leaves this tile.
+   *
+   * @param player The player leaving this tile.
+   */
   void removePlayer(Player<P> player);
 
+  /**
+   * An optional identifier for debugging or referencing a tile number, name, etc.
+   *
+   * @return A string identifier for the tile.
+   */
   String getIdentifier();
 
-  void addObserver(TileObserver<P> observer); // Generic type parameter here
+  /**
+   * Adds an observer to this tile.
+   *
+   * @param observer The observer to add.
+   */
+  void addObserver(TileObserver<P> observer);
 
-  void removeObserver(TileObserver<P> observer); // Generic type parameter here
+  /**
+   * Removes an observer from this tile.
+   *
+   * @param observer The observer to remove.
+   */
+  void removeObserver(TileObserver<P> observer);
 }

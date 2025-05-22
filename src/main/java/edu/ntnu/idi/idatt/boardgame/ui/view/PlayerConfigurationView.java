@@ -26,6 +26,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+/**
+ * View for configuring players in a game. This class provides a user interface for setting up
+ * player names, colors, and other game-specific details.
+ */
 public class PlayerConfigurationView {
 
   private final VBox root;
@@ -43,6 +47,14 @@ public class PlayerConfigurationView {
   private static final int MIN_PLAYERS_CLUEDO = 2;
   private static final int MAX_PLAYERS_CLUEDO = 6;
 
+  /**
+   * Constructs the PlayerConfigurationView.
+   *
+   * @param gameType    The type of game being played (e.g., Snakes and Ladders, Cluedo).
+   * @param onStartGame Callback to be executed when the game is started, passing the game type
+   *                    string and player setup details.
+   * @param onBack      Callback to be executed when the back button is pressed.
+   */
   public PlayerConfigurationView(String gameType,
       BiConsumer<String, List<PlayerSetupDetails>> onStartGame, Runnable onBack) {
     this.gameType = gameType;
