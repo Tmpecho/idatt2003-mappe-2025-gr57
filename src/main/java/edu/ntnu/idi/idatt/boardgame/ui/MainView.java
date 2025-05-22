@@ -2,6 +2,7 @@ package edu.ntnu.idi.idatt.boardgame.ui;
 
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoController;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.persistence.JsonCluedoGameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.view.CluedoView;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.engine.controller.SnlController;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.persistence.JsonSnlGameStateRepository;
@@ -76,6 +77,15 @@ public final class MainView {
 
     Region spacer = new Region();
     VBox.setVgrow(spacer, Priority.ALWAYS);
+
+    Path savesDir = Path.of("saves");
+    try {
+      Files.createDirectories(savesDir);
+    } catch (IOException e) {
+      logger.error("Failed to create saves directory: {}", e.getMessage());
+      LoggingNotification.error("Failed to create saves directory", "Cannot load game.");
+      return;
+    }
 
     saveGameButton = buildSaveButton();
     loadGameButton = buildLoadButton();
@@ -191,16 +201,7 @@ public final class MainView {
   }
 
   private void loadSnakesAndLadders() {
-    Path savesDir = Path.of("saves");
-    try {
-      Files.createDirectories(savesDir);
-    } catch (IOException e) {
-      logger.error("Failed to create saves directory: {}", e.getMessage());
-      LoggingNotification.error("Failed to create saves directory", "Cannot load game.");
-      return;
-    }
-
-    var repo = new JsonSnlGameStateRepository();
+    JsonSnlGameStateRepository repo = new JsonSnlGameStateRepository();
     SnlController controller = new SnlController(2, repo);
 
     this.currentController = controller;
@@ -214,21 +215,15 @@ public final class MainView {
   private void loadCluedo() {
     int numberOfPlayers = 6;
     try {
-      CluedoController cluedoController = new CluedoController(numberOfPlayers);
-      this.currentController = cluedoController;
+      JsonCluedoGameStateRepository repo = new JsonCluedoGameStateRepository();
+      CluedoController cluedoController = new CluedoController(numberOfPlayers, repo);
 
+      this.currentController = cluedoController;
       CluedoView view = new CluedoView(cluedoController);
       contentWrapper.getChildren().setAll(view.getRoot());
 
-      saveGameButton.setDisable(true); // Cluedo save/load not implemented
-      loadGameButton.setDisable(true); // Cluedo save/load not implemented
-
-    } catch (IllegalArgumentException ex) {
-      logger.error("Failed to load Cluedo: {}", ex.getMessage());
-      contentWrapper.getChildren().setAll(new Label("Error loading Cluedo: " + ex.getMessage()));
-      saveGameButton.setDisable(true);
-      loadGameButton.setDisable(true);
-      this.currentController = null;
+      saveGameButton.setDisable(false);
+      loadGameButton.setDisable(false);
     } catch (Exception ex) {
       logger.error("An unexpected error occurred while loading Cluedo: {}", ex.getMessage(), ex);
       contentWrapper.getChildren().setAll(new Label("Unexpected error loading Cluedo."));

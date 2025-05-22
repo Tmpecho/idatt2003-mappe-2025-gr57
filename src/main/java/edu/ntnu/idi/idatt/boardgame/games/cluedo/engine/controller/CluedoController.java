@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.dice.Dice;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.controller.GameController;
+import edu.ntnu.idi.idatt.boardgame.core.persistence.GameStateRepository;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.AbstractCluedoTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
@@ -13,17 +14,24 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.Phase;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.AccusationAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.SuggestionAction;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.persistence.dto.CluedoGameStateDto;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.persistence.mapper.CluedoMapper;
+import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
@@ -35,6 +43,9 @@ import org.slf4j.LoggerFactory;
  * and accusing.
  */
 public final class CluedoController extends GameController<GridPos> {
+
+  /** Repository for saving and loading game state. */
+  private final GameStateRepository<CluedoGameStateDto> repo;
 
   private final CluedoBoard boardModel;
   private int stepsLeft = 0;
@@ -55,9 +66,11 @@ public final class CluedoController extends GameController<GridPos> {
    * @param numberOfPlayers The number of players in the game (2-6).
    * @throws IllegalArgumentException if numberOfPlayers is not between 2 and 6.
    */
-  public CluedoController(int numberOfPlayers) {
+  public CluedoController(int numberOfPlayers, GameStateRepository<CluedoGameStateDto> repo) {
     super(new CluedoBoard(), new Dice(2));
     this.boardModel = (CluedoBoard) this.gameBoard;
+
+    this.repo = Objects.requireNonNull(repo);
 
     if (numberOfPlayers < 2 || numberOfPlayers > 6) {
       throw new IllegalArgumentException("Cluedo requires 2 to 6 players.");
@@ -108,15 +121,33 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   @Override
-  public void saveGameState(String filePath) {
-    // TODO: Implement Cluedo-specific game state saving
-    logger.warn("Cluedo save game state not implemented yet for path: {}", filePath);
+  public void saveGameState(String path) {
+    try {
+      repo.save(CluedoMapper.toDto(this), Path.of(path));
+      LoggingNotification.info("Game Saved", "Game state saved to " + path);
+    } catch (Exception e) {
+      logger.error("Save failed: {}", e.getMessage());
+      LoggingNotification.error("Save failed", e.getMessage());
+    }
   }
 
   @Override
-  public void loadGameState(String filePath) {
-    // TODO: Implement Cluedo-specific game state loading
-    logger.warn("Cluedo load game state not implemented yet from path: {}", filePath);
+  public void loadGameState(String path) {
+    try {
+      CluedoMapper.apply(repo.load(Path.of(path)), this);
+      String message = "Game state loaded.";
+      if (phase == Phase.WAIT_ROLL) {
+        message += " " + currentPlayer.getName() + " to roll.";
+      } else if (phase == Phase.MOVING) {
+        message += " " + currentPlayer.getName() + " to move with " + stepsLeft + " steps left.";
+      } else {
+        message += "Current turn: " + currentPlayer.getName() + ".";
+      }
+      notifyObservers(message);
+    } catch (Exception e) {
+      logger.error("Load failed: {}", e.getMessage());
+      LoggingNotification.error("Load failed", e.getMessage());
+    }
   }
 
   /**
@@ -407,6 +438,52 @@ public final class CluedoController extends GameController<GridPos> {
     nextTurn();
   }
 
+  public Map<Integer, Player<GridPos>> getPlayers() {
+    return players.values().stream()
+        .collect(Collectors.toMap(Player::getId, player -> player, (a, b) -> b));
+  }
+
+  /**
+   * Sets the current player in the game and updates their position in the turn order.
+   *
+   * @param currentPlayer The {@link CluedoPlayer} to set as the current player.
+   */
+  public void setCurrentPlayer(CluedoPlayer currentPlayer) {
+    this.currentPlayer = currentPlayer;
+    this.currentIndex = turnOrder.indexOf(currentPlayer);
+  }
+
+  /**
+   * Retrieves the current phase of the game.
+   *
+   * @return The current phase of the game as a {@link Phase} enum value.
+   */
+  public Phase getPhase() {
+    return phase;
+  }
+
+  /**
+   * Updates the current phase of the game.
+   *
+   * @param phase The new phase to set, as a {@link Phase} enum value.
+   */
+  public void setPhase(Phase phase) {
+    this.phase = phase;
+  }
+
+  /**
+   * Retrieves the number of remaining steps the current player can take during their turn.
+   *
+   * @return The number of steps left for the current player to move.
+   */
+  public int getStepsLeft() {
+    return stepsLeft;
+  }
+
+  public void setStepsLeft(int stepsLeft) {
+    this.stepsLeft = stepsLeft;
+  }
+
   /**
    * Selects the solution for the game by randomly picking one {@link Suspect}, one {@link Weapon},
    * and one {@link Room} from the available cards. The selected cards are then assigned to the
@@ -445,12 +522,5 @@ public final class CluedoController extends GameController<GridPos> {
       }
       idx = (idx + 1) % playersInOrder.size();
     }
-  }
-
-  private enum Phase {
-    WAIT_ROLL,
-    MOVING,
-    IN_ROOM,
-    TURN_OVER
   }
 }

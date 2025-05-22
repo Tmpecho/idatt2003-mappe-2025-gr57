@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * A room described by an ordered list of corner points that form the perimeter.
- */
+/** A room described by an ordered list of corner points that form the perimeter. */
 public final class RoomTile extends AbstractCluedoTile {
 
   private final String roomName;
@@ -19,30 +17,22 @@ public final class RoomTile extends AbstractCluedoTile {
    */
   private final Set<Edge> doorEdges = new HashSet<>();
 
-  /**
-   * The minimum row index this room occupies.
-   */
+  /** The minimum row index this room occupies. */
   private final int minRow;
 
-  /**
-   * The maximum row index this room occupies.
-   */
+  /** The maximum row index this room occupies. */
   private final int maxRow;
 
-  /**
-   * The minimum column index this room occupies.
-   */
+  /** The minimum column index this room occupies. */
   private final int minCol;
 
-  /**
-   * The maximum column index this room occupies.
-   */
+  /** The maximum column index this room occupies. */
   private final int maxCol;
 
   /**
    * Creates a room tile with the given name and outline perimeter.
    *
-   * @param roomName         logical name (“Kitchen”)
+   * @param roomName logical name (“Kitchen”)
    * @param outlinePerimeter ordered points, first = last (minimum 4)
    */
   public RoomTile(String roomName, List<Point> outlinePerimeter) {
@@ -66,10 +56,10 @@ public final class RoomTile extends AbstractCluedoTile {
   /**
    * Marks the edge between a room boundary point and an adjacent corridor point as a doorway.
    *
-   * @param roomBoundaryPoint     The point on the room's boundary.
+   * @param roomBoundaryPoint The point on the room's boundary.
    * @param adjacentCorridorPoint The adjacent point in the corridor.
    * @throws InvalidRoomTileException if roomBoundaryPoint is not on the room's perimeter or if
-   *                                  adjacentCorridorPoint is not outside the room.
+   *     adjacentCorridorPoint is not outside the room.
    */
   public void addDoor(Point roomBoundaryPoint, Point adjacentCorridorPoint) {
     // Check roomBoundaryPoint is actually on the boundary of this room
@@ -178,9 +168,9 @@ public final class RoomTile extends AbstractCluedoTile {
    * must be inside the room.)
    *
    * @param corridorPoint The point in the corridor.
-   * @param door          The door edge to check against.
+   * @param door The door edge to check against.
    * @return True if the corridor point matches one side of the door and the other side is inside
-   * the room.
+   *     the room.
    */
   private boolean corridorMatchesDoor(Point corridorPoint, Edge door) {
     if (door.a().equals(corridorPoint)) {
@@ -214,9 +204,7 @@ public final class RoomTile extends AbstractCluedoTile {
    * @param row The row index.
    * @param col The column index.
    */
-  public record Point(int row, int col) {
-
-  }
+  public record Point(int row, int col) {}
 
   /**
    * Represents an edge connecting two adjacent {@link Point}s on the board. Typically used to
@@ -224,28 +212,14 @@ public final class RoomTile extends AbstractCluedoTile {
    *
    * @param a The first point of the edge.
    * @param b The second point of the edge.
-   * @throws InvalidRoomTileException if the points are not adjacent.
    */
   public record Edge(Point a, Point b) {
 
-    /**
-     * Constructs an Edge. Ensures that the two points are orthogonally adjacent.
-     */
+    /** Constructs an Edge. Ensures that the two points are orthogonally adjacent. */
     public Edge {
       if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1) {
         throw new InvalidRoomTileException("Edge must connect adjacent squares: " + a + ", " + b);
       }
-    }
-
-    /**
-     * Checks if this edge is adjacent to the given point (i.e., if the point is one of its
-     * endpoints).
-     *
-     * @param p The point to check.
-     * @return True if the point is one of the endpoints of this edge, false otherwise.
-     */
-    boolean adjacentTo(Point p) {
-      return p.equals(a) || p.equals(b);
     }
 
     @Override

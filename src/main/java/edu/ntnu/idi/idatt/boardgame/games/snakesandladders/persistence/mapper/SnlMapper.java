@@ -14,9 +14,7 @@ import java.util.List;
  */
 public final class SnlMapper {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
+  /** Private constructor to prevent instantiation. */
   private SnlMapper() {
     // Utility class
   }
@@ -52,7 +50,7 @@ public final class SnlMapper {
    * modifies the controller to reflect the loaded game state. Note: This assumes the
    * SnLController's players map is already initialized with the correct number of players and IDs.
    *
-   * @param dto        The game state DTO to apply.
+   * @param dto The game state DTO to apply.
    * @param controller The game controller to update.
    * @throws IllegalStateException if a player ID from the DTO is not found in the controller.
    */
