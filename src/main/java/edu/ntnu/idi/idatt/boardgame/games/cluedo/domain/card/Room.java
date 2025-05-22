@@ -42,7 +42,7 @@ public enum Room implements Card {
    */
   public static Room fromDisplayName(String name) {
     return Arrays.stream(values())
-        .filter(r -> r.getName().equals(name))
+        .filter(room -> room.getName().equals(name))
         .findFirst()
         .orElseThrow(() -> new InvalidRoomException("Unknown room: " + name));
   }

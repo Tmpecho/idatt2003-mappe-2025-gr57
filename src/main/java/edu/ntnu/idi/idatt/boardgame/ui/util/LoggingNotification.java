@@ -11,40 +11,36 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility for showing non‑blocking, toast‑style log messages.
  *
- * <p>Uses ControlsFX {@link Notifications}. Must be called on the JavaFX Application Thread.
- * Also logs the notification to SLF4J logger.
+ * <p>Uses ControlsFX {@link Notifications}. Must be called on the JavaFX Application Thread. Also
+ * logs the notification to SLF4J logger.
  */
 public final class LoggingNotification {
 
-  private static final Logger logger = LoggerFactory.getLogger(
-      LoggingNotification.class); // NEW LOGGER INSTANCE
+  private static final Logger logger = LoggerFactory.getLogger(LoggingNotification.class);
 
-  private LoggingNotification() {
-  }
+  private LoggingNotification() {}
 
   /**
    * Shows a notification with sensible defaults for the given log type. Also logs the message to
    * the SLF4J logger.
    *
-   * @param type    severity/category (see {@link LoggingType})
-   * @param title   short summary
+   * @param type severity/category (see {@link LoggingType})
+   * @param title short summary
    * @param message detailed message (optional)
    */
   public static void show(LoggingType type, String title, String message) {
     String fullMessage = (message == null || message.isEmpty()) ? title : title + ": " + message;
 
-    // **** NEW: Log to SLF4J first ****
     switch (type) {
       case INFO -> logger.info("[UI INFO] {}", fullMessage);
       case DEBUG -> logger.debug("[UI DEBUG] {}", fullMessage);
       case WARN -> logger.warn("[UI WARN] {}", fullMessage);
       case ERROR -> logger.error("[UI ERROR] {}", fullMessage);
       case FATAL ->
-          logger.error("[UI FATAL] {}", fullMessage); // SLF4J doesn't have FATAL, maps to ERROR
+          logger.error("[UI FATAL] {}", fullMessage); // SLF4J doesn't have FATAL, map to error
       default -> logger.info("[UI UNKNOWN TYPE {}] {}", type, fullMessage);
     }
 
-    // UI Popup logic remains
     Runnable task = () -> build(type, title, message).show();
     runOnFxThread(task);
   }
@@ -52,7 +48,7 @@ public final class LoggingNotification {
   /**
    * Convenience overload for errors.
    *
-   * @param title   The title of the error notification.
+   * @param title The title of the error notification.
    * @param message The detailed message of the error.
    */
   public static void error(String title, String message) {
@@ -62,7 +58,7 @@ public final class LoggingNotification {
   /**
    * Convenience overload for fatal errors.
    *
-   * @param title   The title of the fatal error notification.
+   * @param title The title of the fatal error notification.
    * @param message The detailed message of the fatal error.
    */
   public static void fatal(String title, String message) {
@@ -72,7 +68,7 @@ public final class LoggingNotification {
   /**
    * Convenience overload for warnings.
    *
-   * @param title   The title of the warning notification.
+   * @param title The title of the warning notification.
    * @param message The detailed message of the warning.
    */
   public static void warn(String title, String message) {
@@ -82,7 +78,7 @@ public final class LoggingNotification {
   /**
    * Convenience overload for info messages.
    *
-   * @param title   The title of the info notification.
+   * @param title The title of the info notification.
    * @param message The detailed message of the info.
    */
   public static void info(String title, String message) {
@@ -92,7 +88,7 @@ public final class LoggingNotification {
   /**
    * Convenience overload for debug messages.
    *
-   * @param title   The title of the debug notification.
+   * @param title The title of the debug notification.
    * @param message The detailed message of the debug information.
    */
   public static void debug(String title, String message) {
@@ -114,7 +110,7 @@ public final class LoggingNotification {
       case ERROR -> notifications.graphic(Icon.ERROR.view()).hideAfter(Duration.seconds(6));
       case FATAL -> notifications.graphic(Icon.FATAL.view()).hideAfter(Duration.seconds(8));
       default -> {
-        logger.error("Unexpected LoggingType value in build(): {}", type); // NEW internal log
+        logger.error("Unexpected LoggingType value in build(): {}", type);
         throw new IllegalStateException("Unexpected value: " + type);
       }
     }
@@ -133,7 +129,7 @@ public final class LoggingNotification {
       logger.warn(
           "JavaFX toolkit not initialized when trying to show notification."
               + " Running on current thread.",
-          e); // NEW internal log
+          e);
       r.run();
     }
   }
@@ -147,8 +143,8 @@ public final class LoggingNotification {
 
     private final String path;
 
-    Icon(String p) {
-      this.path = p;
+    Icon(String path) {
+      this.path = path;
     }
 
     ImageView view() {

@@ -27,22 +27,20 @@ import org.slf4j.LoggerFactory;
  */
 public final class SnlController extends GameController<LinearPos> {
 
-  /**
-   * Repository for saving and loading game state.
-   */
+  /** Repository for saving and loading game state. */
   private final GameStateRepository<SnlGameStateDto> repo;
 
   private final int numberOfPlayers;
-  /**
-   * List of player colors to assign to players.
-   */
-  private final List<PlayerColor> playerColors = List.of(
-      PlayerColor.RED,
-      PlayerColor.BLUE,
-      PlayerColor.GREEN,
-      PlayerColor.YELLOW,
-      PlayerColor.ORANGE,
-      PlayerColor.PURPLE);
+
+  /** List of player colors to assign to players. */
+  private final List<PlayerColor> playerColors =
+      List.of(
+          PlayerColor.RED,
+          PlayerColor.BLUE,
+          PlayerColor.GREEN,
+          PlayerColor.YELLOW,
+          PlayerColor.ORANGE,
+          PlayerColor.PURPLE);
 
   private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
 
@@ -50,11 +48,10 @@ public final class SnlController extends GameController<LinearPos> {
    * Constructs an SnLController.
    *
    * @param numberOfPlayers The number of players in the game.
-   * @param repo            The {@link GameStateRepository} for handling persistence of
-   *                        {@link SnlGameStateDto}.
+   * @param repo The {@link GameStateRepository} for handling persistence of {@link
+   *     SnlGameStateDto}.
    */
-  public SnlController(
-      int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
+  public SnlController(int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
     this.numberOfPlayers = numberOfPlayers;
     this.repo = Objects.requireNonNull(repo);
@@ -95,8 +92,8 @@ public final class SnlController extends GameController<LinearPos> {
         .forEach(
             playerId -> {
               PlayerColor color = playerColors.get((playerId - 1) % playerColors.size());
-              Player<LinearPos> player = new Player<>(playerId, "Player " + playerId, color,
-                  new LinearPos(1));
+              Player<LinearPos> player =
+                  new Player<>(playerId, "Player " + playerId, color, new LinearPos(1));
               players.put(playerId, player);
             });
     return players;

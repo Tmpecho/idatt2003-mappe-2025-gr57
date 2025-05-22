@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.GameObserver;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CluedoBoard;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
@@ -12,6 +13,8 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.controller.CluedoControl
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
@@ -51,6 +54,11 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final Map<Room, CheckBox> roomNoteBoxes = new HashMap<>();
   private VBox notesBox;
 
+  public static final String CONTROL_PANEL_STYLE = "-fx-background-color: #f0f0f0;";
+  private static final String NOTES_BOX_STYLE =
+      "-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;";
+  private static final double SPACING = 5.0;
+
   /**
    * Constructs the Cluedo game view.
    *
@@ -74,7 +82,7 @@ public final class CluedoView implements GameObserver<GridPos> {
     this.controlPanel = new VBox(10);
     controlPanel.setPrefWidth(250);
     controlPanel.setPadding(new Insets(10));
-    controlPanel.setStyle("-fx-background-color: #f0f0f0;");
+    controlPanel.setStyle(CONTROL_PANEL_STYLE);
 
     this.statusLabel = new Label("Welcome to Cluedo!");
     statusLabel.setWrapText(true);
@@ -169,11 +177,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setText(message);
     boardView.highlightTile(controller.getCurrentPlayer().getPosition());
 
-    if (!controller.canAccuse() && controlPanel.getChildren().contains(submitAccusationButton)) {
+    if (controller.canNotAccuse() && controlPanel.getChildren().contains(submitAccusationButton)) {
       hideAccusationForm();
     }
 
-    rollDiceButton.setDisable(!controller.isWaitingForRoll());
+    rollDiceButton.setDisable(controller.isNotWaitingForRoll());
 
     // if we’re mid-suggestion (i.e. EndTurn is visible), keep suggest/accuse off
     if (controlPanel.getChildren().contains(endTurnButton)) {
@@ -181,7 +189,7 @@ public final class CluedoView implements GameObserver<GridPos> {
       accuseButton.setDisable(true);
     } else {
       suggestButton.setDisable(!controller.canSuggest());
-      accuseButton.setDisable(!controller.canAccuse());
+      accuseButton.setDisable(controller.canNotAccuse());
     }
 
     refreshNotes();
@@ -197,57 +205,64 @@ public final class CluedoView implements GameObserver<GridPos> {
   }
 
   private void buildNotesBox() {
-    notesBox = new VBox(5);
-    notesBox.setStyle("-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;");
+    initializeNotesBox();
+
+    notesBox
+        .getChildren()
+        .addAll(
+            buildCategory(
+                "Suspects",
+                Suspect.values(),
+                Suspect::getName,
+                (suspect, selected) ->
+                    ((CluedoPlayer) controller.getCurrentPlayer())
+                        .setSuspectNoted(suspect, selected)),
+            buildCategory(
+                "Weapons",
+                Weapon.values(),
+                Weapon::getName,
+                (weapon, selected) ->
+                    ((CluedoPlayer) controller.getCurrentPlayer())
+                        .setWeaponNoted(weapon, selected)),
+            buildCategory(
+                "Rooms",
+                Room.values(),
+                Room::getName,
+                (room, selected) ->
+                    ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, selected)));
+  }
+
+  private void initializeNotesBox() {
+    notesBox = new VBox(SPACING);
+    notesBox.setStyle(NOTES_BOX_STYLE);
     notesBox.getChildren().add(new Label("Notes"));
+  }
 
-    // Suspects
-    notesBox.getChildren().add(new Label("Suspects:"));
-    // when toggled, save to current player
-    Arrays.stream(Suspect.values())
+  private <T extends Card> VBox buildCategory(
+      String title, T[] cards, Function<T, String> labelFunction, BiConsumer<T, Boolean> onToggle) {
+    VBox box = new VBox(5, new Label(title));
+    Arrays.stream(cards)
         .forEach(
-            suspect -> {
-              CheckBox checkBox = new CheckBox(suspect.getName());
-              suspectNoteBoxes.put(suspect, checkBox);
-              notesBox.getChildren().add(checkBox);
+            card -> {
+              CheckBox checkBox = new CheckBox(labelFunction.apply(card));
               checkBox
                   .selectedProperty()
-                  .addListener(
-                      (obs, oldV, newV) ->
-                          ((CluedoPlayer) controller.getCurrentPlayer())
-                              .setSuspectNoted(suspect, newV));
-            });
+                  .addListener((obs, oldV, newV) -> onToggle.accept(card, newV));
+              box.getChildren().add(checkBox);
 
-    // Weapons
-    notesBox.getChildren().add(new Label("Weapons:"));
-    Arrays.stream(Weapon.values())
-        .forEach(
-            weapon -> {
-              CheckBox checkBox = new CheckBox(weapon.getName());
-              weaponNoteBoxes.put(weapon, checkBox);
-              notesBox.getChildren().add(checkBox);
-              checkBox
-                  .selectedProperty()
-                  .addListener(
-                      (obs, oldV, newV) ->
-                          ((CluedoPlayer) controller.getCurrentPlayer())
-                              .setWeaponNoted(weapon, newV));
+              addItemToNoteBox(card, checkBox);
             });
+    return box;
+  }
 
-    // Rooms
-    notesBox.getChildren().add(new Label("Rooms:"));
-    Arrays.stream(Room.values())
-        .forEach(
-            room -> {
-              CheckBox checkBox = new CheckBox(room.getName());
-              roomNoteBoxes.put(room, checkBox);
-              notesBox.getChildren().add(checkBox);
-              checkBox
-                  .selectedProperty()
-                  .addListener(
-                      (obs, oldV, newV) ->
-                          ((CluedoPlayer) controller.getCurrentPlayer()).setRoomNoted(room, newV));
-            });
+  private <T extends Card> void addItemToNoteBox(T card, CheckBox checkBox) {
+    if (card instanceof Suspect) {
+      suspectNoteBoxes.put((Suspect) card, checkBox);
+    } else if (card instanceof Weapon) {
+      weaponNoteBoxes.put((Weapon) card, checkBox);
+    } else if (card instanceof Room) {
+      roomNoteBoxes.put((Room) card, checkBox);
+    }
   }
 
   private void showAccusationForm() {
@@ -301,9 +316,12 @@ public final class CluedoView implements GameObserver<GridPos> {
   }
 
   private void refreshNotes() {
-    CluedoPlayer p = (CluedoPlayer) controller.getCurrentPlayer();
-    suspectNoteBoxes.forEach((s, cb) -> cb.setSelected(p.isSuspectNoted(s)));
-    weaponNoteBoxes.forEach((w, cb) -> cb.setSelected(p.isWeaponNoted(w)));
-    roomNoteBoxes.forEach((r, cb) -> cb.setSelected(p.isRoomNoted(r)));
+    CluedoPlayer currentPlayer = (CluedoPlayer) controller.getCurrentPlayer();
+    suspectNoteBoxes.forEach(
+        (suspect, checkBox) -> checkBox.setSelected(currentPlayer.isSuspectNoted(suspect)));
+    weaponNoteBoxes.forEach(
+        (weapon, checkBox) -> checkBox.setSelected(currentPlayer.isWeaponNoted(weapon)));
+    roomNoteBoxes.forEach(
+        (room, checkBox) -> checkBox.setSelected(currentPlayer.isRoomNoted(room)));
   }
 }

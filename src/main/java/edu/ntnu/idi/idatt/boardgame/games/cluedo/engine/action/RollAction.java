@@ -26,7 +26,7 @@ public final class RollAction implements Action {
 
   @Override
   public void execute() {
-    if (!controller.isWaitingForRoll()) {
+    if (controller.isNotWaitingForRoll()) {
       return; // ignore illegal click
     }
 
