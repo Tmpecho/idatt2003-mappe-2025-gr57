@@ -176,11 +176,11 @@ public final class CluedoView implements GameObserver<GridPos> {
     statusLabel.setText(message);
     boardView.highlightTile(controller.getCurrentPlayer().getPosition());
 
-    if (!controller.canAccuse() && controlPanel.getChildren().contains(submitAccusationButton)) {
+    if (controller.canNotAccuse() && controlPanel.getChildren().contains(submitAccusationButton)) {
       hideAccusationForm();
     }
 
-    rollDiceButton.setDisable(!controller.isWaitingForRoll());
+    rollDiceButton.setDisable(controller.isNotWaitingForRoll());
 
     // if we’re mid-suggestion (i.e. EndTurn is visible), keep suggest/accuse off
     if (controlPanel.getChildren().contains(endTurnButton)) {
@@ -188,7 +188,7 @@ public final class CluedoView implements GameObserver<GridPos> {
       accuseButton.setDisable(true);
     } else {
       suggestButton.setDisable(!controller.canSuggest());
-      accuseButton.setDisable(!controller.canAccuse());
+      accuseButton.setDisable(controller.canNotAccuse());
     }
 
     refreshNotes();

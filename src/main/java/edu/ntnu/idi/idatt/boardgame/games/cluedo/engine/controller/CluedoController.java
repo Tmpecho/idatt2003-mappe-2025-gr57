@@ -124,8 +124,8 @@ public final class CluedoController extends GameController<GridPos> {
    *
    * @return true if the game is in the WAIT_ROLL phase, false otherwise.
    */
-  public boolean isWaitingForRoll() {
-    return phase == Phase.WAIT_ROLL;
+  public boolean isNotWaitingForRoll() {
+    return phase != Phase.WAIT_ROLL;
   }
 
   /**
@@ -163,10 +163,10 @@ public final class CluedoController extends GameController<GridPos> {
    *
    * @return true if the player can make an accusation, false otherwise.
    */
-  public boolean canAccuse() {
+  public boolean canNotAccuse() {
     GridPos pos = currentPlayer.getPosition();
     AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
-    return tile instanceof RoomTile room && "Cluedo".equals(room.getRoomName());
+    return !(tile instanceof RoomTile room) || !"Cluedo".equals(room.getRoomName());
   }
 
   /**
