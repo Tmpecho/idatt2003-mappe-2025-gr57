@@ -1,14 +1,5 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.view;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.ntnu.idi.idatt.boardgame.core.domain.board.Tile;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.GridPos;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
@@ -19,6 +10,11 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.CorridorTile;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board.RoomTile;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import edu.ntnu.idi.idatt.boardgame.ui.util.PlayerTokenFactory;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -37,6 +33,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the visual view of the Cluedo game board. It arranges {@link CluedoTileView} instances

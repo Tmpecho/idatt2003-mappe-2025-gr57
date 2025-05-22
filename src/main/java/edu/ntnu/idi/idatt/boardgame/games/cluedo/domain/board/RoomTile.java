@@ -1,6 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-import edu.ntnu.idi.idatt.boardgame.core.exception.InvalidRoomException;
+import edu.ntnu.idi.idatt.boardgame.core.exception.InvalidRoomTileException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -49,10 +49,10 @@ public final class RoomTile extends AbstractCluedoTile {
     // we store row/col of an arbitrary interior square from the outline
     super(outlinePerimeter.get(0).row(), outlinePerimeter.get(0).col());
     if (outlinePerimeter.size() < 4) {
-      throw new InvalidRoomException("Outline requires ≥ 4 points");
+      throw new InvalidRoomTileException("Outline requires ≥ 4 points");
     }
     if (!outlinePerimeter.get(0).equals(outlinePerimeter.get(outlinePerimeter.size() - 1))) {
-      throw new InvalidRoomException("First and last outline point must match");
+      throw new InvalidRoomTileException("First and last outline point must match");
     }
     this.roomName = Objects.requireNonNull(roomName);
 
@@ -68,8 +68,8 @@ public final class RoomTile extends AbstractCluedoTile {
    *
    * @param roomBoundaryPoint     The point on the room's boundary.
    * @param adjacentCorridorPoint The adjacent point in the corridor.
-   * @throws InvalidRoomException if roomBoundaryPoint is not on the room's perimeter or if
-   *                              adjacentCorridorPoint is not outside the room.
+   * @throws InvalidRoomTileException if roomBoundaryPoint is not on the room's perimeter or if
+   *                                  adjacentCorridorPoint is not outside the room.
    */
   public void addDoor(Point roomBoundaryPoint, Point adjacentCorridorPoint) {
     // Check roomBoundaryPoint is actually on the boundary of this room
@@ -81,7 +81,7 @@ public final class RoomTile extends AbstractCluedoTile {
             && (roomBoundaryPoint.row() >= this.minRow && roomBoundaryPoint.row() <= this.maxRow);
 
     if (!(onHorizontalEdge || onVerticalEdge)) {
-      throw new InvalidRoomException(
+      throw new InvalidRoomTileException(
           "Room boundary point "
               + roomBoundaryPoint
               + " is not on the calculated perimeter (minR:"
@@ -103,7 +103,7 @@ public final class RoomTile extends AbstractCluedoTile {
             || adjacentCorridorPoint.col() < this.minCol
             || adjacentCorridorPoint.col() > this.maxCol;
     if (!corridorIsOutside) {
-      throw new InvalidRoomException(
+      throw new InvalidRoomTileException(
           "Corridor point "
               + adjacentCorridorPoint
               + " is not outside room "
@@ -224,7 +224,7 @@ public final class RoomTile extends AbstractCluedoTile {
    *
    * @param a The first point of the edge.
    * @param b The second point of the edge.
-   * @throws InvalidRoomException if the points are not adjacent.
+   * @throws InvalidRoomTileException if the points are not adjacent.
    */
   public record Edge(Point a, Point b) {
 
@@ -233,7 +233,7 @@ public final class RoomTile extends AbstractCluedoTile {
      */
     public Edge {
       if (Math.abs(a.row() - b.row()) + Math.abs(a.col() - b.col()) != 1) {
-        throw new InvalidRoomException("Edge must connect adjacent squares: " + a + ", " + b);
+        throw new InvalidRoomTileException("Edge must connect adjacent squares: " + a + ", " + b);
       }
     }
 
