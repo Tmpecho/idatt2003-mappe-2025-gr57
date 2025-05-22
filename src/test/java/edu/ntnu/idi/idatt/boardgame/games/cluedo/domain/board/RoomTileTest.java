@@ -1,7 +1,11 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.ntnu.idi.idatt.boardgame.core.exception.InvalidRoomTileException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,12 +13,12 @@ import org.junit.jupiter.api.Test;
 class RoomTileTest {
 
   private final List<RoomTile.Point> kitchenOutline =
-          List.of(
-                  new RoomTile.Point(1, 1),
-                  new RoomTile.Point(1, 5),
-                  new RoomTile.Point(6, 5),
-                  new RoomTile.Point(6, 1),
-                  new RoomTile.Point(1, 1));
+      List.of(
+          new RoomTile.Point(1, 1),
+          new RoomTile.Point(1, 5),
+          new RoomTile.Point(6, 5),
+          new RoomTile.Point(6, 1),
+          new RoomTile.Point(1, 1));
   private RoomTile kitchen;
 
   @BeforeEach
@@ -25,23 +29,24 @@ class RoomTileTest {
   @Test
   void constructor_setsNameAndWalkable() {
     assertEquals("Kitchen", kitchen.getRoomName());
-    assertFalse(kitchen.isWalkable(), "RoomTile should not be walkable by default in its general area.");
+    assertFalse(kitchen.isWalkable(),
+        "RoomTile should not be walkable by default in its general area.");
   }
 
   @Test
   void constructor_throwsForInvalidOutline_tooShort() {
     List<RoomTile.Point> shortOutline =
-            List.of(new RoomTile.Point(0, 0), new RoomTile.Point(0, 1), new RoomTile.Point(0, 0));
-    assertThrows(IllegalArgumentException.class, () -> new RoomTile("Test", shortOutline));
+        List.of(new RoomTile.Point(0, 0), new RoomTile.Point(0, 1), new RoomTile.Point(0, 0));
+    assertThrows(InvalidRoomTileException.class, () -> new RoomTile("Test", shortOutline));
   }
 
   @Test
   void constructor_throwsForInvalidOutline_notClosed() {
     List<RoomTile.Point> openOutline =
-            List.of(
-                    new RoomTile.Point(0, 0), new RoomTile.Point(0, 1),
-                    new RoomTile.Point(1, 1), new RoomTile.Point(1, 0));
-    assertThrows(IllegalArgumentException.class, () -> new RoomTile("Test", openOutline));
+        List.of(
+            new RoomTile.Point(0, 0), new RoomTile.Point(0, 1),
+            new RoomTile.Point(1, 1), new RoomTile.Point(1, 0));
+    assertThrows(InvalidRoomTileException.class, () -> new RoomTile("Test", openOutline));
   }
 
   @Test
@@ -50,7 +55,7 @@ class RoomTileTest {
     RoomTile.Point corridorSide = new RoomTile.Point(7, 3);
     kitchen.addDoor(roomSide, corridorSide);
     assertTrue(kitchen.canEnterFrom(corridorSide.row(), corridorSide.col()),
-            "Should be able to enter from the corridor side of an added door.");
+        "Should be able to enter from the corridor side of an added door.");
   }
 
   @Test
@@ -59,7 +64,7 @@ class RoomTileTest {
     RoomTile.Point roomSideInvalid = new RoomTile.Point(3, 3);
     RoomTile.Point corridorSide = new RoomTile.Point(7, 3);
     Exception exception = assertThrows(
-            IllegalArgumentException.class, () -> kitchen.addDoor(roomSideInvalid, corridorSide));
+        InvalidRoomTileException.class, () -> kitchen.addDoor(roomSideInvalid, corridorSide));
     assertTrue(exception.getMessage().contains("is not on the calculated perimeter"));
   }
 
@@ -68,7 +73,7 @@ class RoomTileTest {
     RoomTile.Point roomSide = new RoomTile.Point(6, 3);
     RoomTile.Point corridorSideInvalid = new RoomTile.Point(5, 3);
     Exception exception = assertThrows(
-            IllegalArgumentException.class, () -> kitchen.addDoor(roomSide, corridorSideInvalid));
+        InvalidRoomTileException.class, () -> kitchen.addDoor(roomSide, corridorSideInvalid));
     assertTrue(exception.getMessage().contains("is not outside room"));
   }
 
@@ -77,7 +82,7 @@ class RoomTileTest {
     RoomTile.Point roomSide = new RoomTile.Point(6, 3);
     RoomTile.Point corridorSideFar = new RoomTile.Point(8, 3);
     assertThrows(
-            IllegalArgumentException.class, () -> new RoomTile.Edge(roomSide, corridorSideFar));
+        InvalidRoomTileException.class, () -> new RoomTile.Edge(roomSide, corridorSideFar));
   }
 
   @Test
@@ -95,8 +100,10 @@ class RoomTileTest {
     RoomTile.Point corridorSide = new RoomTile.Point(7, 3);
     kitchen.addDoor(roomSide, corridorSide);
 
-    assertFalse(kitchen.canEnterFrom(7, 4), "Should not enter from a point not defined as a door's corridor side."); // Adjacent, but not this door
-    assertFalse(kitchen.canEnterFrom(0, 3), "Should not enter if not near any door."); // Not near a door
+    assertFalse(kitchen.canEnterFrom(7, 4),
+        "Should not enter from a point not defined as a door's corridor side."); // Adjacent, but not this door
+    assertFalse(kitchen.canEnterFrom(0, 3),
+        "Should not enter if not near any door."); // Not near a door
   }
 
   @Test
@@ -129,9 +136,9 @@ class RoomTileTest {
   void cluedoRoom_canEnterFromAnyAdjacentCorridor() {
     // Outline for a Cluedo special room
     List<RoomTile.Point> cluedoOutline = List.of(
-            new RoomTile.Point(10, 10), new RoomTile.Point(10, 12),
-            new RoomTile.Point(12, 12), new RoomTile.Point(12, 10),
-            new RoomTile.Point(10, 10)
+        new RoomTile.Point(10, 10), new RoomTile.Point(10, 12),
+        new RoomTile.Point(12, 12), new RoomTile.Point(12, 10),
+        new RoomTile.Point(10, 10)
     );
     RoomTile cluedoRoom = new RoomTile("Cluedo", cluedoOutline);
     // minRow=10, maxRow=12, minCol=10, maxCol=12
@@ -148,9 +155,9 @@ class RoomTileTest {
   @Test
   void cluedoRoom_canExitToAnyAdjacentCorridor() {
     List<RoomTile.Point> cluedoOutline = List.of(
-            new RoomTile.Point(10, 10), new RoomTile.Point(10, 12),
-            new RoomTile.Point(12, 12), new RoomTile.Point(12, 10),
-            new RoomTile.Point(10, 10)
+        new RoomTile.Point(10, 10), new RoomTile.Point(10, 12),
+        new RoomTile.Point(12, 12), new RoomTile.Point(12, 10),
+        new RoomTile.Point(10, 10)
     );
     RoomTile cluedoRoom = new RoomTile("Cluedo", cluedoOutline);
 

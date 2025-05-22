@@ -10,9 +10,7 @@ import javafx.scene.paint.Paint;
  */
 public final class PlayerColorMapper {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
+  /** Private constructor to prevent instantiation. */
   private PlayerColorMapper() {
     // Utility class
   }
