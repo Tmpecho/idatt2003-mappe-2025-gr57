@@ -22,10 +22,9 @@ public final class SnlTile implements Tile<LinearPos> {
    * The 1-based position number of this tile on the board.
    */
   private final int position;
-  /**
-   * List of observers monitoring this tile.
-   */
-  private final List<TileObserver> observers = new ArrayList<>();
+
+  /** List of observers monitoring this tile. */
+  private final List<TileObserver<LinearPos>> observers = new ArrayList<>();
 
   /**
    * Constructs an SnLTile with a given position number.
@@ -58,14 +57,14 @@ public final class SnlTile implements Tile<LinearPos> {
   }
 
   @Override
-  public void addObserver(TileObserver observer) {
+  public void addObserver(TileObserver<LinearPos> observer) {
     if (!observers.contains(observer)) {
       observers.add(observer);
     }
   }
 
   @Override
-  public void removeObserver(TileObserver observer) {
+  public void removeObserver(TileObserver<LinearPos> observer) {
     observers.remove(observer);
   }
 

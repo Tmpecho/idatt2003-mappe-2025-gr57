@@ -38,12 +38,12 @@ public interface Tile<P extends Position> {
    *
    * @param observer The observer to add.
    */
-  void addObserver(TileObserver observer);
+  void addObserver(TileObserver<P> observer);
 
   /**
    * Removes an observer from this tile.
    *
    * @param observer The observer to remove.
    */
-  void removeObserver(TileObserver observer);
+  void removeObserver(TileObserver<P> observer);
 }
