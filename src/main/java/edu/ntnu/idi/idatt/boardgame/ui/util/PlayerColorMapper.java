@@ -1,7 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.ui.util;
 
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
-import edu.ntnu.idi.idatt.boardgame.core.exception.UnknownPlayerColorException;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -11,9 +10,7 @@ import javafx.scene.paint.Paint;
  */
 public final class PlayerColorMapper {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
+  /** Private constructor to prevent instantiation. */
   private PlayerColorMapper() {
     // Utility class
   }
@@ -23,7 +20,6 @@ public final class PlayerColorMapper {
    *
    * @param playerColor The player color to convert.
    * @return The JavaFX Paint object representing the color.
-   * @throws UnknownPlayerColorException if the player color is not recognized.
    */
   public static Paint toPaint(PlayerColor playerColor) {
     return switch (playerColor) {
@@ -34,7 +30,6 @@ public final class PlayerColorMapper {
       case YELLOW -> Color.YELLOW;
       case ORANGE -> Color.ORANGE;
       case PURPLE -> Color.PURPLE;
-      default -> throw new UnknownPlayerColorException("Unrecognized player color: " + playerColor);
     };
   }
 }
