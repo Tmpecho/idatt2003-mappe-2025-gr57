@@ -22,12 +22,16 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@code MainView} class serves as the primary container for the application, featuring a
  * sidebar with game selection and placeholders for save/load functionality.
  */
 public final class MainView {
+
+  private static final Logger logger = LoggerFactory.getLogger(MainView.class);
 
   private final BorderPane root;
   private final StackPane contentWrapper;
@@ -91,7 +95,7 @@ public final class MainView {
     button.setOnAction(
         e -> {
           if (currentController == null) {
-            System.out.println("No game loaded to save.");
+            logger.warn("No game loaded to save.");
             LoggingNotification.error("No game loaded", "Cannot save game.");
             return;
           }
@@ -102,6 +106,7 @@ public final class MainView {
             boolean success = dir.mkdirs();
 
             if (!success) {
+              logger.error("Failed to create saves directory. Cannot save game.");
               LoggingNotification.error("Failed to create saves directory", "Cannot save game.");
               return;
             }
@@ -113,13 +118,13 @@ public final class MainView {
               .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
           Stage stage = getStage();
           if (stage == null) {
-            System.err.println("Could not get the stage to show save dialog.");
+            logger.error("Could not get the stage to show save dialog.");
             LoggingNotification.error("Failed to save game", "Could not get the stage.");
             return;
           }
           File file = chooser.showSaveDialog(stage);
           if (file == null) {
-            System.out.println("Save cancelled.");
+            logger.info("Save cancelled. No file selected.");
             LoggingNotification.info("Save cancelled", "No file selected.");
             return;
           }
@@ -137,7 +142,7 @@ public final class MainView {
           chooser.setTitle("Load Game State");
           File dir = new File("saves");
           if (!dir.exists()) {
-            System.out.println("Saves directory does not exist. Cannot load game.");
+            logger.error("Saves directory does not exist. Cannot load game.");
             LoggingNotification.error("Failed to load game", "Saves directory does not exist.");
             return;
           }
@@ -147,23 +152,24 @@ public final class MainView {
               .add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
           Stage stage = getStage();
           if (stage == null) {
-            System.err.println("Could not get the stage to show load dialog.");
+            logger.error("Could not get the stage to show load dialog.");
             LoggingNotification.error("Failed to load game", "Could not get the stage.");
             return;
           }
           File file = chooser.showOpenDialog(stage);
           if (file == null) {
-            System.out.println("Load cancelled.");
+            logger.info("Load cancelled. No file selected.");
             return;
           }
           if (currentController == null) {
-            System.out.println("Loading default game (Snakes and Ladders) for the save file.");
+            logger.warn(
+                "No game loaded. Loading default game (Snakes and Ladders) for the save file.");
             LoggingNotification.error(
                 "No game loaded", "Loading default game (Snakes and Ladders) for the save file.");
             loadSnakesAndLadders();
           }
           if (currentController == null) {
-            System.err.println("Failed to initialize a game controller for loading.");
+            logger.error("Failed to initialize a game controller for loading.");
             LoggingNotification.error("Failed to load game", "No game controller available.");
             return;
           }
@@ -189,7 +195,7 @@ public final class MainView {
     try {
       Files.createDirectories(savesDir);
     } catch (IOException e) {
-      System.err.println("Failed to create saves directory: " + e.getMessage());
+      logger.error("Failed to create saves directory: {}", e.getMessage());
       LoggingNotification.error("Failed to create saves directory", "Cannot load game.");
       return;
     }
@@ -218,14 +224,13 @@ public final class MainView {
       loadGameButton.setDisable(true); // Cluedo save/load not implemented
 
     } catch (IllegalArgumentException ex) {
-      System.err.println("Failed to load Cluedo: " + ex.getMessage());
+      logger.error("Failed to load Cluedo: {}", ex.getMessage());
       contentWrapper.getChildren().setAll(new Label("Error loading Cluedo: " + ex.getMessage()));
       saveGameButton.setDisable(true);
       loadGameButton.setDisable(true);
       this.currentController = null;
     } catch (Exception ex) {
-      System.err.println("An unexpected error occurred while loading Cluedo: " + ex.getMessage());
-      ex.printStackTrace();
+      logger.error("An unexpected error occurred while loading Cluedo: {}", ex.getMessage(), ex);
       contentWrapper.getChildren().setAll(new Label("Unexpected error loading Cluedo."));
       saveGameButton.setDisable(true);
       loadGameButton.setDisable(true);

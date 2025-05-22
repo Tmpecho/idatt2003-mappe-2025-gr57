@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the game board for Cluedo. It defines the layout of rooms, corridors, and borders, as
@@ -15,6 +17,7 @@ import java.util.stream.IntStream;
  */
 public final class CluedoBoard implements GameBoard<GridPos> {
 
+  private static final Logger logger = LoggerFactory.getLogger(CluedoBoard.class);
   private static final int BOARD_SIZE = 25;
 
   // Player starting positions
@@ -192,7 +195,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       for (int c = roomDimensions.left; c <= roomDimensions.right; c++) {
         if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
           if (board[r][c] != null) {
-            System.err.println(
+            logger.warn(
                 "Warning: Overwriting existing tile at ("
                     + r
                     + ", "
@@ -205,7 +208,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
           board[r][c] = room;
           room.setWalkable(false);
         } else {
-          System.err.println(
+          logger.warn(
               "Warning: Attempted to populate room tile outside board bounds at ("
                   + r
                   + ", "
@@ -224,7 +227,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               || spec.dims.left < 1
               || spec.dims.bottom >= BOARD_SIZE - 1
               || spec.dims.right >= BOARD_SIZE - 1) {
-            System.err.println(
+            logger.error(
                 "CRITICAL Error: Room "
                     + spec.name
                     + " with dimensions "
@@ -240,7 +243,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
             try {
               room.addDoor(doorDef.roomSide(), doorDef.corridorSide());
             } catch (IllegalArgumentException e) {
-              System.err.println(
+              logger.error(
                   "Error adding door for room "
                       + spec.name
                       + " between "
@@ -339,24 +342,24 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   @Override
   public void setPlayerPosition(Player<GridPos> player, GridPos position) {
     if (!isValidPosition(position)) {
-      System.err.println("Error: Attempt to set invalid position " + position);
+      logger.error("Error: Attempt to set invalid position " + position);
       return;
     }
     AbstractCluedoTile targetTile = getTileAtPosition(position);
     if (targetTile
         == null) { // Should not happen if isValidPosition is true and board is fully initialized
-      System.err.println("CRITICAL Error: Target tile is null at valid position " + position);
+      logger.error("CRITICAL Error: Target tile is null at valid position " + position);
       return;
     }
 
     if (targetTile instanceof BorderTile) {
-      System.err.println("Error: Cannot set player position to a BorderTile at " + position);
+      logger.error("Error: Cannot set player position to a BorderTile at " + position);
       return;
     }
     if (!targetTile.isWalkable()
         && !(targetTile
         instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
-      System.err.println(
+      logger.error(
           "Error: Cannot set player position to a non-walkable tile at "
               + position
               + " of type "
@@ -371,7 +374,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       if (oldTile != null) {
         oldTile.removePlayer(player);
       } else {
-        System.err.println(
+        logger.warn(
             "Warning: Player " + player.getName() + " had no valid old tile at " + oldPos);
       }
     }
@@ -382,7 +385,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     if (newTile != null) {
       newTile.addPlayer(player);
     } else {
-      System.err.println(
+      logger.error(
           "CRITICAL Error: New tile is null at valid position "
               + position
               + " for player "
@@ -400,7 +403,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               if (isValidPosition(startPos)) {
                 AbstractCluedoTile startTile = getTileAtPosition(startPos);
                 if (startTile instanceof BorderTile) {
-                  System.err.println(
+                  logger.error(
                       "CRITICAL Error: Calculated start position "
                           + startPos
                           + " for player "
@@ -409,7 +412,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                   return;
                 }
                 if (startTile == null) {
-                  System.err.println(
+                  logger.error(
                       "CRITICAL Error: Start tile is null at supposedly valid position "
                           + startPos
                           + " for player "
@@ -423,7 +426,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
                 if (!startTile.isWalkable()
                     && !(startTile instanceof RoomTile)) { // Rooms are fine to start in.
-                  System.err.println(
+                  logger.error(
                       "Error: Start tile at "
                           + startPos
                           + " for player "
@@ -434,7 +437,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                 startTile.addPlayer(player); // Add player to the tile model
 
               } else {
-                System.err.println(
+                logger.error(
                     "Error: Invalid start position "
                         + startPos
                         + " calculated for player "
@@ -474,7 +477,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       case BLUE -> START_POS_MRS_PEACOCK;
       case PURPLE -> START_POS_PROF_PLUM;
       default -> {
-        System.err.println("Warning: Unmapped player color for start position: " + color);
+        logger.warn("Warning: Unmapped player color for start position: " + color);
         throw new IllegalArgumentException(
             "Invalid or unmapped player color for start position: " + color);
       }

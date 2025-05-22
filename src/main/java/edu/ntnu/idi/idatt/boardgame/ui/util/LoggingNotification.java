@@ -131,7 +131,8 @@ public final class LoggingNotification {
     } catch (IllegalStateException e) {
       // (toolkit not initialized) — swallow or log to console
       logger.warn(
-          "JavaFX toolkit not initialized when trying to show notification. Running on current thread.",
+          "JavaFX toolkit not initialized when trying to show notification."
+              + " Running on current thread.",
           e); // NEW internal log
       r.run();
     }
