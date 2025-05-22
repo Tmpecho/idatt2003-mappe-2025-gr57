@@ -480,6 +480,11 @@ public final class CluedoController extends GameController<GridPos> {
     return stepsLeft;
   }
 
+  /**
+   * Sets the number of steps remaining for the current player to move.
+   *
+   * @param stepsLeft The number of steps remaining for the player's movement.
+   */
   public void setStepsLeft(int stepsLeft) {
     this.stepsLeft = stepsLeft;
   }
