@@ -56,12 +56,12 @@ public abstract class GameController<P extends Position> {
 
     // Default to player with ID 1 starts, if not already set by setupPlayers (e.g. Cluedo)
     if (this.currentPlayer == null) {
-      this.currentPlayer = this.players.get(1);
-      if (this.currentPlayer == null) {
+      this.currentPlayer = this.players.get(1); // Attempt to get player with ID 1
+      if (this.currentPlayer == null && !this.players.isEmpty()) {
         // Fallback if no player with ID 1, take the first available if any
-        this.currentPlayer = this.players.values().stream().findFirst()
-            .orElseThrow(
-                () -> new IllegalStateException("No players available to set as current."));
+        this.currentPlayer = this.players.values().iterator().next();
+      } else if (this.currentPlayer == null) { // players map is empty after all
+        throw new IllegalStateException("No players available to set as current.");
       }
     }
   }
@@ -79,9 +79,15 @@ public abstract class GameController<P extends Position> {
   protected void initialize(int numberOfPlayers) {
     this.players = createPlayers(numberOfPlayers);
     gameBoard.addPlayersToStart(players);
-    currentPlayer = players.get(1); // Default to player 1 starts
+    if (this.players != null && !this.players.isEmpty()) {
+      currentPlayer = players.get(1); // Default to player 1 starts
+      if (currentPlayer == null) { // Fallback if ID 1 doesn't exist
+        currentPlayer = players.values().iterator().next();
+      }
+    } else {
+      throw new IllegalStateException("No players created during initialization.");
+    }
   }
-
 
   public void addObserver(GameObserver<P> observer) {
     observers.add(observer);

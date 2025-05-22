@@ -16,45 +16,37 @@ import java.util.stream.IntStream;
 public final class SnlBoard implements GameBoard<LinearPos> {
 
   private static final int ROWS = 10;
-  private static final int COLS = 9; // E.g., 9 columns for a 90-tile board (10x9)
-  /**
-   * Total number of tiles on the board.
-   */
-  private static final int BOARD_SIZE = ROWS * COLS;
+  private static final int COLS = 9;
 
-  /**
-   * Map of tile position number to {@link SnlTile} object.
-   */
+  /** Total number of tiles on the board. */
+  private static final int BOARD_SIZE = ROWS * COLS;
+  // Standard snake positions: key = start (head), value = length (downwards)
+  private static final Map<Integer, Integer> SNAKES =
+      Map.of(
+          30, 14, // 30 -> 16
+          34, 7, // 34 -> 27
+          47, 7, // 47 -> 40
+          54, 35, // 54 -> 19
+          65, 5, // 65 -> 60
+          87, 31 // 87 -> 56
+          );
+  // Standard ladder positions: key = start (bottom), value = length (upwards)
+  private static final Map<Integer, Integer> LADDERS =
+      Map.of(
+          8, 6, // 8  -> 14
+          21, 10, // 21 -> 31
+          33, 5, // 33 -> 38
+          48, 7, // 48 -> 55
+          61, 8, // 61 -> 69
+          70, 9, // 70 -> 79
+          81, 2 // 81 -> 83
+          );
+  /** Map of tile position number to {@link SnlTile} object. */
   private final Map<Integer, SnlTile> tiles = new HashMap<>();
-  /**
-   * Map of tile position number (start of connector) to {@link Connector} object.
-   */
+  /** Map of tile position number (start of connector) to {@link Connector} object. */
   private final Map<Integer, Connector> connectors = new HashMap<>();
 
-  // Standard snake positions: key = start (head), value = length (downwards)
-  private static final Map<Integer, Integer> SNAKES = Map.of(
-      30, 14, // 30 -> 16
-      34, 7,  // 34 -> 27
-      47, 7,  // 47 -> 40
-      54, 35, // 54 -> 19
-      65, 5,  // 65 -> 60
-      87, 31  // 87 -> 56
-  );
-
-  // Standard ladder positions: key = start (bottom), value = length (upwards)
-  private static final Map<Integer, Integer> LADDERS = Map.of(
-      8, 6,   // 8  -> 14
-      21, 10, // 21 -> 31
-      33, 5,  // 33 -> 38
-      48, 7,  // 48 -> 55
-      61, 8,  // 61 -> 69
-      70, 9,  // 70 -> 79
-      81, 2   // 81 -> 83. Note: Original problem might have larger values for BOARD_SIZE
-  );        // For a 90-tile board, 81+2 = 83 is valid.
-
-  /**
-   * Constructs the Snakes and Ladders board, initializing tiles, snakes, and ladders.
-   */
+  /** Constructs the Snakes and Ladders board, initializing tiles, snakes, and ladders. */
   public SnlBoard() {
     initializeTiles();
     addSnakesAndLadders();
@@ -69,9 +61,9 @@ public final class SnlBoard implements GameBoard<LinearPos> {
     players
         .values()
         .forEach(
-            p -> {
-              p.setPosition(new LinearPos(1));
-              tiles.get(1).addPlayer(p);
+            player -> {
+              player.setPosition(new LinearPos(1));
+              tiles.get(1).addPlayer(player);
             });
   }
 
@@ -81,11 +73,11 @@ public final class SnlBoard implements GameBoard<LinearPos> {
    * at the new position.
    *
    * @param player The player to move.
-   * @param inc    The number of steps to increment the position by.
+   * @param increment The number of steps to increment the position by.
    */
-  public void incrementPlayerPosition(Player<LinearPos> player, int inc) {
+  public void incrementPlayerPosition(Player<LinearPos> player, int increment) {
     int from = player.getPosition().index();
-    int to = computeDestination(from + inc);
+    int to = computeDestination(from + increment);
     movePlayer(player, from, to);
     applyConnector(player);
   }
@@ -107,29 +99,19 @@ public final class SnlBoard implements GameBoard<LinearPos> {
     return Math.max(raw, 1);
   }
 
-  private void movePlayer(Player<LinearPos> p, int from, int to) {
-    tiles.get(from).removePlayer(p);
-    p.setPosition(new LinearPos(to));
-    tiles.get(to).addPlayer(p);
+  private void movePlayer(Player<LinearPos> player, int from, int to) {
+    tiles.get(from).removePlayer(player);
+    player.setPosition(new LinearPos(to));
+    tiles.get(to).addPlayer(player);
   }
 
-  private void applyConnector(Player<LinearPos> p) {
-    int pos = p.getPosition().index();
+  private void applyConnector(Player<LinearPos> player) {
+    int pos = player.getPosition().index();
     Connector c = connectors.get(pos);
     if (c == null) {
       return;
     }
-    movePlayer(p, pos, computeDestination(c.getEnd()));
-  }
-
-  /**
-   * Retrieves the {@link SnlTile} at the given 1-based position.
-   *
-   * @param pos The 1-based position of the tile.
-   * @return The {@link SnlTile} at that position, or null if invalid.
-   */
-  public SnlTile getTileAtPosition(int pos) {
-    return tiles.get(pos);
+    movePlayer(player, pos, computeDestination(c.getEnd()));
   }
 
   private void addSnakesAndLadders() {

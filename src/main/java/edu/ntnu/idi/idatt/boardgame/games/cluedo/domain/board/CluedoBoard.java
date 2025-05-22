@@ -28,16 +28,8 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 23); // BLUE
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 23); // PURPLE
 
-
-  /**
-   * Inner record for defining doors between a room and a corridor.
-   *
-   * @param roomSide     The {@link RoomTile.Point} on the room's side of the door.
-   * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
-   */
-  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {
-
-  }
+  /** The 2D array representing the grid of tiles on the board. */
+  private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
   /**
    * Specifications for each room on the Cluedo board, including dimensions, and door definitions.
@@ -105,14 +97,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               List.of(new DoorDefinition(new RoomTile.Point(19, 6), new RoomTile.Point(18, 6)))),
           new RoomSpec("Cluedo", new RoomDimensions(10, 10, 14, 14), true, List.of()));
 
-  /**
-   * The 2D array representing the grid of tiles on the board.
-   */
-  private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
-
-  /**
-   * Constructs the Cluedo board, initializing all tiles (borders, rooms, corridors).
-   */
+  /** Constructs the Cluedo board, initializing all tiles (borders, rooms, corridors). */
   public CluedoBoard() {
     initializeTiles();
   }
@@ -120,7 +105,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   /**
    * Checks if a move from one position to another is legal based on the game rules.
    *
-   * @param fromPosition   The starting position.
+   * @param fromPosition The starting position.
    * @param targetPosition The target position.
    * @return True if the move is legal, false otherwise.
    */
@@ -130,7 +115,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
     boolean adjacent =
         Math.abs(fromPosition.row() - targetPosition.row())
-            + Math.abs(fromPosition.col() - targetPosition.col())
+                + Math.abs(fromPosition.col() - targetPosition.col())
             == 1;
 
     boolean corridorToCorridor =
@@ -149,6 +134,31 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
     // reject anything but corridor->corridor, corridor->room, room->corridor
     return corridorToCorridor || doorEntry || doorExit;
+  }
+
+  private void populateRoomTiles(RoomDimensions roomDimensions, RoomTile room) {
+    for (int row = roomDimensions.top; row <= roomDimensions.bottom; row++) {
+      for (int col = roomDimensions.left; col <= roomDimensions.right; col++) {
+        if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
+          if (board[row][col] != null) {
+            logger.warn(
+                "Warning: Overwriting existing tile at ({}, {}) while populating room {}."
+                    + " Existing: {}",
+                row,
+                col,
+                room.getRoomName(),
+                board[row][col].getIdentifier());
+          }
+          board[row][col] = room;
+          room.setWalkable(false);
+        } else {
+          logger.warn(
+              "Warning: Attempted to populate room tile outside board bounds at ({}, {})",
+              row,
+              col);
+        }
+      }
+    }
   }
 
   private void initializeTiles() {
@@ -190,35 +200,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     return outline;
   }
 
-  private void populateRoomTiles(RoomDimensions roomDimensions, RoomTile room) {
-    for (int r = roomDimensions.top; r <= roomDimensions.bottom; r++) {
-      for (int c = roomDimensions.left; c <= roomDimensions.right; c++) {
-        if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-          if (board[r][c] != null) {
-            logger.warn(
-                "Warning: Overwriting existing tile at ("
-                    + r
-                    + ", "
-                    + c
-                    + ") while populating room "
-                    + room.getRoomName()
-                    + ". Existing: "
-                    + board[r][c].getIdentifier());
-          }
-          board[r][c] = room;
-          room.setWalkable(false);
-        } else {
-          logger.warn(
-              "Warning: Attempted to populate room tile outside board bounds at ("
-                  + r
-                  + ", "
-                  + c
-                  + ")");
-        }
-      }
-    }
-  }
-
   private void insertRooms() {
     ROOM_SPECS.forEach(
         spec -> {
@@ -228,11 +209,10 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               || spec.dims.bottom >= BOARD_SIZE - 1
               || spec.dims.right >= BOARD_SIZE - 1) {
             logger.error(
-                "CRITICAL Error: Room "
-                    + spec.name
-                    + " with dimensions "
-                    + spec.dims
-                    + " extends into the border area or outside bounds.");
+                "CRITICAL Error: Room {} with dimensions {} extends into the border"
+                    + " area or outside bounds.",
+                spec.name,
+                spec.dims);
             return;
           }
           List<RoomTile.Point> outline = createRectangularOutline(spec.dims);
@@ -244,44 +224,31 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               room.addDoor(doorDef.roomSide(), doorDef.corridorSide());
             } catch (IllegalArgumentException e) {
               logger.error(
-                  "Error adding door for room "
-                      + spec.name
-                      + " between "
-                      + doorDef.roomSide()
-                      + " and "
-                      + doorDef.corridorSide()
-                      + ": "
-                      + e.getMessage());
+                  "Error adding door for room {} between {} and {}: {}",
+                  spec.name,
+                  doorDef.roomSide(),
+                  doorDef.corridorSide(),
+                  e.getMessage());
             }
           }
           // TODO: if (spec.hasSecretPassage) addSecretPassage(room);
         });
   }
 
-  private void insertCorridorTiles() {
-    for (int row = 0; row < BOARD_SIZE; row++) {
-      for (int col = 0; col < BOARD_SIZE; col++) {
-        if (board[row][col] == null) { // If not a border and not a room, it's a corridor
-          board[row][col] = new CorridorTile(row, col);
-        }
-      }
-    }
-  }
-
   private void placeStartPosAdjacentBorders() {
     // PlayerColor.WHITE (Miss Scarlett) -> START_POS_MISS_SCARLETT = new GridPos(23, 7);
     // Tiles adjacent to Miss Scarlett's start
-    replaceWithBorderIfCorridor(START_POS_MISS_SCARLETT.row(),
-        START_POS_MISS_SCARLETT.col() - 1); // 23, 6
-    replaceWithBorderIfCorridor(START_POS_MISS_SCARLETT.row(),
-        START_POS_MISS_SCARLETT.col() + 1); // 23, 8
+    replaceWithBorderIfCorridor(
+        START_POS_MISS_SCARLETT.row(), START_POS_MISS_SCARLETT.col() - 1); // 23, 6
+    replaceWithBorderIfCorridor(
+        START_POS_MISS_SCARLETT.row(), START_POS_MISS_SCARLETT.col() + 1); // 23, 8
 
     // PlayerColor.RED (Col. Mustard) -> START_POS_COL_MUSTARD = new GridPos(17, 1);
     // Tiles adjacent to Col. Mustard's start
-    replaceWithBorderIfCorridor(START_POS_COL_MUSTARD.row() - 1,
-        START_POS_COL_MUSTARD.col()); // 16, 1
-    replaceWithBorderIfCorridor(START_POS_COL_MUSTARD.row() + 1,
-        START_POS_COL_MUSTARD.col()); // 18, 1
+    replaceWithBorderIfCorridor(
+        START_POS_COL_MUSTARD.row() - 1, START_POS_COL_MUSTARD.col()); // 16, 1
+    replaceWithBorderIfCorridor(
+        START_POS_COL_MUSTARD.row() + 1, START_POS_COL_MUSTARD.col()); // 18, 1
 
     // PlayerColor.YELLOW (Mrs. White) -> START_POS_MRS_WHITE = new GridPos(1, 7);
     // Tiles adjacent to Mrs. White's start
@@ -295,10 +262,10 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
     // PlayerColor.BLUE (Mrs. Peacock) -> START_POS_MRS_PEACOCK = new GridPos(6, 23);
     // Tiles adjacent to Mrs. Peacock's start
-    replaceWithBorderIfCorridor(START_POS_MRS_PEACOCK.row() - 1,
-        START_POS_MRS_PEACOCK.col()); // 5, 23
-    replaceWithBorderIfCorridor(START_POS_MRS_PEACOCK.row() + 1,
-        START_POS_MRS_PEACOCK.col()); // 7, 23
+    replaceWithBorderIfCorridor(
+        START_POS_MRS_PEACOCK.row() - 1, START_POS_MRS_PEACOCK.col()); // 5, 23
+    replaceWithBorderIfCorridor(
+        START_POS_MRS_PEACOCK.row() + 1, START_POS_MRS_PEACOCK.col()); // 7, 23
 
     // PlayerColor.PURPLE (Prof. Plum) -> START_POS_PROF_PLUM = new GridPos(19, 23);
     // Tiles adjacent to Prof. Plum's start
@@ -306,64 +273,50 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     replaceWithBorderIfCorridor(START_POS_PROF_PLUM.row() + 1, START_POS_PROF_PLUM.col()); // 20, 23
   }
 
-  private void replaceWithBorderIfCorridor(int r, int c) {
-    if (!isValidPosition(new GridPos(r, c))) {
+  private void insertCorridorTiles() {
+    for (int row = 0; row < BOARD_SIZE; row++) {
+      for (int col = 0; col < BOARD_SIZE; col++) {
+        if (board[row][col] == null) { // If not a border and not a room, it's a corridor
+          board[row][col] = new CorridorTile(row, col);
+        }
+      }
+    }
+  }
+
+  private void replaceWithBorderIfCorridor(int row, int col) {
+    if (!isValidPosition(new GridPos(row, col))) {
       return;
     }
-    AbstractCluedoTile tile = board[r][c];
+    AbstractCluedoTile tile = board[row][col];
     if (tile instanceof CorridorTile) {
-      board[r][c] = new BorderTile(r, c);
+      board[row][col] = new BorderTile(row, col);
     }
-  }
-
-  @Override
-  public int getBoardSize() {
-    return BOARD_SIZE;
-  }
-
-  /**
-   * Gets the number of rows on the board.
-   *
-   * @return The number of rows.
-   */
-  public int getRows() {
-    return BOARD_SIZE;
-  }
-
-  /**
-   * Gets the number of columns on the board.
-   *
-   * @return The number of columns.
-   */
-  public int getCols() {
-    return BOARD_SIZE;
   }
 
   @Override
   public void setPlayerPosition(Player<GridPos> player, GridPos position) {
     if (!isValidPosition(position)) {
-      logger.error("Error: Attempt to set invalid position " + position);
+      logger.error("Error: Attempt to set invalid position {}", position);
       return;
     }
     AbstractCluedoTile targetTile = getTileAtPosition(position);
     if (targetTile
         == null) { // Should not happen if isValidPosition is true and board is fully initialized
-      logger.error("CRITICAL Error: Target tile is null at valid position " + position);
+      logger.error("CRITICAL Error: Target tile is null at valid position {}", position);
       return;
     }
 
     if (targetTile instanceof BorderTile) {
-      logger.error("Error: Cannot set player position to a BorderTile at " + position);
+      logger.error("Error: Cannot set player position to a BorderTile at {}", position);
       return;
     }
     if (!targetTile.isWalkable()
         && !(targetTile
-        instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
+            instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
       logger.error(
-          "Error: Cannot set player position to a non-walkable tile at "
-              + position
-              + " of type "
-              + targetTile.getClass().getSimpleName());
+          "Error: Cannot set player position to a non-walkable tile at {} of type {}",
+          position,
+          targetTile.getClass().getSimpleName());
       return;
     }
 
@@ -374,8 +327,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       if (oldTile != null) {
         oldTile.removePlayer(player);
       } else {
-        logger.warn(
-            "Warning: Player " + player.getName() + " had no valid old tile at " + oldPos);
+        logger.warn("Warning: Player {} had no valid old tile at {}", player.getName(), oldPos);
       }
     }
 
@@ -386,11 +338,15 @@ public final class CluedoBoard implements GameBoard<GridPos> {
       newTile.addPlayer(player);
     } else {
       logger.error(
-          "CRITICAL Error: New tile is null at valid position "
-              + position
-              + " for player "
-              + player.getName());
+          "CRITICAL Error: New tile is null at valid position {} for player {}",
+          position,
+          player.getName());
     }
+  }
+
+  @Override
+  public int getBoardSize() {
+    return BOARD_SIZE;
   }
 
   @Override
@@ -404,21 +360,19 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                 AbstractCluedoTile startTile = getTileAtPosition(startPos);
                 if (startTile instanceof BorderTile) {
                   logger.error(
-                      "CRITICAL Error: Calculated start position "
-                          + startPos
-                          + " for player "
-                          + player.getName()
-                          + " is a BorderTile. Adjust start positions.");
+                      "CRITICAL Error: Calculated start position {} for player {} is a "
+                          + "BorderTile. Adjust start positions.",
+                      startPos,
+                      player.getName());
                   return;
                 }
                 if (startTile == null) {
                   logger.error(
-                      "CRITICAL Error: Start tile is null at supposedly valid position "
-                          + startPos
-                          + " for player "
-                          + player.getName()
-                          + ". This might be due to board initialization "
-                          + "order or incorrect coordinates.");
+                      "CRITICAL Error: Start tile is null at supposedly valid position {} "
+                          + "for player {}. This might be due to board initialization order "
+                          + "or incorrect coordinates.",
+                      startPos,
+                      player.getName());
                   return;
                 }
 
@@ -427,23 +381,38 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                 if (!startTile.isWalkable()
                     && !(startTile instanceof RoomTile)) { // Rooms are fine to start in.
                   logger.error(
-                      "Error: Start tile at "
-                          + startPos
-                          + " for player "
-                          + player.getName()
-                          + " is not walkable and not a Room! Type: "
-                          + startTile.getClass().getSimpleName());
+                      "Error: Start tile at {} for player {} is not walkable and not "
+                          + "a Room! Type: {}",
+                      startPos,
+                      player.getName(),
+                      startTile.getClass().getSimpleName());
                 }
                 startTile.addPlayer(player); // Add player to the tile model
 
               } else {
                 logger.error(
-                    "Error: Invalid start position "
-                        + startPos
-                        + " calculated for player "
-                        + player.getName());
+                    "Error: Invalid start position {} calculated for player {}",
+                    startPos,
+                    player.getName());
               }
             });
+  }
+
+  private GridPos getPlayerStartPosition(Player<GridPos> player) {
+    PlayerColor color = player.getColor();
+    return switch (color) {
+      case WHITE -> START_POS_MISS_SCARLETT;
+      case RED -> START_POS_COL_MUSTARD;
+      case YELLOW -> START_POS_MRS_WHITE;
+      case GREEN -> START_POS_REV_GREEN;
+      case BLUE -> START_POS_MRS_PEACOCK;
+      case PURPLE -> START_POS_PROF_PLUM;
+      default -> {
+        logger.warn("Warning: Unmapped player color for start position: {}", color);
+        throw new IllegalArgumentException(
+            "Invalid or unmapped player color for start position: " + color);
+      }
+    };
   }
 
   /**
@@ -467,22 +436,13 @@ public final class CluedoBoard implements GameBoard<GridPos> {
         && pos.col() < BOARD_SIZE;
   }
 
-  private GridPos getPlayerStartPosition(Player<GridPos> player) {
-    PlayerColor color = player.getColor();
-    return switch (color) {
-      case WHITE -> START_POS_MISS_SCARLETT;
-      case RED -> START_POS_COL_MUSTARD;
-      case YELLOW -> START_POS_MRS_WHITE;
-      case GREEN -> START_POS_REV_GREEN;
-      case BLUE -> START_POS_MRS_PEACOCK;
-      case PURPLE -> START_POS_PROF_PLUM;
-      default -> {
-        logger.warn("Warning: Unmapped player color for start position: " + color);
-        throw new IllegalArgumentException(
-            "Invalid or unmapped player color for start position: " + color);
-      }
-    };
-  }
+  /**
+   * Inner record for defining doors between a room and a corridor.
+   *
+   * @param roomSide The {@link RoomTile.Point} on the room's side of the door.
+   * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
+   */
+  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
 
   /**
    * Gets the underlying 2D array of {@link AbstractCluedoTile} objects representing the board grid.
@@ -495,28 +455,23 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   /**
-   * Record to define the rectangular dimensions of a room. Coordinates are inclusive and
-   * 0-indexed.
+   * Record to define the rectangular dimensions of a room. Coordinates are inclusive and 0-indexed.
    *
-   * @param top    The top-most row index.
-   * @param left   The left-most column index.
+   * @param top The top-most row index.
+   * @param left The left-most column index.
    * @param bottom The bottom-most row index.
-   * @param right  The right-most column index.
+   * @param right The right-most column index.
    */
-  private record RoomDimensions(int top, int left, int bottom, int right) {
-
-  }
+  private record RoomDimensions(int top, int left, int bottom, int right) {}
 
   /**
    * Record to encapsulate the specification for a room on the board.
    *
-   * @param name             The name of the room.
-   * @param dims             The {@link RoomDimensions} of the room.
+   * @param name The name of the room.
+   * @param dims The {@link RoomDimensions} of the room.
    * @param hasSecretPassage True if the room has a secret passage (feature not fully implemented).
-   * @param doors            A list of {@link DoorDefinition}s for the room.
+   * @param doors A list of {@link DoorDefinition}s for the room.
    */
   private record RoomSpec(
-      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {
-
-  }
+      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {}
 }

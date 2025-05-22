@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card;
 
+import edu.ntnu.idi.idatt.boardgame.core.exception.InvalidRoomException;
 import java.util.Arrays;
 
 /**
@@ -41,9 +42,9 @@ public enum Room implements Card {
    */
   public static Room fromDisplayName(String name) {
     return Arrays.stream(values())
-        .filter(r -> r.getName().equals(name))
+        .filter(room -> room.getName().equals(name))
         .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Unknown room: " + name));
+        .orElseThrow(() -> new InvalidRoomException("Unknown room: " + name));
   }
 
   @Override

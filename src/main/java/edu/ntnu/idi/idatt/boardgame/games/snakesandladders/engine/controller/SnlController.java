@@ -29,12 +29,6 @@ public final class SnlController extends GameController<LinearPos> {
 
   private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
 
-  /**
-   * Constructs an SnLController with custom player details.
-   *
-   * @param playerDetailsList List of player configurations.
-   * @param repo              The repository for game state persistence.
-   */
   public SnlController(
       List<PlayerSetupDetails> playerDetailsList, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
@@ -43,52 +37,39 @@ public final class SnlController extends GameController<LinearPos> {
     initializeGame(playerDetailsList);
   }
 
-  /**
-   * Deprecated constructor. Use the constructor with PlayerSetupDetails.
-   *
-   * @param numberOfPlayers The number of players.
-   * @param repo            The repository.
-   */
   @Deprecated
   public SnlController(
       int numberOfPlayers, GameStateRepository<SnlGameStateDto> repo) {
     super(new SnlBoard(), new Dice(2));
     this.repo = Objects.requireNonNull(repo);
-    this.actualNumberOfPlayers = numberOfPlayers; // For compatibility with old init path
-    initialize(numberOfPlayers); // Calls old deprecated GameController.initialize
+    this.actualNumberOfPlayers = numberOfPlayers;
+    initialize(numberOfPlayers);
   }
-
 
   @Override
   protected Map<Integer, Player<LinearPos>> setupPlayers(
       List<PlayerSetupDetails> playerDetailsList) {
     Map<Integer, Player<LinearPos>> newPlayersMap = new HashMap<>();
-    AtomicInteger playerIdCounter = new AtomicInteger(1); // For 1-based IDs
+    AtomicInteger playerIdCounter = new AtomicInteger(1);
 
     playerDetailsList.forEach(detail -> {
       int id = playerIdCounter.getAndIncrement();
       String name = detail.name();
       PlayerColor color = detail.color().orElseThrow(() ->
           new IllegalArgumentException("Player color is missing for SnL player: " + name));
-      // SnL players always start at LinearPos(1)
       Player<LinearPos> player = new Player<>(id, name, color, new LinearPos(1));
       newPlayersMap.put(id, player);
     });
-    this.actualNumberOfPlayers = newPlayersMap.size(); // Update with actual count
+    this.actualNumberOfPlayers = newPlayersMap.size();
     return newPlayersMap;
   }
 
-
-  /**
-   * @deprecated Use setupPlayers(List<PlayerSetupDetails>) with the new initialization flow.
-   */
   @Deprecated
   @Override
   protected Map<Integer, Player<LinearPos>> createPlayers(int numberOfPlayers) {
     final List<PlayerColor> playerColors = List.of(
         PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN,
         PlayerColor.YELLOW, PlayerColor.ORANGE, PlayerColor.PURPLE);
-
     Map<Integer, Player<LinearPos>> tempPlayers = new HashMap<>();
     for (int i = 0; i < numberOfPlayers; i++) {
       int playerId = i + 1;
@@ -111,7 +92,6 @@ public final class SnlController extends GameController<LinearPos> {
   public void setCurrentPlayer(Player<LinearPos> player) {
     this.currentPlayer = player;
   }
-
 
   public void rollDice() {
     Action roll = new RollAction((SnlBoard) gameBoard, currentPlayer, dice);
@@ -138,7 +118,12 @@ public final class SnlController extends GameController<LinearPos> {
 
   @Override
   protected Player<LinearPos> getNextPlayer() {
-    return players.get((currentPlayer.getId() % actualNumberOfPlayers) + 1);
+    if (players == null || players.isEmpty() || actualNumberOfPlayers == 0) {
+      throw new IllegalStateException(
+          "Cannot get next player, player map is empty or not initialized.");
+    }
+    int nextPlayerId = (currentPlayer.getId() % actualNumberOfPlayers) + 1;
+    return players.get(nextPlayerId);
   }
 
   @Override
@@ -155,12 +140,25 @@ public final class SnlController extends GameController<LinearPos> {
   @Override
   public void loadGameState(String path) {
     try {
-      SnlMapper.apply(repo.load(Path.of(path)), this);
+      SnlGameStateDto dto = repo.load(Path.of(path));
+      // Important: Re-initialize players map based on DTO before applying positions
+      Map<Integer, Player<LinearPos>> loadedPlayers = new HashMap<>();
+      for (SnlGameStateDto.PlayerState ps : dto.players) {
+        PlayerColor color = PlayerColor.valueOf(ps.color); // Assuming color string matches enum
+        Player<LinearPos> p = new Player<>(ps.id, "Player " + ps.id, color,
+            new LinearPos(ps.position));
+        loadedPlayers.put(ps.id, p);
+      }
+      this.players = loadedPlayers;
       this.actualNumberOfPlayers = this.players.size();
+      // Apply positions to the now correctly populated this.players map
+      SnlMapper.apply(dto, this);
+
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (Exception e) {
       logger.error("Load failed: {}", e.getMessage(), e);
       LoggingNotification.error("Load failed", e.getMessage());
+      // Potentially reset game or go back to menu
     }
   }
 }

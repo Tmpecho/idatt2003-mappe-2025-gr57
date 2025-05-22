@@ -14,9 +14,7 @@ import java.util.List;
  */
 public final class SnlMapper {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
+  /** Private constructor to prevent instantiation. */
   private SnlMapper() {
     // Utility class
   }
@@ -31,19 +29,19 @@ public final class SnlMapper {
     SnlGameStateDto dto = new SnlGameStateDto();
     dto.currentPlayerTurn = controller.getCurrentPlayer().getId();
 
-    List<SnlGameStateDto.PlayerState> list = new ArrayList<>();
+    List<SnlGameStateDto.PlayerState> playerStates = new ArrayList<>();
     controller
         .getPlayers()
         .values()
         .forEach(
-            p -> {
-              var ps = new SnlGameStateDto.PlayerState();
-              ps.id = p.getId();
-              ps.position = p.getPosition().index();
-              ps.color = p.getColor().name();
-              list.add(ps);
+            player -> {
+              var playerState = new SnlGameStateDto.PlayerState();
+              playerState.id = player.getId();
+              playerState.position = player.getPosition().index();
+              playerState.color = player.getColor().name();
+              playerStates.add(playerState);
             });
-    dto.players = list;
+    dto.players = playerStates;
     return dto;
   }
 
@@ -52,16 +50,18 @@ public final class SnlMapper {
    * modifies the controller to reflect the loaded game state. Note: This assumes the
    * SnLController's players map is already initialized with the correct number of players and IDs.
    *
-   * @param dto        The game state DTO to apply.
+   * @param dto The game state DTO to apply.
    * @param controller The game controller to update.
    * @throws IllegalStateException if a player ID from the DTO is not found in the controller.
    */
   public static void apply(SnlGameStateDto dto, SnlController controller) {
     dto.players.forEach(
         playerState -> {
-          Player<LinearPos> p = controller.getPlayers().get(playerState.id);
-          if (p != null) {
-            controller.getGameBoard().setPlayerPosition(p, new LinearPos(playerState.position));
+          Player<LinearPos> player = controller.getPlayers().get(playerState.id);
+          if (player != null) {
+            controller
+                .getGameBoard()
+                .setPlayerPosition(player, new LinearPos(playerState.position));
           }
         });
 
