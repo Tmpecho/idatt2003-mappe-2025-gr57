@@ -1,5 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame;
 
+import atlantafx.base.theme.PrimerLight;
 import edu.ntnu.idi.idatt.boardgame.ui.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -16,10 +17,11 @@ public final class App extends Application {
    * has returned, and after the system is ready for the application to begin running.
    *
    * @param stage the primary stage for this application, onto which the application scene can be
-   *              set.
+   *     set.
    */
   @Override
   public void start(Stage stage) {
+    Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
     MainView mainView = new MainView();
     Scene scene = new Scene(mainView.getRoot(), 900, 800);
     stage.setScene(scene);
