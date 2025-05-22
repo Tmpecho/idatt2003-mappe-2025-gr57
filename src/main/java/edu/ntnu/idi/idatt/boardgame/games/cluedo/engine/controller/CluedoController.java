@@ -16,6 +16,7 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.player.CluedoPlayer;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.AccusationAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.MoveAction;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.RollAction;
+import edu.ntnu.idi.idatt.boardgame.games.cluedo.engine.action.SuggestionAction;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,15 +43,6 @@ public final class CluedoController extends GameController<GridPos> {
   private final List<Player<GridPos>> turnOrder = new ArrayList<>();
   private int currentIndex;
   private Phase phase = Phase.WAIT_ROLL;
-
-  /**
-   * Checks if the game is currently waiting for the player to roll the dice.
-   *
-   * @return true if the game is in the WAIT_ROLL phase, false otherwise.
-   */
-  public boolean isWaitingForRoll() {
-    return phase == Phase.WAIT_ROLL;
-  }
 
   /**
    * Constructs a CluedoController.
@@ -92,9 +84,8 @@ public final class CluedoController extends GameController<GridPos> {
 
   @Override
   public boolean isGameOver() {
-    // Game over when a correct accusation is made, or all but one player made wrong accusations.
-    // TODO: Implement game over logic for Cluedo
-    return false;
+	  // TODO: Don't know if this is needed
+	  return false;
   }
 
   @Override
@@ -119,6 +110,15 @@ public final class CluedoController extends GameController<GridPos> {
     // TODO: Implement Cluedo-specific game state loading
     System.out.println("Cluedo load game state not implemented yet from path: " + filePath);
   }
+
+	/**
+	 * Checks if the game is currently waiting for the player to roll the dice.
+	 *
+	 * @return true if the game is in the WAIT_ROLL phase, false otherwise.
+	 */
+	public boolean isWaitingForRoll() {
+		return phase == Phase.WAIT_ROLL;
+	}
 
   /**
    * Initiates the movement phase for the current player after they have rolled the dice. Sets the
@@ -191,6 +191,10 @@ public final class CluedoController extends GameController<GridPos> {
     new AccusationAction(this, suspect, weapon, room).execute();
   }
 
+  public void onSuggestButton(Suspect suspect, Weapon weapon, Room room) {
+    new SuggestionAction(this, suspect, weapon, room).execute();
+  }
+
   /**
    * Try to move the current player to the clicked target {@link GridPos}. Movement is allowed
    * between adjacent corridor tiles, or between a corridor and an adjacent room if a valid door
@@ -209,24 +213,18 @@ public final class CluedoController extends GameController<GridPos> {
       return;
     }
 
-    // did we step *into* a room?
     boolean enteringRoom = boardModel.getTileAtPosition(target) instanceof RoomTile;
 
-    // 1) actually move
     boardModel.setPlayerPosition(currentPlayer, target);
-
-    // 2) consume a step (or zero out on entry)
     if (enteringRoom) {
       stepsLeft = 0;
     } else {
       stepsLeft--;
     }
 
-    // 3) log it
     notifyObservers(
         currentPlayer.getName() + " moved to " + target + ". " + stepsLeft + " steps left.");
 
-    // 4) adjust phase / turn
     if (stepsLeft == 0) {
       if (enteringRoom) {
         phase = Phase.IN_ROOM;
@@ -251,14 +249,66 @@ public final class CluedoController extends GameController<GridPos> {
     return currentPlayer;
   }
 
-  /**
-   * Allows the current player to make a suggestion. This is typically done when the player is in a
-   * room. The player suggests a suspect, a weapon, and the current room. Other players then attempt
-   * to disprove the suggestion.
-   */
-  public void makeSuggestion() {
-    // TODO: Implement suggestion logic (only in rooms, move suspect/weapon)
-    notifyObservers(currentPlayer.getName() + " suggestion logic TBD.");
+	/**
+	 * Allows the current player to make a suggestion. This is typically done when the player is in a
+	 * room. The player suggests a suspect, a weapon, and the current room. Other players then attempt
+	 * to disprove the suggestion.
+	 */
+  public void makeSuggestion(Suspect suggestedSuspect, Weapon suggestedWeapon, Room suggestedRoom) {
+    if (suggestedSuspect == null || suggestedWeapon == null || suggestedRoom == null) {
+      throw new IllegalArgumentException("Suggestion cannot be null.");
+    }
+
+    int totalPlayers = turnOrder.size();
+
+    // Try each other player in turn order, starting with the next player
+    for (int stepsFromCurrent = 1; stepsFromCurrent < totalPlayers; stepsFromCurrent++) {
+      int respondentIndex = (currentIndex + stepsFromCurrent) % totalPlayers;
+      CluedoPlayer respondent = (CluedoPlayer) turnOrder.get(respondentIndex);
+
+      // Does this player hold any of the three cards?
+      if (!respondent.hasCard(suggestedSuspect)
+          && !respondent.hasCard(suggestedWeapon)
+          && !respondent.hasCard(suggestedRoom)) {
+        continue;
+      }
+
+      // If they hold more than one, pick one at random to show
+      Card shownCard =
+          respondent.showOneOf(List.of(suggestedSuspect, suggestedWeapon, suggestedRoom), rng);
+
+      String shownCardName = shownCard.getName();
+
+      notifyObservers(
+          currentPlayer.getName()
+              + " suggested "
+              + suggestedSuspect.getName()
+              + " in the "
+              + suggestedRoom.getName()
+              + " with the "
+              + suggestedWeapon.getName()
+              + ".  "
+              + respondent.getName()
+              + " disproved by showing \""
+              + shownCardName
+              + ".\"");
+
+      phase = Phase.WAIT_ROLL;
+      return;
+    }
+
+    // Nobody could disprove
+    notifyObservers(
+        currentPlayer.getName()
+            + " suggested "
+            + suggestedSuspect.getName()
+            + " in the "
+            + suggestedRoom.getName()
+            + " with the "
+            + suggestedWeapon.getName()
+            + ".  No one could disprove the suggestion.");
+
+    phase = Phase.WAIT_ROLL;
   }
 
   /**
@@ -313,20 +363,19 @@ public final class CluedoController extends GameController<GridPos> {
     notifyObservers(p.getName() + " has been eliminated and removed from the board.");
   }
 
-  private enum Phase {
-    WAIT_ROLL,
-    MOVING,
-    IN_ROOM,
-    TURN_OVER
+  public Room getRoomOfCurrentPlayer() {
+    GridPos pos = currentPlayer.getPosition();
+    AbstractCluedoTile tile = boardModel.getTileAtPosition(pos);
+    if (tile instanceof RoomTile room) {
+      return Room.fromDisplayName(room.getRoomName());
+    }
+    return null;
   }
 
-  /**
-   * Called when this player’s movement finishes. Advances turn.
-   */
-  private void endTurn() {
-    Player<GridPos> next = getNextPlayer();
-    currentPlayer = next;
-    notifyObservers("Turn over. It is now " + next.getName() + "'s turn.");
+  /** Called when this player’s movement finishes. Advances turn. */
+  public void endTurn() {
+    this.phase = Phase.WAIT_ROLL;
+    nextTurn();
   }
 
   /**
@@ -369,5 +418,12 @@ public final class CluedoController extends GameController<GridPos> {
       }
       idx = (idx + 1) % playersInOrder.size();
     }
+  }
+
+  private enum Phase {
+    WAIT_ROLL,
+    MOVING,
+    IN_ROOM,
+    TURN_OVER
   }
 }

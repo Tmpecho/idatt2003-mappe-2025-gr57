@@ -8,11 +8,14 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
 import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.EnumMap;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.Map;
+import java.util.List;
+import java.util.Collection;
+import java.util.Random;
 
 /**
  * Represents a player in the Cluedo game, extending the generic {@link Player} class. Cluedo
@@ -23,6 +26,9 @@ public final class CluedoPlayer extends Player<GridPos> {
   private final Set<Suspect> suspectHand = new HashSet<>();
   private final Set<Weapon> weaponHand = new HashSet<>();
   private final Set<Room> roomHand = new HashSet<>();
+  private final Map<Suspect, Boolean> suspectNotes = new EnumMap<>(Suspect.class);
+  private final Map<Weapon, Boolean> weaponNotes = new EnumMap<>(Weapon.class);
+  private final Map<Room, Boolean> roomNotes = new EnumMap<>(Room.class);
 
   /**
    * Constructs a new CluedoPlayer.
@@ -34,6 +40,10 @@ public final class CluedoPlayer extends Player<GridPos> {
    */
   public CluedoPlayer(int id, String name, PlayerColor color, GridPos startPos) {
     super(id, name, color, startPos);
+
+    Arrays.stream(Suspect.values()).forEach(suspect -> suspectNotes.put(suspect, false));
+    Arrays.stream(Weapon.values()).forEach(weapon -> weaponNotes.put(weapon, false));
+    Arrays.stream(Room.values()).forEach(room -> roomNotes.put(room, false));
   }
 
   /**
@@ -128,5 +138,29 @@ public final class CluedoPlayer extends Player<GridPos> {
       throw new IllegalArgumentException("No cards to show");
     }
     return matches.get(rng.nextInt(matches.size()));
+  }
+
+  public boolean isSuspectNoted(Suspect s) {
+    return suspectNotes.get(s);
+  }
+
+  public void setSuspectNoted(Suspect s, boolean v) {
+    suspectNotes.put(s, v);
+  }
+
+  public boolean isWeaponNoted(Weapon w) {
+    return weaponNotes.get(w);
+  }
+
+  public void setWeaponNoted(Weapon w, boolean v) {
+    weaponNotes.put(w, v);
+  }
+
+  public boolean isRoomNoted(Room r) {
+    return roomNotes.get(r);
+  }
+
+  public void setRoomNoted(Room r, boolean v) {
+    roomNotes.put(r, v);
   }
 }

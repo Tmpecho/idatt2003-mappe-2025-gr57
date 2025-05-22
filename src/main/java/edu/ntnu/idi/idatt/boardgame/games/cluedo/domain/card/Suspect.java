@@ -92,6 +92,7 @@ public enum Suspect implements Card {
    *
    * @return The display name.
    */
+  @Override
   public String getName() {
     return displayName;
   }

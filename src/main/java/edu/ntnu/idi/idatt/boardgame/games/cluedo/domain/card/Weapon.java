@@ -29,6 +29,7 @@ public enum Weapon implements Card {
     return Arrays.stream(Weapon.values()).map(Weapon::getName).toArray(String[]::new);
   }
 
+  @Override
   public String getName() {
     return name;
   }
