@@ -48,6 +48,8 @@ public final class MainView {
 
     contentWrapper = new StackPane();
     contentWrapper.setPadding(new Insets(10));
+    // Set a default message or view in the contentWrapper
+    contentWrapper.getChildren().add(new Label("Welcome! Click 'Menu' to start."));
     root.setCenter(contentWrapper);
 
     loadMenu();
@@ -68,30 +70,57 @@ public final class MainView {
     sidebar.setAlignment(javafx.geometry.Pos.TOP_CENTER);
     sidebar.setStyle("-fx-background-color: #336699;");
 
-    Label titleLabel = new Label("Board games");
-    titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
-
-    VBox gamesBox = new VBox(10);
-    addGames(gamesBox);
+    // Create the new Menu button
+    Button menuButton = new Button("Menu");
+    menuButton.setOnAction(e -> showChooseGameView());
+    menuButton.setMaxWidth(Double.MAX_VALUE);
 
     Region spacer = new Region();
     VBox.setVgrow(spacer, Priority.ALWAYS);
 
     saveGameButton = buildSaveButton();
     loadGameButton = buildLoadButton();
+    saveGameButton.setDisable(true);
+    loadGameButton.setDisable(true);
 
     Button exitButton = new Button("Exit");
     exitButton.setOnAction(e -> Platform.exit());
+    exitButton.setMaxWidth(Double.MAX_VALUE);
+    saveGameButton.setMaxWidth(Double.MAX_VALUE);
+    loadGameButton.setMaxWidth(Double.MAX_VALUE);
 
     sidebar
         .getChildren()
-        .addAll(titleLabel, gamesBox, spacer, saveGameButton, loadGameButton, exitButton);
+        .addAll(menuButton, spacer, saveGameButton, loadGameButton, exitButton);
     root.setLeft(sidebar);
   }
 
+  /**
+   * Shows a placeholder for the "Choose Game" view in the content wrapper.
+   */
+  private void showChooseGameView() {
+    // Placeholder for now. This will be replaced with the actual ChooseGameView in Phase 2.
+    Label chooseGamePlaceholder = new Label("Choose Game View Placeholder\n\n"
+        + " (This will show game options like Snakes & Ladders and Cluedo)");
+    chooseGamePlaceholder.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
+    chooseGamePlaceholder.setWrapText(true);
+    contentWrapper.getChildren().setAll(chooseGamePlaceholder);
+
+    if (currentController != null) {
+      // Consider if we want to clear currentController here or prompt the user
+      // For now, let's assume we might be navigating away from an active game,
+      // but the game state itself isn't cleared until a new game starts.
+      // Save/Load buttons should reflect the state of `currentController`.
+      // However, if we are at the menu, save/load for a *new* game doesn't make sense yet.
+    }
+    saveGameButton.setDisable(true);
+    loadGameButton.setDisable(false);
+  }
+
+
   private Button buildSaveButton() {
     Button button = new Button("Save game");
-    button.setDisable(true);
+    // button.setDisable(true); // Initial state set in loadMenu
     button.setOnAction(
         e -> {
           if (currentController == null) {
@@ -135,7 +164,7 @@ public final class MainView {
 
   private Button buildLoadButton() {
     Button button = new Button("Load game");
-    button.setDisable(true);
+    // button.setDisable(true); // Initial state set in loadMenu
     button.setOnAction(
         e -> {
           FileChooser chooser = new FileChooser();
@@ -161,33 +190,55 @@ public final class MainView {
             logger.info("Load cancelled. No file selected.");
             return;
           }
+
+          boolean wasGameActive = currentController != null;
+
           if (currentController == null) {
+            // Attempt to load Snakes and Ladders by default if no game is active
             logger.warn(
-                "No game loaded. Loading default game (Snakes and Ladders) for the save file.");
-            LoggingNotification.error(
-                "No game loaded", "Loading default game (Snakes and Ladders) for the save file.");
-            loadSnakesAndLadders();
+                "No game context for loading. Attempting to load as Snakes and Ladders.");
+            loadSnakesAndLaddersForLoading(); // A specific method to set up for loading
           }
+
           if (currentController == null) {
             logger.error("Failed to initialize a game controller for loading.");
             LoggingNotification.error("Failed to load game", "No game controller available.");
             return;
           }
+
           currentController.loadGameState(file.getPath());
           saveGameButton.setDisable(false);
           loadGameButton.setDisable(false);
+
+
         });
     return button;
   }
 
-  private void addGames(VBox games) {
-    Button snakesAndLaddersButton = new Button("Snakes and Ladders");
-    snakesAndLaddersButton.setOnAction(e -> loadSnakesAndLadders());
+  /**
+   * Helper method to initialize Snakes and Ladders specifically for the purpose of loading a save
+   * file, without necessarily making it the "active" game being played from scratch. This method
+   * sets up the controller and view, then the loadGameState will be called on it.
+   */
+  private void loadSnakesAndLaddersForLoading() {
+    Path savesDir = Path.of("saves");
+    try {
+      Files.createDirectories(savesDir);
+    } catch (IOException e) {
+      logger.error("Failed to create saves directory: {}", e.getMessage());
+      LoggingNotification.error("Failed to create saves directory", "Cannot load game.");
+      this.currentController = null; // Ensure controller is null if setup fails
+      return;
+    }
 
-    Button cluedoButton = new Button("Cluedo");
-    cluedoButton.setOnAction(e -> loadCluedo());
+    var repo = new JsonSnlGameStateRepository();
+    SnlController controller = new SnlController(2,
+        repo); // Default to 2 players for loading context
 
-    games.getChildren().addAll(snakesAndLaddersButton, cluedoButton);
+    this.currentController = controller;
+    SnlView view = new SnlView(controller); // View is created, observers will be notified by load
+    contentWrapper.getChildren().setAll(view.getRoot());
+    // Save/load buttons will be managed by the calling load method
   }
 
   private void loadSnakesAndLadders() {
@@ -201,7 +252,7 @@ public final class MainView {
     }
 
     var repo = new JsonSnlGameStateRepository();
-    SnlController controller = new SnlController(2, repo);
+    SnlController controller = new SnlController(2, repo); // Default to 2 players for now
 
     this.currentController = controller;
     SnlView view = new SnlView(controller);
@@ -212,7 +263,7 @@ public final class MainView {
   }
 
   private void loadCluedo() {
-    int numberOfPlayers = 6;
+    int numberOfPlayers = 6; // Default to 6 players for now
     try {
       CluedoController cluedoController = new CluedoController(numberOfPlayers);
       this.currentController = cluedoController;
@@ -220,8 +271,8 @@ public final class MainView {
       CluedoView view = new CluedoView(cluedoController);
       contentWrapper.getChildren().setAll(view.getRoot());
 
-      saveGameButton.setDisable(true); // Cluedo save/load not implemented
-      loadGameButton.setDisable(true); // Cluedo save/load not implemented
+      saveGameButton.setDisable(true);
+      loadGameButton.setDisable(true);
 
     } catch (IllegalArgumentException ex) {
       logger.error("Failed to load Cluedo: {}", ex.getMessage());
