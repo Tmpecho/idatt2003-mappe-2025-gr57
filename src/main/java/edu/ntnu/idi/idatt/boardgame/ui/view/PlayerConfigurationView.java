@@ -255,8 +255,8 @@ public class PlayerConfigurationView {
           this.assignedSuspectIfCluedo = Suspect.values()[playerNumber - 1];
           nameField = new TextField(this.assignedSuspectIfCluedo.getName());
           nameField.setEditable(false);
-          cluedoCharacterLabel = new Label(this.assignedSuspectIfCluedo.getName() +
-              " (" + this.assignedSuspectIfCluedo.colour().name() + ")");
+          cluedoCharacterLabel = new Label(this.assignedSuspectIfCluedo.getName()
+              + " (" + this.assignedSuspectIfCluedo.colour().name() + ")");
         } else {
           this.assignedSuspectIfCluedo = null;
           nameField = new TextField("N/A");
