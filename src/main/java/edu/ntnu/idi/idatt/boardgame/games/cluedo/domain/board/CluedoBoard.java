@@ -444,10 +444,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
    * @param roomSide     The {@link RoomTile.Point} on the room's side of the door.
    * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
    */
-  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {
-
-  }
-
+  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
   /**
    * Gets the underlying 2D array of {@link AbstractCluedoTile} objects representing the board grid.
    * Primarily for view rendering.
