@@ -235,23 +235,15 @@ class CluedoControllerTest {
 
     Player<GridPos> accusingPlayer = controller.getCurrentPlayer();
     int initialPlayerCount = controller.getPlayers().values().stream()
-        .filter(p -> getTurnOrder().contains(p)).collect(Collectors.toList()).size();
+        .filter(p -> controller.getTurnOrder().contains(p)).collect(Collectors.toList()).size();
 
     assertFalse(controller.isGameOver());
     int afterAccusationPlayerCount = controller.getPlayers().values().stream()
-        .filter(p -> getTurnOrder().contains(p)).collect(Collectors.toList()).size();
+        .filter(p -> controller.getTurnOrder().contains(p)).collect(Collectors.toList()).size();
 
   }
 
-  private List<Player<GridPos>> getTurnOrder() {
-    try {
-      java.lang.reflect.Field turnOrderField = CluedoController.class.getDeclaredField("turnOrder");
-      turnOrderField.setAccessible(true);
-      return (List<Player<GridPos>>) turnOrderField.get(controller);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
-      throw new RuntimeException(e);
-    }
-  }
+  // Removed the reflection-based getTurnOrder() method as it is no longer needed.
 
 
   @Test
