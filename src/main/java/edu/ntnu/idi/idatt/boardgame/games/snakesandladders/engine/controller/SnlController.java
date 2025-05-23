@@ -68,7 +68,7 @@ public final class SnlController extends GameController<LinearPos> {
       Player<LinearPos> player = new Player<>(id, name, color, new LinearPos(1));
       newPlayersMap.put(id, player);
     });
-    this.actualNumberOfPlayers = newPlayersMap.size(); // Set for new game
+    this.actualNumberOfPlayers = newPlayersMap.size();
     return newPlayersMap;
   }
 
@@ -152,25 +152,21 @@ public final class SnlController extends GameController<LinearPos> {
   public void loadGameState(String path) {
     try {
       SnlGameStateDto dto = repo.load(Path.of(path));
-      // Important: Re-initialize players map based on DTO before applying positions
       Map<Integer, Player<LinearPos>> loadedPlayers = new HashMap<>();
       for (SnlGameStateDto.PlayerState ps : dto.players) {
-        PlayerColor color = PlayerColor.valueOf(ps.color); // Assuming color string matches enum
-        // Consider storing/loading actual player name from PlayerSetupDetails if it was saved
+        PlayerColor color = PlayerColor.valueOf(ps.color);
         Player<LinearPos> p = new Player<>(ps.id, "Player " + ps.id, color,
             new LinearPos(ps.position));
         loadedPlayers.put(ps.id, p);
       }
       this.players = loadedPlayers;
-      this.actualNumberOfPlayers = this.players.size(); // Crucial for getNextPlayer
-      // Apply positions to the now correctly populated this.players map
-      SnlMapper.apply(dto, this); // This will set currentPlayer
+      this.actualNumberOfPlayers = this.players.size();
+      SnlMapper.apply(dto, this);
 
       notifyObservers("Game state loaded. Current turn: " + currentPlayer.getName());
     } catch (Exception e) {
       logger.error("Load failed: {}", e.getMessage(), e);
       LoggingNotification.error("Load failed", e.getMessage());
-      // Potentially reset game or go back to menu
     }
   }
 }
