@@ -46,10 +46,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class CluedoController extends GameController<GridPos> {
 
-  /**
-   * Repository for saving and loading game state.
-   */
+  /** Repository for saving and loading game state. */
   private final GameStateRepository<CluedoGameStateDto> repo;
+
   private final CluedoBoard boardModel;
   private int stepsLeft = 0;
   private Suspect solutionSuspect;
@@ -66,10 +65,10 @@ public final class CluedoController extends GameController<GridPos> {
    * Constructs a CluedoController with the specified player details and game state repository.
    *
    * @param playerDetailsList List of player setup details. Can be null/empty for loading.
-   * @param repo              Repository for saving and loading game state.
+   * @param repo Repository for saving and loading game state.
    */
-  public CluedoController(List<PlayerSetupDetails> playerDetailsList,
-      GameStateRepository<CluedoGameStateDto> repo) {
+  public CluedoController(
+      List<PlayerSetupDetails> playerDetailsList, GameStateRepository<CluedoGameStateDto> repo) {
     super(new CluedoBoard(), new Dice(2));
     this.boardModel = (CluedoBoard) this.gameBoard;
     this.repo = Objects.requireNonNull(repo);
@@ -92,7 +91,6 @@ public final class CluedoController extends GameController<GridPos> {
     // For loading, observers are notified by loadGameState after state is fully restored.
   }
 
-
   @Override
   protected Map<Integer, Player<GridPos>> setupPlayers(List<PlayerSetupDetails> playerDetailsList) {
     LinkedHashMap<Integer, Player<GridPos>> newPlayersMap = new LinkedHashMap<>();
@@ -109,9 +107,13 @@ public final class CluedoController extends GameController<GridPos> {
     for (PlayerSetupDetails detail : playerDetailsList) {
       int id = playerIdCounter.getAndIncrement();
       String name = detail.name();
-      Suspect suspect = detail.suspectIfCluedo().orElseThrow(
-          () -> new IllegalArgumentException("Suspect details missing for Cluedo player: " + name)
-      );
+      Suspect suspect =
+          detail
+              .suspectIfCluedo()
+              .orElseThrow(
+                  () ->
+                      new IllegalArgumentException(
+                          "Suspect details missing for Cluedo player: " + name));
       // Start position is nominal; actual placement is handled by gameBoard.addPlayersToStart
       CluedoPlayer player = new CluedoPlayer(id, name, suspect.colour(), new GridPos(0, 0));
       newPlayersMap.put(id, player);
@@ -184,8 +186,8 @@ public final class CluedoController extends GameController<GridPos> {
         PlayerColor playerColor = PlayerColor.valueOf(ps.colour);
         Suspect suspect = Suspect.from(playerColor);
         // Actual name from Suspect might be better than "Player X" if details were stored
-        CluedoPlayer player = new CluedoPlayer(ps.id, suspect.getName(), playerColor,
-            new GridPos(ps.row, ps.col));
+        CluedoPlayer player =
+            new CluedoPlayer(ps.id, suspect.getName(), playerColor, new GridPos(ps.row, ps.col));
         loadedPlayers.put(ps.id, player);
         this.turnOrder.add(player); // Rebuild turnOrder based on DTO's player list order
       }
@@ -224,7 +226,6 @@ public final class CluedoController extends GameController<GridPos> {
       LoggingNotification.error("Load failed", e.getMessage());
     }
   }
-
 
   /**
    * Determines whether the game is in the "WAIT_ROLL" phase.
@@ -297,8 +298,8 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the roll dice button is pressed. Executes a
-   * {@link RollAction} for the current player.
+   * Handles the action triggered when the roll dice button is pressed. Executes a {@link
+   * RollAction} for the current player.
    */
   public void onRollButton() {
     if (phase != Phase.WAIT_ROLL) {
@@ -309,8 +310,8 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when a tile on the game board is clicked. Executes a
-   * {@link MoveAction} for the current player towards the target position.
+   * Handles the action triggered when a tile on the game board is clicked. Executes a {@link
+   * MoveAction} for the current player towards the target position.
    *
    * @param target The {@link GridPos} of the clicked tile.
    */
@@ -323,12 +324,12 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the accuse button is pressed. Executes an
-   * {@link AccusationAction} with the provided suspect, weapon, and room.
+   * Handles the action triggered when the accuse button is pressed. Executes an {@link
+   * AccusationAction} with the provided suspect, weapon, and room.
    *
    * @param suspect The suspected character.
-   * @param weapon  The suspected weapon.
-   * @param room    The room where the crime is suspected to have occurred.
+   * @param weapon The suspected weapon.
+   * @param room The room where the crime is suspected to have occurred.
    */
   public void onAccuseButton(Suspect suspect, Weapon weapon, Room room) {
     if (!canAccuse()) {
@@ -340,18 +341,18 @@ public final class CluedoController extends GameController<GridPos> {
   }
 
   /**
-   * Handles the action triggered when the suggest button is pressed. Executes a
-   * {@link SuggestionAction} with the provided suspect, weapon, and room.
+   * Handles the action triggered when the suggest button is pressed. Executes a {@link
+   * SuggestionAction} with the provided suspect, weapon, and room.
    *
    * @param suspect The suspected character involved in the suggestion.
-   * @param weapon  The suspected weapon used in the suggestion.
-   * @param room    The room where the suggestion is being made.
+   * @param weapon The suspected weapon used in the suggestion.
+   * @param room The room where the suggestion is being made.
    */
   public void onSuggestButton(Suspect suspect, Weapon weapon, Room room) {
     if (!canSuggest()) {
       logger.warn("Suggest button clicked when suggestion is not allowed (Phase: {}).", phase);
-      LoggingNotification.warn("Cannot Suggest",
-          "You must be in a regular room to make a suggestion.");
+      LoggingNotification.warn(
+          "Cannot Suggest", "You must be in a regular room to make a suggestion.");
       return;
     }
     new SuggestionAction(this, suspect, weapon, room).execute();
@@ -392,7 +393,9 @@ public final class CluedoController extends GameController<GridPos> {
         phase = Phase.IN_ROOM;
         String roomName = ((RoomTile) boardModel.getTileAtPosition(target)).getRoomName();
         notifyObservers(
-            currentPlayer.getName() + " entered the " + roomName
+            currentPlayer.getName()
+                + " entered the "
+                + roomName
                 + ". Make a suggestion/accusation or end turn.");
       } else {
         endTurn();
@@ -447,8 +450,11 @@ public final class CluedoController extends GameController<GridPos> {
 
     if (playerToMove != null && playerToMove != currentPlayer) {
       boardModel.setPlayerPosition(playerToMove, currentPlayer.getPosition());
-      LoggingNotification.info("Player Moved",
-          suggestedSuspect.getName() + " has been moved to the " + suggestedRoom.getName()
+      LoggingNotification.info(
+          "Player Moved",
+          suggestedSuspect.getName()
+              + " has been moved to the "
+              + suggestedRoom.getName()
               + " for the suggestion.");
     }
 
@@ -477,9 +483,17 @@ public final class CluedoController extends GameController<GridPos> {
         Card shownCard = heldMatchingCards.get(rng.nextInt(heldMatchingCards.size()));
         notifyObservers(
             currentPlayer.getName()
-                + " suggested " + suggestedSuspect.getName() + " in the "
-                + suggestedRoom.getName() + " with the " + suggestedWeapon.getName() + ". "
-                + respondent.getName() + " disproved by showing \"" + shownCard.getName() + ".\"");
+                + " suggested "
+                + suggestedSuspect.getName()
+                + " in the "
+                + suggestedRoom.getName()
+                + " with the "
+                + suggestedWeapon.getName()
+                + ". "
+                + respondent.getName()
+                + " disproved by showing \""
+                + shownCard.getName()
+                + ".\"");
         disproved = true;
         break;
       }
@@ -488,8 +502,12 @@ public final class CluedoController extends GameController<GridPos> {
     if (!disproved) {
       notifyObservers(
           currentPlayer.getName()
-              + " suggested " + suggestedSuspect.getName() + " in the "
-              + suggestedRoom.getName() + " with the " + suggestedWeapon.getName()
+              + " suggested "
+              + suggestedSuspect.getName()
+              + " in the "
+              + suggestedRoom.getName()
+              + " with the "
+              + suggestedWeapon.getName()
               + ". No one could disprove the suggestion.");
     }
   }
@@ -498,8 +516,8 @@ public final class CluedoController extends GameController<GridPos> {
    * Allows the current player to make an accusation.
    *
    * @param suspect The suspected character.
-   * @param weapon  The suspected weapon.
-   * @param room    The room where the crime is suspected to have occurred.
+   * @param weapon The suspected weapon.
+   * @param room The room where the crime is suspected to have occurred.
    */
   public void makeAccusation(Suspect suspect, Weapon weapon, Room room) {
     if (suspect == null || weapon == null || room == null) {
@@ -507,15 +525,26 @@ public final class CluedoController extends GameController<GridPos> {
     }
 
     if (suspect == solutionSuspect && weapon == solutionWeapon && room == solutionRoom) {
-      notifyObservers(currentPlayer.getName() + " wins! The solution was indeed "
-          + solutionSuspect.getName() + " with the " + solutionWeapon.getName() + " in the "
-          + solutionRoom.getName() + ".");
+      notifyObservers(
+          currentPlayer.getName()
+              + " wins! The solution was indeed "
+              + solutionSuspect.getName()
+              + " with the "
+              + solutionWeapon.getName()
+              + " in the "
+              + solutionRoom.getName()
+              + ".");
       onGameFinish();
     } else {
       notifyObservers(
           currentPlayer.getName()
-              + " accused " + suspect.getName() + " with " + weapon.getName()
-              + " in " + room.getName() + ". This is WRONG!");
+              + " accused "
+              + suspect.getName()
+              + " with "
+              + weapon.getName()
+              + " in "
+              + room.getName()
+              + ". This is WRONG!");
       eliminateCurrentPlayer(currentPlayer);
 
       if (isGameOver()) {
@@ -569,7 +598,7 @@ public final class CluedoController extends GameController<GridPos> {
    * the method returns null.
    *
    * @return The {@link Room} object representing the current player's location if they are in a
-   * room, or null if the player is not in a room.
+   *     room, or null if the player is not in a room.
    */
   public Room getRoomOfCurrentPlayer() {
     String roomName = getRoomOfCurrentPlayerName();
@@ -596,9 +625,7 @@ public final class CluedoController extends GameController<GridPos> {
     return null;
   }
 
-  /**
-   * Called when this player’s movement finishes. Advances turn.
-   */
+  /** Called when this player’s movement finishes. Advances turn. */
   public void endTurn() {
     if (phase == Phase.TURN_OVER) {
       return;
@@ -614,8 +641,11 @@ public final class CluedoController extends GameController<GridPos> {
     solutionWeapon = localWeaponList.remove(0);
     var localRoomList = Cards.shuffledRooms(rng);
     solutionRoom = localRoomList.remove(0);
-    logger.info("Solution picked: {} with {} in {}", solutionSuspect.getName(),
-        solutionWeapon.getName(), solutionRoom.getName());
+    logger.info(
+        "Solution picked: {} with {} in {}",
+        solutionSuspect.getName(),
+        solutionWeapon.getName(),
+        solutionRoom.getName());
   }
 
   private void dealRemainingCards() {
@@ -676,7 +706,8 @@ public final class CluedoController extends GameController<GridPos> {
       logger.warn(
           "setCurrentPlayer called with a player not found in turnOrder or turnOrder is "
               + "inconsistent. Player: {}, TurnOrder size: {}",
-          currentPlayer.getName(), this.turnOrder.size());
+          currentPlayer.getName(),
+          this.turnOrder.size());
       // Attempt to find by ID if names differ, or re-evaluate turnOrder setup during load
       boolean found = false;
       for (int i = 0; i < this.turnOrder.size(); i++) {
@@ -687,7 +718,8 @@ public final class CluedoController extends GameController<GridPos> {
         }
       }
       if (!found && !this.turnOrder.isEmpty()) {
-        logger.warn("Fallback: Setting currentIndex to 0 as player ID {} not in turnOrder.",
+        logger.warn(
+            "Fallback: Setting currentIndex to 0 as player ID {} not in turnOrder.",
             currentPlayer.getId());
         this.currentIndex = 0; // Fallback, may need adjustment if DTO stores turn order explicitly
       } else if (this.turnOrder.isEmpty()) {
@@ -763,14 +795,17 @@ public final class CluedoController extends GameController<GridPos> {
    * Sets the solution for the game, including the suspect, weapon, and room.
    *
    * @param suspect The {@link Suspect} object representing the solution suspect.
-   * @param weapon  The {@link Weapon} object representing the solution weapon.
-   * @param room    The {@link Room} object representing the solution room.
+   * @param weapon The {@link Weapon} object representing the solution weapon.
+   * @param room The {@link Room} object representing the solution room.
    */
   public void setSolution(Suspect suspect, Weapon weapon, Room room) {
     this.solutionSuspect = suspect;
     this.solutionWeapon = weapon;
     this.solutionRoom = room;
-    logger.info("Solution loaded: {} with {} in {}",
-        solutionSuspect.getName(), solutionWeapon.getName(), solutionRoom.getName());
+    logger.info(
+        "Solution loaded: {} with {} in {}",
+        solutionSuspect.getName(),
+        solutionWeapon.getName(),
+        solutionRoom.getName());
   }
 }

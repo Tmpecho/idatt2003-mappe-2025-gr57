@@ -12,9 +12,8 @@ import javafx.scene.text.FontWeight;
 /**
  * View for choosing a game in the application.
  *
- * <p>This class provides a user interface for
- * selecting between different games. It includes buttons for each game and a back button to return
- * to the main menu.
+ * <p>This class provides a user interface for selecting between different games. It includes
+ * buttons for each game and a back button to return to the main menu.
  */
 public class ChooseGameView {
 
@@ -26,8 +25,8 @@ public class ChooseGameView {
    * Constructs the view for choosing a game.
    *
    * @param onGameSelected Callback to be executed when a game is selected, passing the game type
-   *                       string.
-   * @param onBack         Callback to be executed when the back button is pressed.
+   *     string.
+   * @param onBack Callback to be executed when the back button is pressed.
    */
   public ChooseGameView(Consumer<String> onGameSelected, Runnable onBack) {
     root = new VBox(30);
@@ -65,10 +64,14 @@ public class ChooseGameView {
     button.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 18));
     button.setStyle(
         "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 5;");
-    button.setOnMouseEntered(e -> button.setStyle(
-        "-fx-background-color: #45a049; -fx-text-fill: white; -fx-background-radius: 5;"));
-    button.setOnMouseExited(e -> button.setStyle(
-        "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 5;"));
+    button.setOnMouseEntered(
+        e ->
+            button.setStyle(
+                "-fx-background-color: #45a049; -fx-text-fill: white; -fx-background-radius: 5;"));
+    button.setOnMouseExited(
+        e ->
+            button.setStyle(
+                "-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 5;"));
   }
 
   /**
