@@ -11,6 +11,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.LinearPos;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.domain.player.PlayerColor;
 import edu.ntnu.idi.idatt.boardgame.core.engine.event.TileObserver;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -83,7 +84,7 @@ class SnlTileTest {
   @Test
   void getPlayers_returnsUnmodifiableListOfPlayers() {
     tile.addPlayer(player1);
-    var players = tile.getPlayers();
+    List<Player<LinearPos>> players = tile.getPlayers();
     assertThrows(UnsupportedOperationException.class, () -> players.add(player2));
   }
 

@@ -1,8 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.core.domain.dice;
 
-/**
- * Interface for objects that can be rolled, like a set of dice.
- */
+/** Interface for objects that can be rolled, like a set of dice. */
 public interface DiceInterface {
 
   /**

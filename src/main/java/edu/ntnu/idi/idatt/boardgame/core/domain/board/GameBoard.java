@@ -30,7 +30,7 @@ public interface GameBoard<P extends Position> {
    * Sets the position of a given player on the board. This method should handle removing the player
    * from their old tile and adding them to the new tile.
    *
-   * @param player   The player whose position is to be set.
+   * @param player The player whose position is to be set.
    * @param position The new position for the player.
    */
   void setPlayerPosition(Player<P> player, P position);

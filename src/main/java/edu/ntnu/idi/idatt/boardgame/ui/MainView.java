@@ -163,7 +163,7 @@ public final class MainView {
 
     try {
       if (ChooseGameView.GAME_SNAKES_AND_LADDERS.equals(gameType)) {
-        var repo = new JsonSnlGameStateRepository();
+        JsonSnlGameStateRepository repo = new JsonSnlGameStateRepository();
         SnlController snlController = new SnlController(playerDetailsList, repo);
         this.currentController = snlController;
         SnlView snlView = new SnlView(snlController);
@@ -171,7 +171,7 @@ public final class MainView {
         saveGameButton.setDisable(false);
         loadGameButton.setDisable(false);
       } else if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        var cluedoRepo = new JsonCluedoGameStateRepository();
+        JsonCluedoGameStateRepository cluedoRepo = new JsonCluedoGameStateRepository();
         CluedoController cluedoController = new CluedoController(playerDetailsList, cluedoRepo);
         this.currentController = cluedoController;
         CluedoView cluedoView = new CluedoView(cluedoController);

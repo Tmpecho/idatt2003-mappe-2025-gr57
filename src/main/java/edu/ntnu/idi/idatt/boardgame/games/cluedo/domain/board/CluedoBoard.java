@@ -27,10 +27,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_REV_GREEN = new GridPos(1, 16); // GREEN
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 23); // BLUE
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 23); // PURPLE
-
-  /** The 2D array representing the grid of tiles on the board. */
-  private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
-
   /**
    * Specifications for each room on the Cluedo board, including dimensions, and door definitions.
    */
@@ -96,6 +92,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               true,
               List.of(new DoorDefinition(new RoomTile.Point(19, 6), new RoomTile.Point(18, 6)))),
           new RoomSpec("Cluedo", new RoomDimensions(10, 10, 14, 14), true, List.of()));
+
+  /** The 2D array representing the grid of tiles on the board. */
+  private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
   /** Constructs the Cluedo board, initializing all tiles (borders, rooms, corridors). */
   public CluedoBoard() {
@@ -436,14 +435,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   /**
-   * Inner record for defining doors between a room and a corridor.
-   *
-   * @param roomSide The {@link RoomTile.Point} on the room's side of the door.
-   * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
-   */
-  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
-
-  /**
    * Gets the underlying 2D array of {@link AbstractCluedoTile} objects representing the board grid.
    * Primarily for view rendering.
    *
@@ -452,6 +443,14 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   public AbstractCluedoTile[][] getBoardGrid() {
     return board;
   }
+
+  /**
+   * Inner record for defining doors between a room and a corridor.
+   *
+   * @param roomSide The {@link RoomTile.Point} on the room's side of the door.
+   * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
+   */
+  private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
 
   /**
    * Record to define the rectangular dimensions of a room. Coordinates are inclusive and 0-indexed.

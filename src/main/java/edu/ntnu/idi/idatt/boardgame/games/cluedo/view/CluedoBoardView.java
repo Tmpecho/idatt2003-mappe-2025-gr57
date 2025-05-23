@@ -53,11 +53,11 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
   private static final int LABEL_PADDING = 5;
   private final GridPane grid;
   private final Map<GridPos, Node> tileMap = new HashMap<>();
-  private Node highlightedNode = null;
   private final Map<RoomTile, FlowPane> roomTokenPanes = new HashMap<>();
   private final Consumer<GridPos> onTileClick;
   private final CluedoBoard boardModel;
   private final Supplier<GridPos> currentPlayerPositionSupplier;
+  private Node highlightedNode = null;
 
   /**
    * Constructs a CluedoBoardView.
@@ -85,6 +85,15 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     getChildren().add(grid);
   }
 
+  private static FlowPane makePlayerPane() {
+    FlowPane playerTokenPane = new FlowPane();
+    playerTokenPane.setAlignment(Pos.CENTER);
+    playerTokenPane.setHgap(1);
+    playerTokenPane.setVgap(1);
+    playerTokenPane.setPickOnBounds(false);
+    return playerTokenPane;
+  }
+
   /**
    * Highlights the tile at the given grid position. Any previously highlighted tile will be
    * un-highlighted.
@@ -100,15 +109,6 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
       node.setStyle("-fx-border-color: blue;");
       highlightedNode = node;
     }
-  }
-
-  private static FlowPane makePlayerPane() {
-    FlowPane playerTokenPane = new FlowPane();
-    playerTokenPane.setAlignment(Pos.CENTER);
-    playerTokenPane.setHgap(1);
-    playerTokenPane.setVgap(1);
-    playerTokenPane.setPickOnBounds(false);
-    return playerTokenPane;
   }
 
   private boolean isCorridorTileDoor(int corridorRow, int corridorCol) {
@@ -153,22 +153,18 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
 
         AbstractCluedoTile tileModel = boardGrid[row][col];
 
-        if (tileModel == null) {
-          Pane emptyPane = new Pane();
-          emptyPane.setPrefSize(TILE_SIZE, TILE_SIZE);
-          emptyPane.setStyle("-fx-background-color: #1A1A1A;");
-          grid.add(emptyPane, col, row);
-          continue;
-        }
-
-        if (tileModel instanceof RoomTile roomTile) {
-          addRoomTile(roomTile, numRows, numCols, boardGrid, visitedRoomCells);
-        } else if (tileModel instanceof CorridorTile) {
-          addCorridorTile(tileModel, row, col);
-        } else if (tileModel instanceof BorderTile) {
-          addBorderTile(tileModel, col, row);
-        } else {
-          addUnknownTile(col, row, tileModel);
+        switch (tileModel) {
+          case null -> {
+            Pane emptyPane = new Pane();
+            emptyPane.setPrefSize(TILE_SIZE, TILE_SIZE);
+            emptyPane.setStyle("-fx-background-color: #1A1A1A;");
+            grid.add(emptyPane, col, row);
+          }
+          case RoomTile roomTile ->
+              addRoomTile(roomTile, numRows, numCols, boardGrid, visitedRoomCells);
+          case CorridorTile corridorTile -> addCorridorTile(tileModel, row, col);
+          case BorderTile borderTile -> addBorderTile(tileModel, col, row);
+          default -> addUnknownTile(col, row, tileModel);
         }
       }
     }
@@ -376,6 +372,20 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
     node.setOnMouseClicked(e -> onTileClick.accept(pos));
   }
 
+  private enum Direction {
+    NORTH(-1, 0),
+    SOUTH(1, 0),
+    WEST(0, -1),
+    EAST(0, 1);
+    public final int directionRow;
+    public final int directionCol;
+
+    Direction(int directionRow, int directionCol) {
+      this.directionRow = directionRow;
+      this.directionCol = directionCol;
+    }
+  }
+
   /**
    * Record to store the dimensions of a room on the grid.
    *
@@ -402,20 +412,6 @@ public final class CluedoBoardView extends Pane implements TileObserver<GridPos>
      */
     public int colSpan() {
       return maxCol - minCol + 1;
-    }
-  }
-
-  private enum Direction {
-    NORTH(-1, 0),
-    SOUTH(1, 0),
-    WEST(0, -1),
-    EAST(0, 1);
-    public final int directionRow;
-    public final int directionCol;
-
-    Direction(int directionRow, int directionCol) {
-      this.directionRow = directionRow;
-      this.directionCol = directionCol;
     }
   }
 }

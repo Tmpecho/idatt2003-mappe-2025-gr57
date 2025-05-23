@@ -19,7 +19,7 @@ public class InvalidRoomException extends RuntimeException {
    * Constructs a new InvalidRoomException with the specified detail message and cause.
    *
    * @param message the detail message
-   * @param cause   the cause of the exception
+   * @param cause the cause of the exception
    */
   public InvalidRoomException(String message, Throwable cause) {
     super(message, cause);

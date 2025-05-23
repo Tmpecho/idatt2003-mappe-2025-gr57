@@ -10,9 +10,7 @@ import java.util.stream.IntStream;
  */
 public final class Dice implements DiceInterface {
 
-  /**
-   * The list of individual {@link Die} objects.
-   */
+  /** The list of individual {@link Die} objects. */
   private final List<Die> dice = new ArrayList<>();
 
   /**

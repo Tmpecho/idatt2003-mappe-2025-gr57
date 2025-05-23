@@ -14,13 +14,10 @@ import java.util.List;
  */
 public final class SnlTile implements Tile<LinearPos> {
 
-  /**
-   * List of players currently occupying this tile.
-   */
+  /** List of players currently occupying this tile. */
   private final List<Player<LinearPos>> players;
-  /**
-   * The 1-based position number of this tile on the board.
-   */
+
+  /** The 1-based position number of this tile on the board. */
   private final int position;
 
   /** List of observers monitoring this tile. */
@@ -68,9 +65,7 @@ public final class SnlTile implements Tile<LinearPos> {
     observers.remove(observer);
   }
 
-  /**
-   * Notifies all registered observers that this tile has changed.
-   */
+  /** Notifies all registered observers that this tile has changed. */
   private void notifyObservers() {
     observers.forEach(observer -> observer.onTileChanged(this));
   }

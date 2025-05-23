@@ -33,6 +33,10 @@ import javafx.scene.layout.VBox;
  */
 public final class CluedoView implements GameObserver<GridPos> {
 
+  public static final String CONTROL_PANEL_STYLE = "-fx-background-color: #f0f0f0;";
+  private static final String NOTES_BOX_STYLE =
+      "-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;";
+  private static final double SPACING = 5.0;
   private final BorderPane root;
   private final CluedoBoardView boardView;
   private final VBox controlPanel;
@@ -46,18 +50,13 @@ public final class CluedoView implements GameObserver<GridPos> {
   private final ChoiceBox<Suspect> suspectChoice;
   private final ChoiceBox<Weapon> weaponChoice;
   private final ChoiceBox<Room> roomChoice;
-  private VBox accusationForm;
-  private VBox suggestionForm;
   private final CluedoController controller;
   private final Map<Suspect, CheckBox> suspectNoteBoxes = new HashMap<>();
   private final Map<Weapon, CheckBox> weaponNoteBoxes = new HashMap<>();
   private final Map<Room, CheckBox> roomNoteBoxes = new HashMap<>();
+  private VBox accusationForm;
+  private VBox suggestionForm;
   private VBox notesBox;
-
-  public static final String CONTROL_PANEL_STYLE = "-fx-background-color: #f0f0f0;";
-  private static final String NOTES_BOX_STYLE =
-      "-fx-border-color: gray; -fx-padding: 5; -fx-background-color: #dadada;";
-  private static final double SPACING = 5.0;
 
   /**
    * Constructs the Cluedo game view.
@@ -188,7 +187,7 @@ public final class CluedoView implements GameObserver<GridPos> {
       suggestButton.setDisable(true);
       accuseButton.setDisable(true);
     } else {
-      suggestButton.setDisable(!controller.canSuggest());
+      suggestButton.setDisable(controller.canNotSuggest());
       accuseButton.setDisable(controller.canNotAccuse());
     }
 

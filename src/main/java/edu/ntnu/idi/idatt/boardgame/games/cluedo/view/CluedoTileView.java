@@ -36,7 +36,7 @@ public final class CluedoTileView implements TileObserver<GridPos> {
    * Constructs a CluedoTileView.
    *
    * @param tileModel The {@link AbstractCluedoTile} this view represents.
-   * @param tileSize  The size (width and height) of the tile in pixels.
+   * @param tileSize The size (width and height) of the tile in pixels.
    */
   public CluedoTileView(AbstractCluedoTile tileModel, int tileSize) {
     this.tileModel = tileModel;
@@ -101,25 +101,33 @@ public final class CluedoTileView implements TileObserver<GridPos> {
   void updateDisplay() {
     playerPane.getChildren().clear();
 
-    if (tileModel instanceof RoomTile roomTile) {
-      tileBackground.setFill(Color.LIGHTSLATEGRAY); // Room color
-      infoLabel.setText(roomTile.getRoomName());
-      infoLabel.setVisible(true);
-      infoLabel.setText(""); // Cleared, as room name is now part of a larger pane
-    } else if (tileModel instanceof CorridorTile) {
-      if (this.isDoorCorridor) {
-        tileBackground.setFill(Color.KHAKI); // Door corridor color
-      } else {
-        tileBackground.setFill(Color.BEIGE); // Normal corridor color
+    switch (tileModel) {
+      case RoomTile roomTile -> {
+        tileBackground.setFill(Color.LIGHTSLATEGRAY); // Room color
+
+        infoLabel.setText(roomTile.getRoomName());
+        infoLabel.setVisible(true);
+        infoLabel.setText(""); // Cleared, as room name is now part of a larger pane
       }
-      infoLabel.setVisible(false);
-    } else if (tileModel instanceof BorderTile) {
-      tileBackground.setFill(Color.DARKSLATEGRAY); // Border color
-      infoLabel.setVisible(false);
-    } else {
-      tileBackground.setFill(Color.LIGHTGRAY); // Unknown/default color
-      infoLabel.setText("?");
-      infoLabel.setVisible(true);
+      case CorridorTile corridorTile -> {
+        if (this.isDoorCorridor) {
+          tileBackground.setFill(Color.KHAKI); // Door corridor color
+        } else {
+          tileBackground.setFill(Color.BEIGE); // Normal corridor color
+        }
+        infoLabel.setVisible(false);
+      }
+      case BorderTile borderTile -> {
+        tileBackground.setFill(Color.DARKSLATEGRAY); // Border color
+
+        infoLabel.setVisible(false);
+      }
+      case null, default -> {
+        tileBackground.setFill(Color.LIGHTGRAY); // Unknown/default color
+
+        infoLabel.setText("?");
+        infoLabel.setVisible(true);
+      }
     }
 
     // Add player circles if any players are on this tile

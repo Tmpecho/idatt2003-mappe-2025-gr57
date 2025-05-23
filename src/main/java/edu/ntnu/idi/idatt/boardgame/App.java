@@ -13,6 +13,15 @@ import javafx.stage.Stage;
 public final class App extends Application {
 
   /**
+   * The main method, which launches the JavaFX application.
+   *
+   * @param args command line arguments
+   */
+  public static void main(String[] args) {
+    launch();
+  }
+
+  /**
    * The main entry point for all JavaFX applications. This method is called after the init method
    * has returned, and after the system is ready for the application to begin running.
    *
@@ -29,14 +38,5 @@ public final class App extends Application {
     stage.setFullScreen(true);
     stage.setOnCloseRequest(evt -> System.exit(0));
     stage.show();
-  }
-
-  /**
-   * The main method, which launches the JavaFX application.
-   *
-   * @param args command line arguments
-   */
-  public static void main(String[] args) {
-    launch();
   }
 }

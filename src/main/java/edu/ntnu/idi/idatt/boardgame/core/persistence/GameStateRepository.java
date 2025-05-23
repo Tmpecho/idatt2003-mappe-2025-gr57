@@ -14,7 +14,7 @@ public interface GameStateRepository<T extends GameStateDto> {
   /**
    * Saves the given game state DTO to a file.
    *
-   * @param dto  The game state DTO to save.
+   * @param dto The game state DTO to save.
    * @param file The path to the file where the game state should be saved.
    * @throws IOException if an I/O error occurs during saving.
    */

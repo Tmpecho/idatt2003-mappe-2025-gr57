@@ -6,33 +6,21 @@ import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.Arrays;
 
 /**
- * Enum representing the suspects in the Cluedo game. Each suspect has an associated
- * {@link PlayerColor} and a display name.
+ * Enum representing the suspects in the Cluedo game. Each suspect has an associated {@link
+ * PlayerColor} and a display name.
  */
 public enum Suspect implements Card {
-  /**
-   * Miss Scarlett, associated with {@link PlayerColor#WHITE}.
-   */
+  /** Miss Scarlett, associated with {@link PlayerColor#WHITE}. */
   MISS_SCARLETT(PlayerColor.WHITE, "Miss Scarlett"),
-  /**
-   * Colonel Mustard, associated with {@link PlayerColor#RED}.
-   */
+  /** Colonel Mustard, associated with {@link PlayerColor#RED}. */
   COLONEL_MUSTARD(PlayerColor.RED, "Col. Mustard"),
-  /**
-   * Mrs. White, associated with {@link PlayerColor#YELLOW}.
-   */
+  /** Mrs. White, associated with {@link PlayerColor#YELLOW}. */
   MRS_WHITE(PlayerColor.YELLOW, "Mrs. White"),
-  /**
-   * Reverend Green, associated with {@link PlayerColor#GREEN}.
-   */
+  /** Reverend Green, associated with {@link PlayerColor#GREEN}. */
   REVEREND_GREEN(PlayerColor.GREEN, "Rev. Green"),
-  /**
-   * Mrs. Peacock, associated with {@link PlayerColor#BLUE}.
-   */
+  /** Mrs. Peacock, associated with {@link PlayerColor#BLUE}. */
   MRS_PEACOCK(PlayerColor.BLUE, "Mrs. Peacock"),
-  /**
-   * Professor Plum, associated with {@link PlayerColor#PURPLE}.
-   */
+  /** Professor Plum, associated with {@link PlayerColor#PURPLE}. */
   PROFESSOR_PLUM(PlayerColor.PURPLE, "Prof. Plum");
 
   private final PlayerColor colour;

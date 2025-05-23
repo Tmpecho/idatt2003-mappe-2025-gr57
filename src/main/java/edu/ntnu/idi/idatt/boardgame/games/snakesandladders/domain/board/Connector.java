@@ -2,9 +2,7 @@ package edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board;
 
 import javafx.scene.paint.Color;
 
-/**
- * Represents a connector between two tiles on the game board.
- */
+/** Represents a connector between two tiles on the game board. */
 public abstract class Connector {
 
   private final int start;

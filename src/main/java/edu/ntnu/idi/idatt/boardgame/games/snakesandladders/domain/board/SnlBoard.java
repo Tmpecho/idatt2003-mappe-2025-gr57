@@ -20,6 +20,7 @@ public final class SnlBoard implements GameBoard<LinearPos> {
 
   /** Total number of tiles on the board. */
   private static final int BOARD_SIZE = ROWS * COLS;
+
   // Standard snake positions: key = start (head), value = length (downwards)
   private static final Map<Integer, Integer> SNAKES =
       Map.of(
@@ -41,8 +42,10 @@ public final class SnlBoard implements GameBoard<LinearPos> {
           70, 9, // 70 -> 79
           81, 2 // 81 -> 83
           );
+
   /** Map of tile position number to {@link SnlTile} object. */
   private final Map<Integer, SnlTile> tiles = new HashMap<>();
+
   /** Map of tile position number (start of connector) to {@link Connector} object. */
   private final Map<Integer, Connector> connectors = new HashMap<>();
 

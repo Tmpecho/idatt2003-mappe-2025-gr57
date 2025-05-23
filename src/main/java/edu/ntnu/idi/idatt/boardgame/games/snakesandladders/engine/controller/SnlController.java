@@ -28,19 +28,18 @@ import org.slf4j.LoggerFactory;
  */
 public final class SnlController extends GameController<LinearPos> {
 
-  /**
-   * Repository for saving and loading game state.
-   */
-  private final GameStateRepository<SnlGameStateDto> repo;
-  private int actualNumberOfPlayers;
-
   private static final Logger logger = LoggerFactory.getLogger(SnlController.class);
+
+  /** Repository for saving and loading game state. */
+  private final GameStateRepository<SnlGameStateDto> repo;
+
+  private int actualNumberOfPlayers;
 
   /**
    * Constructs a SnlController with the specified player details and game state repository.
    *
    * @param playerDetailsList List of player setup details. Can be null/empty for loading.
-   * @param repo              Repository for saving and loading game state.
+   * @param repo Repository for saving and loading game state.
    */
   public SnlController(
       List<PlayerSetupDetails> playerDetailsList, GameStateRepository<SnlGameStateDto> repo) {
@@ -60,18 +59,23 @@ public final class SnlController extends GameController<LinearPos> {
     }
 
     AtomicInteger playerIdCounter = new AtomicInteger(1);
-    playerDetailsList.forEach(detail -> {
-      int id = playerIdCounter.getAndIncrement();
-      String name = detail.name();
-      PlayerColor color = detail.color().orElseThrow(() ->
-          new IllegalArgumentException("Player color is missing for SnL player: " + name));
-      Player<LinearPos> player = new Player<>(id, name, color, new LinearPos(1));
-      newPlayersMap.put(id, player);
-    });
+    playerDetailsList.forEach(
+        detail -> {
+          int id = playerIdCounter.getAndIncrement();
+          String name = detail.name();
+          PlayerColor color =
+              detail
+                  .color()
+                  .orElseThrow(
+                      () ->
+                          new IllegalArgumentException(
+                              "Player color is missing for SnL player: " + name));
+          Player<LinearPos> player = new Player<>(id, name, color, new LinearPos(1));
+          newPlayersMap.put(id, player);
+        });
     this.actualNumberOfPlayers = newPlayersMap.size(); // Set for new game
     return newPlayersMap;
   }
-
 
   public Map<Integer, Player<LinearPos>> getPlayers() {
     return players;
@@ -95,14 +99,16 @@ public final class SnlController extends GameController<LinearPos> {
     this.currentPlayer = player;
   }
 
-  /**
-   * Rolls the dice for the current player and updates their position on the board.
-   */
+  /** Rolls the dice for the current player and updates their position on the board. */
   public void rollDice() {
     Action roll = new RollAction((SnlBoard) gameBoard, currentPlayer, dice);
     roll.execute();
-    notifyObservers(currentPlayer.getName() + " rolled " + (dice.getDie(0) + dice.getDie(1))
-        + " and is now at tile " + currentPlayer.getPosition());
+    notifyObservers(
+        currentPlayer.getName()
+            + " rolled "
+            + (dice.getDie(0) + dice.getDie(1))
+            + " and is now at tile "
+            + currentPlayer.getPosition());
     if (isGameOver()) {
       onGameFinish();
     } else {
@@ -131,8 +137,12 @@ public final class SnlController extends GameController<LinearPos> {
     Player<LinearPos> nextPlayer = players.get(nextPlayerId);
     if (nextPlayer == null) {
       throw new IllegalStateException(
-          "Next player ID " + nextPlayerId + " not found in players map. Current player: "
-              + currentPlayer.getId() + ", actualNum: " + actualNumberOfPlayers);
+          "Next player ID "
+              + nextPlayerId
+              + " not found in players map. Current player: "
+              + currentPlayer.getId()
+              + ", actualNum: "
+              + actualNumberOfPlayers);
     }
     return nextPlayer;
   }
@@ -157,8 +167,8 @@ public final class SnlController extends GameController<LinearPos> {
       for (SnlGameStateDto.PlayerState ps : dto.players) {
         PlayerColor color = PlayerColor.valueOf(ps.color); // Assuming color string matches enum
         // Consider storing/loading actual player name from PlayerSetupDetails if it was saved
-        Player<LinearPos> p = new Player<>(ps.id, "Player " + ps.id, color,
-            new LinearPos(ps.position));
+        Player<LinearPos> p =
+            new Player<>(ps.id, "Player " + ps.id, color, new LinearPos(ps.position));
         loadedPlayers.put(ps.id, p);
       }
       this.players = loadedPlayers;

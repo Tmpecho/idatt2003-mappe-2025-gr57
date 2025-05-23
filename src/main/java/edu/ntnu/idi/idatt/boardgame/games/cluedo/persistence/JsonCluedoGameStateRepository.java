@@ -9,19 +9,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Concrete implementation of {@link GameStateRepository} for handling the persistence of
- * {@link CluedoGameStateDto} objects in JSON format. This class provides functionality to save and
- * load game states to and from files using the Gson library for JSON serialization and
- * deserialization.
+ * Concrete implementation of {@link GameStateRepository} for handling the persistence of {@link
+ * CluedoGameStateDto} objects in JSON format. This class provides functionality to save and load
+ * game states to and from files using the Gson library for JSON serialization and deserialization.
  *
  * <p>This repository is specifically designed to work with the game state structure defined in
  * {@link CluedoGameStateDto}.
  */
 public class JsonCluedoGameStateRepository implements GameStateRepository<CluedoGameStateDto> {
 
-  /**
-   * Gson instance for JSON serialization and deserialization. Configured for pretty printing.
-   */
+  /** Gson instance for JSON serialization and deserialization. Configured for pretty printing. */
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   @Override

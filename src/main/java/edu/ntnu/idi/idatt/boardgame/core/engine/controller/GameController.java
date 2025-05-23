@@ -26,6 +26,9 @@ public abstract class GameController<P extends Position> {
    */
   protected final Dice dice;
 
+  /** A list of observers monitoring game events. */
+  private final List<GameObserver<P>> observers = new ArrayList<>();
+
   /**
    * A map of player IDs to {@link Player} objects.
    */
@@ -34,11 +37,6 @@ public abstract class GameController<P extends Position> {
    * The player whose turn it is currently.
    */
   protected Player<P> currentPlayer;
-
-  /**
-   * A list of observers monitoring game events.
-   */
-  private final List<GameObserver<P>> observers = new ArrayList<>();
 
   /**
    * Constructs a GameController.

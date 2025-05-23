@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,20 +33,16 @@ import javafx.scene.text.FontWeight;
  */
 public class PlayerConfigurationView {
 
+  private static final int MIN_PLAYERS = 2;
+  private static final int MAX_PLAYERS = 6;
   private final VBox root;
   private final String gameType;
   private final BiConsumer<String, List<PlayerSetupDetails>> onStartGame;
   private final Runnable onBack;
-
-  private Spinner<Integer> numPlayersSpinner;
-  private VBox playerInputContainer;
+  private final VBox playerInputContainer;
   private final List<PlayerInputRow> playerInputRows = new ArrayList<>();
-  private Label errorLabel;
-
-  private static final int MIN_PLAYERS_SNL = 2;
-  private static final int MAX_PLAYERS_SNL = 6;
-  private static final int MIN_PLAYERS_CLUEDO = 2;
-  private static final int MAX_PLAYERS_CLUEDO = 6;
+  private final Label errorLabel;
+  private Spinner<Integer> numPlayersSpinner;
 
   /**
    * Constructs the PlayerConfigurationView.
@@ -114,17 +111,7 @@ public class PlayerConfigurationView {
   }
 
   private void setupNumPlayersSpinner() {
-    int min = MIN_PLAYERS_SNL;
-    int max = MAX_PLAYERS_SNL;
-    int initial = MIN_PLAYERS_SNL;
-
-    if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-      min = MIN_PLAYERS_CLUEDO;
-      max = MAX_PLAYERS_CLUEDO;
-      initial = MIN_PLAYERS_CLUEDO;
-    }
-
-    numPlayersSpinner = new Spinner<>(min, max, initial);
+    numPlayersSpinner = new Spinner<>(MIN_PLAYERS, MAX_PLAYERS, MIN_PLAYERS);
     numPlayersSpinner.setPrefWidth(80);
     numPlayersSpinner
         .valueProperty()
@@ -148,18 +135,19 @@ public class PlayerConfigurationView {
       grid.add(new Label("Color"), 2, 0);
     }
 
-    for (int i = 0; i < numPlayers; i++) {
-      PlayerInputRow row = new PlayerInputRow(i + 1, gameType);
-      playerInputRows.add(row);
-
-      grid.add(new Label("Player " + (i + 1)), 0, i + 1);
-      if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        grid.add(row.getChoiceNode(), 1, i + 1);
-      } else {
-        grid.add(row.getNameField(), 1, i + 1);
-        grid.add(row.getChoiceNode(), 2, i + 1);
-      }
-    }
+    IntStream.range(0, numPlayers)
+        .forEach(
+            i -> {
+              PlayerInputRow row = new PlayerInputRow(i + 1, gameType);
+              playerInputRows.add(row);
+              grid.add(new Label("Player " + (i + 1)), 0, i + 1);
+              if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
+                grid.add(row.getChoiceNode(), 1, i + 1);
+              } else {
+                grid.add(row.getNameField(), 1, i + 1);
+                grid.add(row.getChoiceNode(), 2, i + 1);
+              }
+            });
     playerInputContainer.getChildren().add(grid);
   }
 
@@ -183,7 +171,7 @@ public class PlayerConfigurationView {
         return;
       }
 
-      Optional<PlayerColor> color = Optional.empty();
+      Optional<PlayerColor> color;
       Optional<Suspect> suspect = Optional.empty();
 
       if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
@@ -252,8 +240,8 @@ public class PlayerConfigurationView {
   private static class PlayerInputRow {
 
     private final TextField nameField;
-    private ChoiceBox<PlayerColor> colorChoiceBox;
-    private Label cluedoCharacterLabel;
+    private final ChoiceBox<PlayerColor> colorChoiceBox;
+    private final Label cluedoCharacterLabel;
     private final Suspect assignedSuspectIfCluedo;
     private final String gameType;
 

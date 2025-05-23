@@ -17,9 +17,9 @@ import javafx.scene.text.FontWeight;
  */
 public class ChooseGameView {
 
-  private final VBox root;
   public static final String GAME_SNAKES_AND_LADDERS = "SNAKES_AND_LADDERS";
   public static final String GAME_CLUEDO = "CLUEDO";
+  private final VBox root;
 
   /**
    * Constructs the view for choosing a game.

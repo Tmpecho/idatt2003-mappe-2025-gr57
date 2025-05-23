@@ -1,8 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-/**
- * Represents a solid, non-walkable border tile on the Cluedo board.
- */
+/** Represents a solid, non-walkable border tile on the Cluedo board. */
 public final class BorderTile extends AbstractCluedoTile {
 
   /**

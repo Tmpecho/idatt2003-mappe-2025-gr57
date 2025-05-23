@@ -14,9 +14,7 @@ import java.nio.file.Path;
  */
 public final class JsonSnlGameStateRepository implements GameStateRepository<SnlGameStateDto> {
 
-  /**
-   * Gson instance for JSON serialization and deserialization. Configured for pretty printing.
-   */
+  /** Gson instance for JSON serialization and deserialization. Configured for pretty printing. */
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   @Override

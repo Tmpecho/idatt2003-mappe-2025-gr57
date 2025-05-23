@@ -6,9 +6,7 @@ import edu.ntnu.idi.idatt.boardgame.core.domain.player.Player;
 import edu.ntnu.idi.idatt.boardgame.core.engine.action.Action;
 import edu.ntnu.idi.idatt.boardgame.games.snakesandladders.domain.board.SnlBoard;
 
-/**
- * Represents the action of a player rolling dice and moving on the Snakes and Ladders board.
- */
+/** Represents the action of a player rolling dice and moving on the Snakes and Ladders board. */
 public final class RollAction implements Action {
 
   private final SnlBoard gameBoard;
@@ -19,8 +17,8 @@ public final class RollAction implements Action {
    * Constructs a RollAction.
    *
    * @param gameBoard The {@link SnlBoard} on which the action takes place.
-   * @param player    The {@link Player} performing the roll and move.
-   * @param dice      The {@link Dice} to be rolled.
+   * @param player The {@link Player} performing the roll and move.
+   * @param dice The {@link Dice} to be rolled.
    */
   public RollAction(SnlBoard gameBoard, Player<LinearPos> player, Dice dice) {
     this.gameBoard = gameBoard;

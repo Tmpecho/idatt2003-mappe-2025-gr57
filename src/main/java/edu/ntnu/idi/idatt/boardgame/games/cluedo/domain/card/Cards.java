@@ -11,11 +11,8 @@ import java.util.Random;
  */
 public final class Cards {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
-  private Cards() {
-  }
+  /** Private constructor to prevent instantiation. */
+  private Cards() {}
 
   /**
    * Returns a shuffled list of all suspects using the provided random number generator.
@@ -24,7 +21,7 @@ public final class Cards {
    * @return A shuffled list of suspects.
    */
   public static List<Suspect> shuffledSuspects(Random rng) {
-    var list = new ArrayList<>(List.of(Suspect.values()));
+    ArrayList<Suspect> list = new ArrayList<>(List.of(Suspect.values()));
     Collections.shuffle(list, rng);
     return list;
   }
@@ -36,7 +33,7 @@ public final class Cards {
    * @return A shuffled list of weapons.
    */
   public static List<Weapon> shuffledWeapons(Random rng) {
-    var list = new ArrayList<>(List.of(Weapon.values()));
+    ArrayList<Weapon> list = new ArrayList<>(List.of(Weapon.values()));
     Collections.shuffle(list, rng);
     return list;
   }
@@ -48,7 +45,7 @@ public final class Cards {
    * @return A shuffled list of rooms.
    */
   public static List<Room> shuffledRooms(Random rng) {
-    var list = new ArrayList<>(List.of(Room.values()));
+    ArrayList<Room> list = new ArrayList<>(List.of(Room.values()));
     Collections.shuffle(list, rng);
     return list;
   }

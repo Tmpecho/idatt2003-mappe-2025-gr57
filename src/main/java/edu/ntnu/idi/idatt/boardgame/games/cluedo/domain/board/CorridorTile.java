@@ -1,8 +1,6 @@
 package edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.board;
 
-/**
- * A single walkable square on the Cluedo board.
- */
+/** A single walkable square on the Cluedo board. */
 public final class CorridorTile extends AbstractCluedoTile {
 
   /**
@@ -16,5 +14,4 @@ public final class CorridorTile extends AbstractCluedoTile {
     super(row, col);
     // Walkable is true by default in AbstractCluedoTile constructor for this type
   }
-
 }

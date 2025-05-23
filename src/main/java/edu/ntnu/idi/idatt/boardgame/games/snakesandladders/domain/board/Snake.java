@@ -8,21 +8,18 @@ import javafx.scene.paint.Color;
  */
 public final class Snake extends Connector {
 
-  /**
-   * The tile number where the snake's tail is located.
-   */
+  /** The tile number where the snake's tail is located. */
   private final int end;
-  /**
-   * The color used to represent snakes on the board (typically red).
-   */
+
+  /** The color used to represent snakes on the board (typically red). */
   private final Color color = Color.RED;
 
   /**
    * Constructs a Snake.
    *
-   * @param start  The tile number where the snake's head is located (start of the slide).
+   * @param start The tile number where the snake's head is located (start of the slide).
    * @param length The number of tiles the snake makes a player slide down. The end position will be
-   *               {@code start - length}.
+   *     {@code start - length}.
    */
   public Snake(int start, int length) {
     super(start);

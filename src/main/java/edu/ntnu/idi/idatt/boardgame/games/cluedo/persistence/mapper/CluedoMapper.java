@@ -19,12 +19,9 @@ import java.util.List;
  */
 public final class CluedoMapper {
 
-  private CluedoMapper() {
-  }
+  private CluedoMapper() {}
 
-  /**
-   * Snapshot the entire CluedoController state into a DTO.
-   */
+  /** Snapshot the entire CluedoController state into a DTO. */
   public static CluedoGameStateDto toDto(CluedoController controller) {
     CluedoGameStateDto dto = new CluedoGameStateDto();
     dto.currentPlayerTurn = controller.getCurrentPlayer().getId();
@@ -104,14 +101,14 @@ public final class CluedoMapper {
     controller.setSolution(
         Suspect.valueOf(dto.solutionSuspect),
         Weapon.valueOf(dto.solutionWeapon),
-        Room.valueOf(dto.solutionRoom)
-    );
+        Room.valueOf(dto.solutionRoom));
 
     dto.players.forEach(
         playerState -> {
           CluedoPlayer player = (CluedoPlayer) controller.getPlayers().get(playerState.id);
           if (player == null) {
-            LoggingNotification.error("Load error",
+            LoggingNotification.error(
+                "Load error",
                 "No player with id " + playerState.id + " found in controller during apply.");
             throw new IllegalStateException(
                 "No player with id " + playerState.id + " found in controller during apply.");
@@ -122,15 +119,9 @@ public final class CluedoMapper {
               .getGameBoard()
               .setPlayerPosition(player, new GridPos(playerState.row, playerState.col));
 
-          playerState.suspectHand.stream()
-              .map(Suspect::valueOf)
-              .forEach(player::addCard);
-          playerState.weaponHand.stream()
-              .map(Weapon::valueOf)
-              .forEach(player::addCard);
-          playerState.roomHand.stream()
-              .map(Room::valueOf)
-              .forEach(player::addCard);
+          playerState.suspectHand.stream().map(Suspect::valueOf).forEach(player::addCard);
+          playerState.weaponHand.stream().map(Weapon::valueOf).forEach(player::addCard);
+          playerState.roomHand.stream().map(Room::valueOf).forEach(player::addCard);
 
           // restore notes
           playerState.suspectNotes.forEach(
@@ -153,7 +144,8 @@ public final class CluedoMapper {
     // restore whose turn it is
     CluedoPlayer current = (CluedoPlayer) controller.getPlayers().get(dto.currentPlayerTurn);
     if (current == null) {
-      LoggingNotification.error("Load error",
+      LoggingNotification.error(
+          "Load error",
           "Current player ID " + dto.currentPlayerTurn + " not found after populating players.");
       // Attempt to recover or throw:
       if (!controller.getPlayers().isEmpty()) {
@@ -161,7 +153,8 @@ public final class CluedoMapper {
         LoggingNotification.warn("Load Warning", "Defaulting current player to first in list.");
       } else {
         throw new IllegalStateException(
-            "Save-file error: no player with id " + dto.currentPlayerTurn
+            "Save-file error: no player with id "
+                + dto.currentPlayerTurn
                 + " and no players available to default to.");
       }
     }

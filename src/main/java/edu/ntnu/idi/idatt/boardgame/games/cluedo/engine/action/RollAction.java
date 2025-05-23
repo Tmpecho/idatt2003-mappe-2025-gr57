@@ -17,7 +17,7 @@ public final class RollAction implements Action {
    * given controller.
    *
    * @param controller the CluedoController managing the game state and player actions
-   * @param dice       the Dice object used to perform the roll
+   * @param dice the Dice object used to perform the roll
    */
   public RollAction(CluedoController controller, Dice dice) {
     this.controller = controller;

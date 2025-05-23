@@ -5,6 +5,4 @@ package edu.ntnu.idi.idatt.boardgame.core.persistence.dto;
  * implementations should extend this class to define their specific game state structure for
  * persistence.
  */
-public abstract class GameStateDto {
-
-}
+public abstract class GameStateDto {}

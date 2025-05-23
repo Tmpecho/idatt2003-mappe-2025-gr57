@@ -2,16 +2,13 @@ package edu.ntnu.idi.idatt.boardgame.core.domain.dice;
 
 import java.util.Random;
 
-/**
- * Represents a single six-sided die.
- */
+/** Represents a single six-sided die. */
 public final class Die {
 
-  /**
-   * The value of the last roll.
-   */
-  private int lastRolledValue;
   private final Random random = new Random();
+
+  /** The value of the last roll. */
+  private int lastRolledValue;
 
   /**
    * Rolls the die and returns the result. The result is a random integer between 1 and 6

@@ -8,21 +8,18 @@ import javafx.scene.paint.Color;
  */
 public final class Ladder extends Connector {
 
-  /**
-   * The tile number where the ladder's top is located.
-   */
+  /** The tile number where the ladder's top is located. */
   private final int end;
-  /**
-   * The color used to represent ladders on the board (typically green).
-   */
+
+  /** The color used to represent ladders on the board (typically green). */
   private final Color color = Color.GREEN;
 
   /**
    * Constructs a Ladder.
    *
-   * @param start  The tile number where the ladder's bottom is located (start of the climb).
+   * @param start The tile number where the ladder's bottom is located (start of the climb).
    * @param length The number of tiles the ladder makes a player climb up. The end position will be
-   *               {@code start + length}.
+   *     {@code start + length}.
    */
   public Ladder(int start, int length) {
     super(start);

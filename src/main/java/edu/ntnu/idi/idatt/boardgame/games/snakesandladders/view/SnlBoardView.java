@@ -70,7 +70,7 @@ public final class SnlBoardView extends Pane implements TileObserver<LinearPos> 
       col = boardModel.getCols() - 1 - (index % boardModel.getCols());
     }
     int gridRow = boardModel.getRows() - 1 - rowFromBottom;
-    return new int[]{col, gridRow};
+    return new int[] {col, gridRow};
   }
 
   private void drawConnector(Connector connector) {
@@ -88,10 +88,9 @@ public final class SnlBoardView extends Pane implements TileObserver<LinearPos> 
     int[] coords = getGridCoordinates(pos);
     double x = coords[0] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
     double y = coords[1] * (TILE_SIZE + GAP_SIZE) + TILE_SIZE / 2.0;
-    return new double[]{x, y};
+    return new double[] {x, y};
   }
 
   @Override
-  public void onTileChanged(Tile<LinearPos> tile) {
-  }
+  public void onTileChanged(Tile<LinearPos> tile) {}
 }

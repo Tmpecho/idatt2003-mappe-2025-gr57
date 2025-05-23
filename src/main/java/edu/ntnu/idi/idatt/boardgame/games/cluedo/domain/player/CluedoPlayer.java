@@ -7,14 +7,10 @@ import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Card;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Room;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Suspect;
 import edu.ntnu.idi.idatt.boardgame.games.cluedo.domain.card.Weapon;
-import edu.ntnu.idi.idatt.boardgame.ui.util.LoggingNotification;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -101,43 +97,6 @@ public final class CluedoPlayer extends Player<GridPos> {
    */
   public boolean hasCard(Room room) {
     return roomHand.contains(room);
-  }
-
-  /**
-   * Selects and returns one card from the given collection of options that this player holds in
-   * their hand. If multiple matching cards are found, one is chosen at random using the provided
-   * {@link Random} instance.
-   *
-   * @param options the collection of cards to check against the player's hand
-   * @param rng the random number generator used to select a card if multiple matches are found
-   * @return a card from the player's hand that matches one of the options
-   * @throws IllegalArgumentException if none of the options are in the player's hand or if an
-   *     unknown card type is encountered
-   */
-  public Card showOneOf(Collection<Card> options, Random rng) {
-    List<Card> matches =
-        options.stream()
-            .filter(
-                card -> {
-                  if (card instanceof Suspect) {
-                    return suspectHand.contains(card);
-                  }
-                  if (card instanceof Weapon) {
-                    return weaponHand.contains(card);
-                  }
-                  if (card instanceof Room) {
-                    return roomHand.contains(card);
-                  }
-                  LoggingNotification.error(
-                      this.getClass().getName(), "Unknown card type: " + card);
-                  throw new IllegalArgumentException("Unknown card type: " + card.getClass());
-                })
-            .toList();
-    if (matches.isEmpty()) {
-      LoggingNotification.error(this.getClass().getName(), "No cards to show");
-      throw new IllegalArgumentException("No cards to show");
-    }
-    return matches.get(rng.nextInt(matches.size()));
   }
 
   /**

@@ -16,13 +16,12 @@ public class Player<P extends Position> {
    */
   private final String name;
   /**
-   * The current position of the player on the game board.
-   */
-  private P position;
-  /**
    * The color associated with the player.
    */
   private final PlayerColor color;
+
+  /** The current position of the player on the game board. */
+  private P position;
 
   /**
    * Constructs a new Player.
