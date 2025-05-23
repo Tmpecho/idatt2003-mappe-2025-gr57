@@ -13,10 +13,7 @@ import java.util.Optional;
  * @param suspectIfCluedo The chosen Suspect if the game is Cluedo, otherwise empty. For Cluedo, the
  *                        color will be derived from the suspect.
  */
-public record PlayerSetupDetails(
-    String name,
-    Optional<PlayerColor> color,
-    Optional<Suspect> suspectIfCluedo
-) {
+public record PlayerSetupDetails(String name, Optional<PlayerColor> color,
+                                 Optional<Suspect> suspectIfCluedo) {
 
 }

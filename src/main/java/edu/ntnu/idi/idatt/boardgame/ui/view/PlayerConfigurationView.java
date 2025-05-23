@@ -43,7 +43,7 @@ public class PlayerConfigurationView {
   private Label errorLabel;
 
   private static final int MIN_PLAYERS_SNL = 2;
-  private static final int MAX_PLAYERS_SNL = 6; // Max 6 due to PlayerColor enum size
+  private static final int MAX_PLAYERS_SNL = 6;
   private static final int MIN_PLAYERS_CLUEDO = 2;
   private static final int MAX_PLAYERS_CLUEDO = 6;
 
@@ -137,16 +137,24 @@ public class PlayerConfigurationView {
     grid.setPadding(new Insets(10));
 
     grid.add(new Label("Player"), 0, 0);
-    grid.add(new Label("Name"), 1, 0);
-    grid.add(new Label(ChooseGameView.GAME_CLUEDO.equals(gameType) ? "Suspect" : "Color"), 2, 0);
+    if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
+      grid.add(new Label("Character (Auto-Assigned)"), 1, 0);
+    } else {
+      grid.add(new Label("Name"), 1, 0);
+      grid.add(new Label("Color"), 2, 0);
+    }
 
     for (int i = 0; i < numPlayers; i++) {
       PlayerInputRow row = new PlayerInputRow(i + 1, gameType);
       playerInputRows.add(row);
 
       grid.add(new Label("Player " + (i + 1)), 0, i + 1);
-      grid.add(row.getNameField(), 1, i + 1);
-      grid.add(row.getChoiceNode(), 2, i + 1);
+      if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
+        grid.add(row.getChoiceNode(), 1, i + 1);
+      } else {
+        grid.add(row.getNameField(), 1, i + 1);
+        grid.add(row.getChoiceNode(), 2, i + 1);
+      }
     }
     playerInputContainer.getChildren().add(grid);
   }
@@ -175,24 +183,26 @@ public class PlayerConfigurationView {
       Optional<Suspect> suspect = Optional.empty();
 
       if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        Suspect selectedSuspect = row.getSuspectChoiceBox().getValue();
-        if (selectedSuspect == null) {
-          showError("Player " + (i + 1) + " must select a suspect.");
+        Suspect assignedSuspect = row.getAssignedSuspectIfCluedo();
+        if (assignedSuspect == null) {
+          showError("Error assigning suspect for Player " + (i + 1)
+              + ". Max players might exceed available suspects.");
           return;
         }
-        if (!usedSuspects.add(selectedSuspect)) {
-          showError("Suspect " + selectedSuspect.getName() + " is already chosen. Pick another.");
+        if (!usedSuspects.add(assignedSuspect)) {
+          showError("Internal error: Suspect " + assignedSuspect.getName()
+              + " assigned multiple times. This shouldn't happen.");
           return;
         }
-        suspect = Optional.of(selectedSuspect);
-        color = Optional.of(selectedSuspect.colour());
+        suspect = Optional.of(assignedSuspect);
+        color = Optional.of(assignedSuspect.colour());
 
       } else {
-        PlayerColor selectedColor = row.getColorChoiceBox().getValue();
-        if (selectedColor == null) {
+        if (row.getColorChoiceBox() == null || row.getColorChoiceBox().getValue() == null) {
           showError("Player " + (i + 1) + " must select a color.");
           return;
         }
+        PlayerColor selectedColor = row.getColorChoiceBox().getValue();
         if (!usedColors.add(selectedColor)) {
           showError("Color " + selectedColor.name() + " is already chosen. Pick another.");
           return;
@@ -233,24 +243,37 @@ public class PlayerConfigurationView {
 
     private final TextField nameField;
     private ChoiceBox<PlayerColor> colorChoiceBox;
-    private ChoiceBox<Suspect> suspectChoiceBox;
+    private Label cluedoCharacterLabel;
+    private final Suspect assignedSuspectIfCluedo;
     private final String gameType;
 
     PlayerInputRow(int playerNumber, String gameType) {
       this.gameType = gameType;
-      nameField = new TextField("Player " + playerNumber);
-      nameField.setPromptText("Enter Name");
-      nameField.setPrefWidth(150);
 
       if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        suspectChoiceBox = new ChoiceBox<>(
-            FXCollections.observableArrayList(Suspect.values()));
-        suspectChoiceBox.setPrefWidth(150);
+        if (playerNumber - 1 < Suspect.values().length) {
+          this.assignedSuspectIfCluedo = Suspect.values()[playerNumber - 1];
+          nameField = new TextField(this.assignedSuspectIfCluedo.getName());
+          nameField.setEditable(false);
+          cluedoCharacterLabel = new Label(this.assignedSuspectIfCluedo.getName() +
+              " (" + this.assignedSuspectIfCluedo.colour().name() + ")");
+        } else {
+          this.assignedSuspectIfCluedo = null;
+          nameField = new TextField("N/A");
+          nameField.setEditable(false);
+          cluedoCharacterLabel = new Label("Error: No suspect available");
+        }
+        this.colorChoiceBox = null;
       } else {
+        this.assignedSuspectIfCluedo = null;
+        nameField = new TextField("Player " + playerNumber);
+        nameField.setPromptText("Enter Name");
         colorChoiceBox = new ChoiceBox<>(
             FXCollections.observableArrayList(PlayerColor.values()));
         colorChoiceBox.setPrefWidth(150);
+        this.cluedoCharacterLabel = null;
       }
+      nameField.setPrefWidth(150);
     }
 
     TextField getNameField() {
@@ -261,12 +284,12 @@ public class PlayerConfigurationView {
       return colorChoiceBox;
     }
 
-    ChoiceBox<Suspect> getSuspectChoiceBox() {
-      return suspectChoiceBox;
+    Suspect getAssignedSuspectIfCluedo() {
+      return assignedSuspectIfCluedo;
     }
 
     Node getChoiceNode() {
-      return ChooseGameView.GAME_CLUEDO.equals(gameType) ? suspectChoiceBox : colorChoiceBox;
+      return ChooseGameView.GAME_CLUEDO.equals(gameType) ? cluedoCharacterLabel : colorChoiceBox;
     }
   }
 }
