@@ -188,7 +188,7 @@ public final class CluedoView implements GameObserver<GridPos> {
       suggestButton.setDisable(true);
       accuseButton.setDisable(true);
     } else {
-      suggestButton.setDisable(!controller.canSuggest());
+      suggestButton.setDisable(controller.canNotSuggest());
       accuseButton.setDisable(controller.canNotAccuse());
     }
 
