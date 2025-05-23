@@ -14,7 +14,7 @@ A desktop application built with JavaFX for playing board games. This project wa
 
 ## Overview
 
-Board Games Hub is a JavaFX-based desktop application designed to bring the fun of board games to your computer. The current implementation includes **Snakes and Ladders**, with **Cluedo** currently being added.
+Board Games Hub is a JavaFX-based desktop application designed to bring the fun of board games to your computer. The current implementation includes **Snakes and Ladders** and **Cluedo**.
 
 ---
 
@@ -22,9 +22,7 @@ Board Games Hub is a JavaFX-based desktop application designed to bring the fun 
 
 **Current Game:**
 - **Snakes and Ladders:** Experience a classic board game with automatic dice rolling and game progression.
-
-**Upcoming Game:**
-- **Cluedo:** Planned for future release to broaden the gaming experience.
+-  **Cluedo:** Solve the case before your opponents do!
 
 ---
 
@@ -32,7 +30,7 @@ Board Games Hub is a JavaFX-based desktop application designed to bring the fun 
 
 ### Prerequisites
 
-- **Java JDK 17 or later:** Ensure you have JDK 17 installed on your system.
+- **Java JDK 21 or later:** Ensure you have JDK 21 installed on your system.
 - **Maven:** Required for building and managing project dependencies.
 - **JavaFX:** The project utilizes JavaFX libraries (automatically managed via Maven).
 
@@ -42,7 +40,7 @@ Clone the repository using Git:
 
 ```bash
 git clone https://github.com/Tmpecho/idatt2003-mappe-2025-gr57.git
-cd board-game
+cd idatt2003-mappe-2025-gr57
 ```
 
 ### Running the Application
@@ -51,4 +49,9 @@ You can build and run the application using Maven with the following command:
 
 ```bash
 mvn clean javafx:run
+```
+
+or with the `.jar`-file (assuming you've downloaded the javafx-sdk)
+```bash
+java --module-path /path/to/javafx-sdk-21/lib \ --add-modules javafx.controls \ -jar boardgame-21.jar
 ```
