@@ -45,7 +45,6 @@ public final class MainView {
   private GameController<?> currentController;
   private Button saveGameButton;
   private Button loadGameButton;
-  private String selectedGameType; // Retained for context, though load button tries to infer
 
   /**
    * Constructs the main view of the application. Initializes the root layout and loads the main
@@ -107,56 +106,51 @@ public final class MainView {
     saveGameButton.setMaxWidth(Double.MAX_VALUE);
     loadGameButton.setMaxWidth(Double.MAX_VALUE);
 
-    sidebar
-        .getChildren()
-        .addAll(menuButton, spacer, saveGameButton, loadGameButton, exitButton);
+    sidebar.getChildren().addAll(menuButton, spacer, saveGameButton, loadGameButton, exitButton);
     root.setLeft(sidebar);
   }
 
   private void showChooseGameView() {
-    ChooseGameView chooseGameView = new ChooseGameView(
-        gameType -> {
-          this.selectedGameType = gameType;
-          logger.info("Game selected: {}", gameType);
-          showPlayerConfigurationView(gameType);
-          loadGameButton.setDisable(false); // Enable load once a game type context is selected
-        },
-        () -> {
-          logger.info("Back to main menu from ChooseGameView.");
-          Label welcomeLabel = new Label("Welcome! Click 'Menu' to start.");
-          welcomeLabel.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
-          StackPane.setAlignment(welcomeLabel, Pos.CENTER);
-          contentWrapper.getChildren().setAll(welcomeLabel);
-          this.selectedGameType = null;
-          this.currentController = null;
-          saveGameButton.setDisable(true);
-          loadGameButton.setDisable(true);
-        }
-    );
+    ChooseGameView chooseGameView =
+        new ChooseGameView(
+            gameType -> {
+              logger.info("Game selected: {}", gameType);
+              showPlayerConfigurationView(gameType);
+              loadGameButton.setDisable(false); // Enable load once a game type context is selected
+            },
+            () -> {
+              logger.info("Back to main menu from ChooseGameView.");
+              Label welcomeLabel = new Label("Welcome! Click 'Menu' to start.");
+              welcomeLabel.setStyle("-fx-font-size: 16px; -fx-alignment: center;");
+              StackPane.setAlignment(welcomeLabel, Pos.CENTER);
+              contentWrapper.getChildren().setAll(welcomeLabel);
+              this.currentController = null;
+              saveGameButton.setDisable(true);
+              loadGameButton.setDisable(true);
+            });
     contentWrapper.getChildren().setAll(chooseGameView.getRoot());
     this.currentController = null;
     saveGameButton.setDisable(true);
   }
 
   private void showPlayerConfigurationView(String gameType) {
-    PlayerConfigurationView configView = new PlayerConfigurationView(
-        gameType,
-        (type, playerDetailsList) -> {
-          logger.info("Attempting to start game: {} with {} players.", type,
-              playerDetailsList.size());
-          playerDetailsList.forEach(pd -> logger.debug("Player Detail: {}", pd));
-          startGame(type, playerDetailsList);
-        },
-        () -> {
-          logger.info("Back to game selection from PlayerConfigurationView.");
-          showChooseGameView();
-        }
-    );
+    PlayerConfigurationView configView =
+        new PlayerConfigurationView(
+            gameType,
+            (type, playerDetailsList) -> {
+              logger.info(
+                  "Attempting to start game: {} with {} players.", type, playerDetailsList.size());
+              playerDetailsList.forEach(pd -> logger.debug("Player Detail: {}", pd));
+              startGame(type, playerDetailsList);
+            },
+            () -> {
+              logger.info("Back to game selection from PlayerConfigurationView.");
+              showChooseGameView();
+            });
     contentWrapper.getChildren().setAll(configView.getRoot());
     this.currentController = null;
     saveGameButton.setDisable(true);
-    loadGameButton.setDisable(
-        true);
+    loadGameButton.setDisable(true);
   }
 
   private void startGame(String gameType, List<PlayerSetupDetails> playerDetailsList) {
@@ -165,7 +159,7 @@ public final class MainView {
 
     try {
       if (ChooseGameView.GAME_SNAKES_AND_LADDERS.equals(gameType)) {
-        var repo = new JsonSnlGameStateRepository();
+        JsonSnlGameStateRepository repo = new JsonSnlGameStateRepository();
         SnlController snlController = new SnlController(playerDetailsList, repo);
         this.currentController = snlController;
         SnlView snlView = new SnlView(snlController);
@@ -173,7 +167,7 @@ public final class MainView {
         saveGameButton.setDisable(false);
         loadGameButton.setDisable(false);
       } else if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        var cluedoRepo = new JsonCluedoGameStateRepository();
+        JsonCluedoGameStateRepository cluedoRepo = new JsonCluedoGameStateRepository();
         CluedoController cluedoController = new CluedoController(playerDetailsList, cluedoRepo);
         this.currentController = cluedoController;
         CluedoView cluedoView = new CluedoView(cluedoController);
@@ -185,12 +179,13 @@ public final class MainView {
         showChooseGameView();
         return;
       }
-      LoggingNotification.info("Game Started",
-          getGameDisplayName(gameType) + " started with " + playerDetailsList.size()
-              + " players.");
+      LoggingNotification.info(
+          "Game Started",
+          getGameDisplayName(gameType) + " started with " + playerDetailsList.size() + " players.");
     } catch (Exception e) {
       logger.error("Error starting game {}: {}", gameType, e.getMessage(), e);
-      LoggingNotification.error("Game Start Failed",
+      LoggingNotification.error(
+          "Game Start Failed",
           "Could not start " + getGameDisplayName(gameType) + ": " + e.getMessage());
       showChooseGameView();
     }
@@ -204,7 +199,6 @@ public final class MainView {
     }
     return "Unknown Game";
   }
-
 
   private Button buildSaveButton() {
     Button button = new Button("Save game");
@@ -280,22 +274,21 @@ public final class MainView {
             logger.info("Attempting to load as Cluedo game: {}", filePath);
             try {
               JsonCluedoGameStateRepository cluedoRepo = new JsonCluedoGameStateRepository();
-              CluedoController cluedoController = new CluedoController(emptyPlayerDetails,
-                  cluedoRepo);
+              CluedoController cluedoController =
+                  new CluedoController(emptyPlayerDetails, cluedoRepo);
               this.currentController = cluedoController; // Set controller BEFORE load
               cluedoController.loadGameState(
                   filePath); // Now load can populate players in the controller
-              CluedoView cluedoView = new CluedoView(
-                  cluedoController); // View after controller is ready
+              CluedoView cluedoView =
+                  new CluedoView(cluedoController); // View after controller is ready
               contentWrapper.getChildren().setAll(cluedoView.getRoot());
               saveGameButton.setDisable(false);
               loadGameButton.setDisable(false); // Re-enable load, game is active
               loadedSuccessfully = true;
-              this.selectedGameType = ChooseGameView.GAME_CLUEDO; // Update game type context
             } catch (Exception ex) {
               logger.error("Failed to load Cluedo game from {}: {}", filePath, ex.getMessage(), ex);
-              LoggingNotification.error("Load Failed",
-                  "Could not load Cluedo game. " + ex.getMessage());
+              LoggingNotification.error(
+                  "Load Failed", "Could not load Cluedo game. " + ex.getMessage());
               this.currentController = null;
             }
           } else if (fileName.contains("snl")) {
@@ -310,16 +303,19 @@ public final class MainView {
               saveGameButton.setDisable(false);
               loadGameButton.setDisable(false);
               loadedSuccessfully = true;
-              this.selectedGameType = ChooseGameView.GAME_SNAKES_AND_LADDERS;
             } catch (Exception ex) {
-              logger.error("Failed to load Snakes and Ladders game from {}: {}", filePath,
-                  ex.getMessage(), ex);
-              LoggingNotification.error("Load Failed",
-                  "Could not load S&L game. " + ex.getMessage());
+              logger.error(
+                  "Failed to load Snakes and Ladders game from {}: {}",
+                  filePath,
+                  ex.getMessage(),
+                  ex);
+              LoggingNotification.error(
+                  "Load Failed", "Could not load S&L game. " + ex.getMessage());
               this.currentController = null;
             }
           } else {
-            LoggingNotification.warn("Load Canceled",
+            LoggingNotification.warn(
+                "Load Canceled",
                 "Could not determine game type from filename. "
                     + "Please ensure filename contains 'cluedo' or 'snl'.");
           }

@@ -183,14 +183,14 @@ class CluedoControllerTest {
   void canSuggest_inRoom_returnsTrue() {
     board.setPlayerPosition(controller.getCurrentPlayer(), new GridPos(6, 4));
     controller.setPhase(Phase.IN_ROOM);
-    assertTrue(controller.canSuggest());
+    assertFalse(controller.canNotSuggest());
   }
 
   @Test
   void canSuggest_inCluedoRoom_returnsFalse() {
     board.setPlayerPosition(controller.getCurrentPlayer(), new GridPos(10, 10));
     controller.setPhase(Phase.IN_ROOM);
-    assertFalse(controller.canSuggest());
+    assertTrue(controller.canNotSuggest());
   }
 
   @Test
@@ -198,14 +198,14 @@ class CluedoControllerTest {
     board.setPlayerPosition(controller.getCurrentPlayer(),
         new GridPos(10, 10));
     controller.setPhase(Phase.IN_ROOM);
-    assertTrue(controller.canAccuse());
+    assertFalse(controller.canNotAccuse());
   }
 
   @Test
   void canAccuse_notInCluedoRoom_returnsFalse() {
     board.setPlayerPosition(controller.getCurrentPlayer(), new GridPos(6, 4));
     controller.setPhase(Phase.IN_ROOM);
-    assertFalse(controller.canAccuse());
+    assertTrue(controller.canNotAccuse());
   }
 
   @Test
