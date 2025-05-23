@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,9 +39,9 @@ public class PlayerConfigurationView {
   private final Runnable onBack;
 
   private Spinner<Integer> numPlayersSpinner;
-  private VBox playerInputContainer;
+  private final VBox playerInputContainer;
   private final List<PlayerInputRow> playerInputRows = new ArrayList<>();
-  private Label errorLabel;
+  private final Label errorLabel;
 
   private static final int MIN_PLAYERS_SNL = 2;
   private static final int MAX_PLAYERS_SNL = 6;
@@ -50,13 +51,13 @@ public class PlayerConfigurationView {
   /**
    * Constructs the PlayerConfigurationView.
    *
-   * @param gameType    The type of game being played (e.g., Snakes and Ladders, Cluedo).
+   * @param gameType The type of game being played (e.g., Snakes and Ladders, Cluedo).
    * @param onStartGame Callback to be executed when the game is started, passing the game type
-   *                    string and player setup details.
-   * @param onBack      Callback to be executed when the back button is pressed.
+   *     string and player setup details.
+   * @param onBack Callback to be executed when the back button is pressed.
    */
-  public PlayerConfigurationView(String gameType,
-      BiConsumer<String, List<PlayerSetupDetails>> onStartGame, Runnable onBack) {
+  public PlayerConfigurationView(
+      String gameType, BiConsumer<String, List<PlayerSetupDetails>> onStartGame, Runnable onBack) {
     this.gameType = gameType;
     this.onStartGame = onStartGame;
     this.onBack = onBack;
@@ -94,9 +95,12 @@ public class PlayerConfigurationView {
     actionButtons.setAlignment(Pos.CENTER);
 
     root.getChildren()
-        .addAll(titleLabel, errorLabel,
+        .addAll(
+            titleLabel,
+            errorLabel,
             new HBox(10, new Label("Number of Players:"), numPlayersSpinner),
-            scrollPane, actionButtons);
+            scrollPane,
+            actionButtons);
 
     updatePlayerInputRows(numPlayersSpinner.getValue());
   }
@@ -111,19 +115,26 @@ public class PlayerConfigurationView {
   }
 
   private void setupNumPlayersSpinner() {
-    int min = MIN_PLAYERS_SNL;
-    int max = MAX_PLAYERS_SNL;
-    int initial = MIN_PLAYERS_SNL;
+    int min;
+    int max;
+    int initial;
 
-    if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
+    if (ChooseGameView.GAME_SNAKES_AND_LADDERS.equals(gameType)) {
+      min = MIN_PLAYERS_SNL;
+      max = MAX_PLAYERS_SNL;
+      initial = MIN_PLAYERS_SNL;
+    } else if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
       min = MIN_PLAYERS_CLUEDO;
       max = MAX_PLAYERS_CLUEDO;
       initial = MIN_PLAYERS_CLUEDO;
+    } else {
+      throw new IllegalArgumentException("Unsupported game type: " + gameType);
     }
 
     numPlayersSpinner = new Spinner<>(min, max, initial);
     numPlayersSpinner.setPrefWidth(80);
-    numPlayersSpinner.valueProperty()
+    numPlayersSpinner
+        .valueProperty()
         .addListener((obs, oldValue, newValue) -> updatePlayerInputRows(newValue));
   }
 
@@ -144,18 +155,19 @@ public class PlayerConfigurationView {
       grid.add(new Label("Color"), 2, 0);
     }
 
-    for (int i = 0; i < numPlayers; i++) {
-      PlayerInputRow row = new PlayerInputRow(i + 1, gameType);
-      playerInputRows.add(row);
-
-      grid.add(new Label("Player " + (i + 1)), 0, i + 1);
-      if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
-        grid.add(row.getChoiceNode(), 1, i + 1);
-      } else {
-        grid.add(row.getNameField(), 1, i + 1);
-        grid.add(row.getChoiceNode(), 2, i + 1);
-      }
-    }
+    IntStream.range(0, numPlayers)
+        .forEach(
+            i -> {
+              PlayerInputRow row = new PlayerInputRow(i + 1, gameType);
+              playerInputRows.add(row);
+              grid.add(new Label("Player " + (i + 1)), 0, i + 1);
+              if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
+                grid.add(row.getChoiceNode(), 1, i + 1);
+              } else {
+                grid.add(row.getNameField(), 1, i + 1);
+                grid.add(row.getChoiceNode(), 2, i + 1);
+              }
+            });
     playerInputContainer.getChildren().add(grid);
   }
 
@@ -179,19 +191,23 @@ public class PlayerConfigurationView {
         return;
       }
 
-      Optional<PlayerColor> color = Optional.empty();
+      Optional<PlayerColor> color;
       Optional<Suspect> suspect = Optional.empty();
 
       if (ChooseGameView.GAME_CLUEDO.equals(gameType)) {
         Suspect assignedSuspect = row.getAssignedSuspectIfCluedo();
         if (assignedSuspect == null) {
-          showError("Error assigning suspect for Player " + (i + 1)
-              + ". Max players might exceed available suspects.");
+          showError(
+              "Error assigning suspect for Player "
+                  + (i + 1)
+                  + ". Max players might exceed available suspects.");
           return;
         }
         if (!usedSuspects.add(assignedSuspect)) {
-          showError("Internal error: Suspect " + assignedSuspect.getName()
-              + " assigned multiple times. This shouldn't happen.");
+          showError(
+              "Internal error: Suspect "
+                  + assignedSuspect.getName()
+                  + " assigned multiple times. This shouldn't happen.");
           return;
         }
         suspect = Optional.of(assignedSuspect);
@@ -221,15 +237,17 @@ public class PlayerConfigurationView {
     LoggingNotification.warn("Player Configuration Error", message);
   }
 
-
   private void styleButton(Button button, String bgColor, String hoverColor) {
     button.setPrefHeight(40);
     button.setPrefWidth(180);
     button.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
-    String baseStyle = String.format(
-        "-fx-background-color: %s; -fx-text-fill: white; -fx-background-radius: 5;", bgColor);
-    String hoverStyle = String.format(
-        "-fx-background-color: %s; -fx-text-fill: white; -fx-background-radius: 5;", hoverColor);
+    String baseStyle =
+        String.format(
+            "-fx-background-color: %s; -fx-text-fill: white; -fx-background-radius: 5;", bgColor);
+    String hoverStyle =
+        String.format(
+            "-fx-background-color: %s; -fx-text-fill: white; -fx-background-radius: 5;",
+            hoverColor);
     button.setStyle(baseStyle);
     button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
     button.setOnMouseExited(e -> button.setStyle(baseStyle));
@@ -242,8 +260,8 @@ public class PlayerConfigurationView {
   private static class PlayerInputRow {
 
     private final TextField nameField;
-    private ChoiceBox<PlayerColor> colorChoiceBox;
-    private Label cluedoCharacterLabel;
+    private final ChoiceBox<PlayerColor> colorChoiceBox;
+    private final Label cluedoCharacterLabel;
     private final Suspect assignedSuspectIfCluedo;
     private final String gameType;
 
@@ -255,8 +273,12 @@ public class PlayerConfigurationView {
           this.assignedSuspectIfCluedo = Suspect.values()[playerNumber - 1];
           nameField = new TextField(this.assignedSuspectIfCluedo.getName());
           nameField.setEditable(false);
-          cluedoCharacterLabel = new Label(this.assignedSuspectIfCluedo.getName()
-              + " (" + this.assignedSuspectIfCluedo.colour().name() + ")");
+          cluedoCharacterLabel =
+              new Label(
+                  this.assignedSuspectIfCluedo.getName()
+                      + " ("
+                      + this.assignedSuspectIfCluedo.colour().name()
+                      + ")");
         } else {
           this.assignedSuspectIfCluedo = null;
           nameField = new TextField("N/A");
@@ -268,8 +290,7 @@ public class PlayerConfigurationView {
         this.assignedSuspectIfCluedo = null;
         nameField = new TextField("Player " + playerNumber);
         nameField.setPromptText("Enter Name");
-        colorChoiceBox = new ChoiceBox<>(
-            FXCollections.observableArrayList(PlayerColor.values()));
+        colorChoiceBox = new ChoiceBox<>(FXCollections.observableArrayList(PlayerColor.values()));
         colorChoiceBox.setPrefWidth(150);
         this.cluedoCharacterLabel = null;
       }
