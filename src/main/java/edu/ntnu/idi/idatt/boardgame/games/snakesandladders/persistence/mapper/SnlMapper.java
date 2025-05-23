@@ -35,7 +35,7 @@ public final class SnlMapper {
         .values()
         .forEach(
             player -> {
-              var playerState = new SnlGameStateDto.PlayerState();
+              SnlGameStateDto.PlayerState playerState = new SnlGameStateDto.PlayerState();
               playerState.id = player.getId();
               playerState.position = player.getPosition().index();
               playerState.color = player.getColor().name();
