@@ -28,7 +28,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   private static final GridPos START_POS_MRS_PEACOCK = new GridPos(6, 23); // BLUE
   private static final GridPos START_POS_PROF_PLUM = new GridPos(19, 23); // PURPLE
 
-  /** The 2D array representing the grid of tiles on the board. */
+  /**
+   * The 2D array representing the grid of tiles on the board.
+   */
   private final AbstractCluedoTile[][] board = new AbstractCluedoTile[BOARD_SIZE][BOARD_SIZE];
 
   /**
@@ -97,7 +99,9 @@ public final class CluedoBoard implements GameBoard<GridPos> {
               List.of(new DoorDefinition(new RoomTile.Point(19, 6), new RoomTile.Point(18, 6)))),
           new RoomSpec("Cluedo", new RoomDimensions(10, 10, 14, 14), true, List.of()));
 
-  /** Constructs the Cluedo board, initializing all tiles (borders, rooms, corridors). */
+  /**
+   * Constructs the Cluedo board, initializing all tiles (borders, rooms, corridors).
+   */
   public CluedoBoard() {
     initializeTiles();
   }
@@ -105,7 +109,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   /**
    * Checks if a move from one position to another is legal based on the game rules.
    *
-   * @param fromPosition The starting position.
+   * @param fromPosition   The starting position.
    * @param targetPosition The target position.
    * @return True if the move is legal, false otherwise.
    */
@@ -115,7 +119,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
 
     boolean adjacent =
         Math.abs(fromPosition.row() - targetPosition.row())
-                + Math.abs(fromPosition.col() - targetPosition.col())
+            + Math.abs(fromPosition.col() - targetPosition.col())
             == 1;
 
     boolean corridorToCorridor =
@@ -166,7 +170,6 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     insertRooms();
     insertCorridorTiles();
     placeStartPosAdjacentBorders();
-    // TODO: Secret passages are not yet implemented here
   }
 
   private void insertBorderTiles() {
@@ -219,7 +222,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
           RoomTile room = new RoomTile(spec.name, outline);
           populateRoomTiles(spec.dims, room);
 
-          for (DoorDefinition doorDef : spec.doors) {
+          spec.doors.forEach(doorDef -> {
             try {
               room.addDoor(doorDef.roomSide(), doorDef.corridorSide());
             } catch (IllegalArgumentException e) {
@@ -230,8 +233,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
                   doorDef.corridorSide(),
                   e.getMessage());
             }
-          }
-          // TODO: if (spec.hasSecretPassage) addSecretPassage(room);
+          });
         });
   }
 
@@ -312,7 +314,7 @@ public final class CluedoBoard implements GameBoard<GridPos> {
     }
     if (!targetTile.isWalkable()
         && !(targetTile
-            instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
+        instanceof RoomTile)) { // Allow moving into rooms even if "not walkable" squares
       logger.error(
           "Error: Cannot set player position to a non-walkable tile at {} of type {}",
           position,
@@ -439,11 +441,10 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   /**
    * Inner record for defining doors between a room and a corridor.
    *
-   * @param roomSide The {@link RoomTile.Point} on the room's side of the door.
+   * @param roomSide     The {@link RoomTile.Point} on the room's side of the door.
    * @param corridorSide The {@link RoomTile.Point} on the corridor's side of the door.
    */
   private record DoorDefinition(RoomTile.Point roomSide, RoomTile.Point corridorSide) {}
-
   /**
    * Gets the underlying 2D array of {@link AbstractCluedoTile} objects representing the board grid.
    * Primarily for view rendering.
@@ -455,23 +456,28 @@ public final class CluedoBoard implements GameBoard<GridPos> {
   }
 
   /**
-   * Record to define the rectangular dimensions of a room. Coordinates are inclusive and 0-indexed.
+   * Record to define the rectangular dimensions of a room. Coordinates are inclusive and
+   * 0-indexed.
    *
-   * @param top The top-most row index.
-   * @param left The left-most column index.
+   * @param top    The top-most row index.
+   * @param left   The left-most column index.
    * @param bottom The bottom-most row index.
-   * @param right The right-most column index.
+   * @param right  The right-most column index.
    */
-  private record RoomDimensions(int top, int left, int bottom, int right) {}
+  private record RoomDimensions(int top, int left, int bottom, int right) {
+
+  }
 
   /**
    * Record to encapsulate the specification for a room on the board.
    *
-   * @param name The name of the room.
-   * @param dims The {@link RoomDimensions} of the room.
+   * @param name             The name of the room.
+   * @param dims             The {@link RoomDimensions} of the room.
    * @param hasSecretPassage True if the room has a secret passage (feature not fully implemented).
-   * @param doors A list of {@link DoorDefinition}s for the room.
+   * @param doors            A list of {@link DoorDefinition}s for the room.
    */
   private record RoomSpec(
-      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {}
+      String name, RoomDimensions dims, boolean hasSecretPassage, List<DoorDefinition> doors) {
+
+  }
 }
